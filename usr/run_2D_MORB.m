@@ -16,7 +16,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 D         =  100;                 % chamber depth [m]
 N         =  200;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  D/4;                 % chamber width (equal to h for 1-D mode) [m]
+L         =  D;                 % chamber width (equal to h for 1-D mode) [m]
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
@@ -33,11 +33,11 @@ dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
 
 % set thermo-chemical boundary parameters
 periodic  =  1;
-bndmode   =  3;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
+bndmode   =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
 bnd_w     =  h;                 % boundary layer width [m]
 tau_T     =  bnd_w^2/1e-6;        % wall cooling/assimilation time [s]
-Twall     =  [300,300,nan];       % [top,bot,sds] wall rock temperature [degC] (nan = insulating)
-cwall     =  nan(3,7);
+Twall     =  [300,300,nan,nan];       % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+cwall     =  nan(3,7,7);
 Ptop      =  2.0e8;               % top pressure [Pa]
 fin       =  0;
 fout      =  1;

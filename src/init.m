@@ -75,9 +75,12 @@ MapW = reshape(1:NW,Nz+1,Nx+2);
 MapU = reshape(1:NU,Nz+2,Nx+1) + NW;
 
 % set up shape functions for initial boundary layers
-topinit = zeros(size(ZZ));
-botinit = zeros(size(ZZ));
-sdsinit = zeros(size(XX));
+
+%sdsinit = zeros(size(XX)); %spare sides boundary variable (both left and right)
+topinit = zeros(size(ZZ)); 
+botinit = zeros(size(ZZ)); 
+leftinit = zeros(size(XX));
+rightinit = zeros(size(XX)); 
 if any(bnd_h)
     switch bndmode
         case 0  % none
@@ -91,19 +94,31 @@ if any(bnd_h)
         case 4 % all walls
             topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-            sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 ...
-                    + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
+            leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
+            rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
+            %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
         case 5 % only walls
-            sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 ...
-                    + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
+            leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
+            rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
+            %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
+        case 6 % mid ocean ridge set up
+            topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
+            botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
+            leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
+            rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
+            %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
     end
-    sdsinit = max(0,sdsinit-topinit-botinit);
+    %sdsinit = max(0,sdsinit-topinit-botinit);%spare sides boundary variable
+    leftinit = max(0,leftinit-topinit-botinit);
+    rightinit = max(0,rightinit-topinit-botinit);
 end
 
 % set up shape functions for transient boundary layers
+%sdsshape = zeros(size(XX)); %spare sides boundary variable (both left and right)
 topshape = zeros(size(ZZ));
 botshape = zeros(size(ZZ));
-sdsshape = zeros(size(XX));
+leftshape = zeros(size(XX));
+rightshape = zeros(size(XX));
 if ~any(bnd_h)
     switch bndmode
         case 0  % none
@@ -117,13 +132,23 @@ if ~any(bnd_h)
         case 4 % all walls
             topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
-            sdsshape = exp( ( -XX)/bnd_w) ...
-                     + exp(-(L-XX)/bnd_w);
+            leftshape = exp( ( -XX)/bnd_w);
+            rightshape = exp(-(L-XX)/bnd_w);
+            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
         case 5 % only walls
-            sdsshape = exp( ( -XX)/bnd_w) ...
-                     + exp(-(L-XX)/bnd_w);
+            leftshape = exp( ( -XX)/bnd_w);
+            rightshape = exp(-(L-XX)/bnd_w);
+            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
+        case 6 % mid ocean ridge set up
+            topshape = exp( ( -ZZ)/bnd_w);
+            botshape = exp(-(D-ZZ)/bnd_w);
+            leftshape = exp( ( -XX)/bnd_w);
+            rightshape = exp(-(L-XX)/bnd_w);
+            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable     
     end
-    sdsshape = max(0,sdsshape - topshape - botshape);
+    %sdsshape = max(0,sdsshape - topshape - botshape);
+    leftshape = max(0,leftshape - topshape - botshape);
+    rightshape = max(0,rightshape - topshape - botshape);
 end
 
 bnd_S = zeros(Nz,Nx);
@@ -131,13 +156,14 @@ bnd_C = zeros(Nz,Nx,cal.ncmp);
 bnd_V = zeros(Nz,Nx);
 
 % set specified boundaries to no slip, else to free slip
-if bndmode>=4;               sds = +1;      % no slip sides for 'all sides(4)'
-else;                        sds = -1; end  % free slip sides for other types
+if bndmode>=4;               sdleft = +1; sdright = +1;      % no slip sides for 'all sides(4)'
+else;                        sdleft = -1; sdright = -1; end  % free slip sides for other types
 if bndmode==1 || bndmode>=3; top = +1;      % no slip top for 'top only(1)', 'top/bot(3)', 'all sides(4)'
 else;                        top = -1; end  % free slip for other types
 if bndmode>=2;               bot = +1;      % no slip bot for 'bot only(2)', 'top/bot(3)', 'all sides(4)'
 else;                        bot = -1; end  % free slip for other types
 if bndmode==5;               top = -1; bot = -1; end % free slip top/bot for 'only walls(5)'
+if bndmode==6;               sdleft = +1; sdright = -1; top = -1; bot = -1; end %Mid ocean ridge setting 
 
 % set ghosted index arrays
 if periodic  % periodic side boundaries
@@ -208,20 +234,27 @@ end
 % apply initial boundary layers
 if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
 if any(botinit(:)) && ~isnan(Twall(2)); Tp = Tp + (Twall(2)-Tp).*botinit; end
-if any(sdsinit(:)) && ~isnan(Twall(3)); Tp = Tp + (Twall(3)-Tp).*sdsinit; end
+if any(leftinit(:)) && ~isnan(Twall(3)); Tp = Tp + (Twall(3)-Tp).*leftinit; end
+if any(rightinit(:)) && ~isnan(Twall(4)); Tp = Tp + (Twall(4)-Tp).*rightinit; end
+%if any(sdsinit(:)) && ~isnan(Twall(3)); Tp = Tp + (Twall(3)-Tp).*sdsinit; end
+
 Tin = Tp;
 
 for i = 1:cal.ncmp
     if any(topinit(:)) && ~any(isnan(cwall(1,:))); c(:,:,i) = c(:,:,i) + (cwall(1,i)-c(:,:,i)).*topinit; end
     if any(botinit(:)) && ~any(isnan(cwall(2,:))); c(:,:,i) = c(:,:,i) + (cwall(2,i)-c(:,:,i)).*botinit; end
-    if any(sdsinit(:)) && ~any(isnan(cwall(3,:))); c(:,:,i) = c(:,:,i) + (cwall(3,i)-c(:,:,i)).*sdsinit; end
+    if any(leftinit(:)) && ~any(isnan(cwall(3,:))); c(:,:,i) = c(:,:,i) + (cwall(3,i)-c(:,:,i)).*leftinit; end
+    if any(rightinit(:)) && ~any(isnan(cwall(4,:))); c(:,:,i) = c(:,:,i) + (cwall(4,i)-c(:,:,i)).*rightinit; end
+    %if any(sdsinit(:)) && ~any(isnan(cwall(3,:))); c(:,:,i) = c(:,:,i) + (cwall(3,i)-c(:,:,i)).*sdsinit; end
 end
 cin = c;
 
 for i = 1:cal.ntrc
     if any(topinit(:)) && ~isnan(trcwall(1,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(1,i)-trc(:,:,i)).*topinit; end
     if any(botinit(:)) && ~isnan(trcwall(2,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(2,i)-trc(:,:,i)).*botinit; end
-    if any(sdsinit(:)) && ~isnan(trcwall(3,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(3,i)-trc(:,:,i)).*sdsinit; end
+    if any(leftinit(:)) && ~isnan(trcwall(3,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(3,i)-trc(:,:,i)).*leftinit; end
+    if any(rightinit(:)) && ~isnan(trcwall(4,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(4,i)-trc(:,:,i)).*rightinit; end
+    %if any(sdsinit(:)) && ~isnan(trcwall(3,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(3,i)-trc(:,:,i)).*sdsinit; end
 end
 tein = trc;
 

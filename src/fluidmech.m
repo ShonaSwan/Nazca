@@ -65,7 +65,7 @@ else
 end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sds];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sdleft];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
@@ -76,7 +76,7 @@ else
 end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sds];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sdright];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % top boundary
@@ -87,11 +87,11 @@ aa  = zeros(size(ii)) + WBG(1,:);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapW(end,:); jj = ii;
-aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii)) + WBG(end,:);
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+%ii  = MapW(end,:); jj = ii;
+%aa  = zeros(size(ii));
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
+%aa  = zeros(size(ii)) + WBG(end,:);
+%IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
 % internal points
@@ -155,6 +155,20 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+bot];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
+% left boundary 
+ii  = MapU(:,1); jj = ii;
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
+aa  = zeros(size(ii)) + UBG(:,1);
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
+% right boundary
+%ii  = MapU(:,end); jj = ii;
+%aa  = zeros(size(ii));
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
+%aa  = zeros(size(ii)) + UBG(:,end);
+%IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
 if ~periodic
     % left boundary
     ii  = MapU(:,1); jj = ii;
@@ -163,13 +177,14 @@ if ~periodic
     aa  = zeros(size(ii));
     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-    % right boundary
+    % right boundary 
     ii  = MapU(:,end); jj = ii;
     aa  = zeros(size(ii));
     IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
     aa  = zeros(size(ii));
     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 end
+
 
 % internal points
 if periodic

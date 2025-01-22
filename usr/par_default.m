@@ -59,9 +59,9 @@ fin      =  0;                   % ingassing factor (0 = no ingassing; 1 = free 
 fout     =  1;                   % outgassing factor (0 = no outgassing; 1 = free flow outgassing)
 tau_T    =  12*hr;               % wall cooling/assimilation time [s]
 tau_a    =  24*hr;               % wall cooling/assimilation tie [s]
-Twall    =  [300,300,nan];       % [top,bot,sds] wall rock temperature [degC] (nan = insulating)
-cwall    =  nan(3,7);            % [top,bot,sds] wall rock major component [wt SiO2] (nan = no assimilation)
-trcwall  =  nan(3,6);            % [top,bot,sds] wall rock trace elements [wt ppm] (nan = no assimilation)
+Twall    =  [300,300,nan,nan];  % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+cwall    =  nan(3,7,7);            % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
+trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elements [wt ppm] (nan = no assimilation)
 
 % set thermo-chemical material parameters
 calID    =  'MORB';              % phase diagram calibration

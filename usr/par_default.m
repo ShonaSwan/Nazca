@@ -13,6 +13,8 @@ D        =  10;                  % chamber depth [m]
 L        =  10;                  % chamber width [m]
 N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
 h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
+sprate    =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
+
 
 % set model timing parameters
 Nt       =  3e5;                 % number of time steps to take

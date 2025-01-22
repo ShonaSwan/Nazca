@@ -17,6 +17,8 @@ D         =  100;                 % chamber depth [m]
 N         =  200;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  D;                 % chamber width (equal to h for 1-D mode) [m]
+sprate    =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
+
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
@@ -32,7 +34,7 @@ dcr       =  [1,1,1,-1,-1,-1,0]*1e-4;
 dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
 
 % set thermo-chemical boundary parameters
-periodic  =  1;
+periodic  =  0;
 bndmode   =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
 bnd_w     =  h;                 % boundary layer width [m]
 tau_T     =  bnd_w^2/1e-6;        % wall cooling/assimilation time [s]

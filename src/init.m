@@ -102,7 +102,8 @@ if any(bnd_h)
             rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
             %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
         case 6 % mid ocean ridge set up
-            topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
+             
+            topinit = 0.5 * (1 + tanh(XX / bnd_w));  % Smooth spreading profile
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
             leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
             rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
@@ -140,11 +141,13 @@ if ~any(bnd_h)
             rightshape = exp(-(L-XX)/bnd_w);
             %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
         case 6 % mid ocean ridge set up
-            topshape = exp( ( -ZZ)/bnd_w);
+            sptime = XX / sprate; % calcuate the spreading time of ridge
+            topshape = sqrt(sptime * kmax); %(not sure which diffusivity values to use could only find max and min?)
             botshape = exp(-(D-ZZ)/bnd_w);
             leftshape = exp( ( -XX)/bnd_w);
             rightshape = exp(-(L-XX)/bnd_w);
-            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable     
+            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
+            topinit = topinit .* topshape; 
     end
     %sdsshape = max(0,sdsshape - topshape - botshape);
     leftshape = max(0,leftshape - topshape - botshape);

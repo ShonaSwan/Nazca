@@ -48,8 +48,8 @@ dcr   = dcr-round(mean(dcr),16);
 % get coordinate arrays
 Xc        = -h/2:h:L+h/2;
 Zc        = -h/2:h:D+h/2;
-Xf        = (Xc(1:end-1)+Xc(2:end))./2;
-Zf        = (Zc(1:end-1)+Zc(2:end))./2;
+Xf        = (Xc(1:end-1)+Xc(2:end))./2; Xu = Xf;
+Zf        = (Zc(1:end-1)+Zc(2:end))./2; Zw = Zf;
 [XXu,ZZu] = meshgrid(Xf,Zc);
 [XXw,ZZw] = meshgrid(Xc,Zf);
 Xc        = Xc(2:end-1);
@@ -145,8 +145,7 @@ if ~any(bnd_h)
             rightshape = exp(-(L-XX)/bnd_w);
             %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
         case 6 % mid ocean ridge set up
-            sptime = XX / sprate; % calcuate the spreading time of ridge
-            topshape = sqrt(sptime * kmax); %(not sure which diffusivity values to use could only find max and min?)
+            topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
             leftshape = exp( ( -XX)/bnd_w);
             rightshape = exp(-(L-XX)/bnd_w);
@@ -170,7 +169,7 @@ else;                        top = -1; end  % free slip for other types
 if bndmode>=2;               bot = +1;      % no slip bot for 'bot only(2)', 'top/bot(3)', 'all sides(4)'
 else;                        bot = -1; end  % free slip for other types
 if bndmode==5;               top = -1; bot = -1; end % free slip top/bot for 'only walls(5)'
-if bndmode==6;               sdleft = +1; sdright = -1; top = -1; bot = -1; end %Mid ocean ridge setting 
+if bndmode==6;               sdleft = -1; sdright = -1; top = 1; bot = -1; end %Mid ocean ridge setting 
 
 % set ghosted index arrays
 if periodic  % periodic side boundaries
@@ -236,6 +235,18 @@ switch init_mode
             trci(:,:,i)   = trcii + dr_trc(i).*rp + dg_trc(i).*gp;
         end
         trc = trci;
+
+    case 'MOR'
+        sprtime = XX./sprate;
+        Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
+        c = zeros(Nz,Nx,cal.ncmp);
+        for i = 1:cal.ncmp
+            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % composition elements?
+        end
+        trc = zeros(Nz,Nx,cal.ntrc);
+        for i = 1:cal.ntrc
+            trc(:,:,i)  =  trc0(i) + (trc1(i)-trc0(i)) .* (ZZ/D) + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
+        end
 end
 
 % apply initial boundary layers
@@ -284,7 +295,7 @@ eta    = ones(Nz,Nx);
 etamax = min(eta(:)) .* etacntr;
 VolSrc = 0.*Tp; 
 kW     = 0.*Tp;
-Tref   = min(cal.T0)+273.15;
+Tref   = T1;%min(cal.T0)+273.15;
 Pref   = 1e5;
 c0_oxd = c0*cal.cmp_oxd;
 c0_oxd_all = zeros(size(c0,1),9);
@@ -302,7 +313,7 @@ rhofz  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhofx  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhofz.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
 rhoUo  = rhofx.*U(2:end-1,:); rhoUoo = rhoUo; advn_mx = 0.*rhoUo;
-fq     = zeros(size(Tp));  mq = ones(size(Tp))/2;  xq = 1-mq-fq; 
+fq     = zeros(size(Tp));  mq = zeros(size(Tp));  xq = 1-mq-fq; 
 cmq    = c; cxq = c;  cfq = 0.*c;  cfq(:,:,end) = 1;  cf = cfq;
 cm_oxd = reshape(reshape(c,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
 cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
@@ -386,34 +397,37 @@ while res > tol
     rhoref = mean(rho(:));
     T  = (Tp+273.15).*exp(aT./RhoCp.*(Pt-Pref));
 
-    eqtime = tic;
+    % eqtime = tic;
+    % 
+    % var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
+    % var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
+    % var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
+    % var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt](melt model ?)
+    % var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
+    % var.H2O    = var.c(:,end);                % water concentration [wt]
+    % var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
+    % cal.H2Osat = fluidsat(var); % water saturation [wt]
+    % 
+    % [var,cal] = meltmodel(var,cal,'E');
+    % 
+    % mq = reshape(var.m,Nz,Nx); 
+    % fq = reshape(var.f,Nz,Nx);
+    % xq = reshape(var.x,Nz,Nx); 
+    % x  = xq;  
+    % m = mq; 
+    % f = fq;
+    % 
+    % cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
+    % cfq = reshape(var.cf,Nz,Nx,cal.ncmp);
+    % cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+    % cm  = cmq; cx = cxq;  cf = cfq;
+    % 
+    % eqtime = toc(eqtime);
+    % EQtime = EQtime + eqtime;
 
-    var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
-    var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
-    var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
-    var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt](melt model ?)
-    var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
-    var.H2O    = var.c(:,end);                % water concentration [wt]
-    var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
-    cal.H2Osat = fluidsat(var); % water saturation [wt]
-
-    %Tring to work out where to turn off melt model 
-    %[var,cal] = meltmodel(var,cal,'E');
-
-    mq = reshape(var.m,Nz,Nx); 
-    fq = reshape(var.f,Nz,Nx);
-    xq = reshape(var.x,Nz,Nx); %when turning off the melt model it throws a hissy fit here need to work out why ?
-    x  = xq;  
-    m = mq; 
-    f = fq;
-
-    cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-    cfq = reshape(var.cf,Nz,Nx,cal.ncmp);
-    cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
-    cm  = cmq; cx = cxq;  cf = cfq;
-
-    eqtime = toc(eqtime);
-    EQtime = EQtime + eqtime;
+    cx = cxq; cm = cmq; cf = cfq;  % set phase compositions to equilibrium/initial values for time being
+     x =  xq;  m =  mq;  f =  fq;  % set phase fractions to equilibrium/initial values for time being
+    Tsol = 0*T;  Tliq = 0*T;
 
     update;
 

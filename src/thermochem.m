@@ -73,27 +73,27 @@ c = C./sum(C,3);
 %*** update phase equilibrium
 eqtime = tic;
 
-var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
-var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
-var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
-var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt]
-var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
-var.H2O    = var.c(:,end);                % water concentration [wt]
-var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
-cal.H2Osat = fluidsat(var);               % water saturation [wt]
+% var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
+% var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
+% var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
+% var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt]
+% var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
+% var.H2O    = var.c(:,end);                % water concentration [wt]
+% var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
+% cal.H2Osat = fluidsat(var);               % water saturation [wt]
 
 %Tring to work out where to turn off melt model 
 %[var,cal]  = meltmodel(var,cal,'E'); (Melt model?)
 
-mq = reshape(var.m,Nz,Nx);
-fq = reshape(var.f,Nz,Nx);
-xq = reshape(var.x,Nz,Nx);
-
-cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
-
-eqtime = toc(eqtime);
-EQtime = EQtime + eqtime;
+% mq = reshape(var.m,Nz,Nx);
+% fq = reshape(var.f,Nz,Nx);
+% xq = reshape(var.x,Nz,Nx);
+% 
+% cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
+% cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+% 
+% eqtime = toc(eqtime);
+% EQtime = EQtime + eqtime;
 
 
 %***  update phase fraction densities
@@ -160,47 +160,47 @@ upd_T  = (upd_s.*rho + aT.*upd_Pt) .*T./RhoCp;
 Tp     = Tp + upd_Tp;
 T      = T  + upd_T;
 
-% update major component phase composition
-Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
-Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
-subsol  = m<=1e-9 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
-supliq  = x<=1e-9 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
-subsolc = repmat(subsol,1,1,cal.ncmp);
-supliqc = repmat(supliq,1,1,cal.ncmp);
-rnorm   = 1;  tol  = atol*10;
-it      = 1;  mxit = 100;
-upd_cm  = 0.*cm;  upd_cx = 0.*cx;
-cm = cmq;  cx = cxq;
-while rnorm>tol && it<mxit
-
-    Kx = cx./(cm+eps);
-    Kf = cf./(cm+eps);
-
-    cmK = c    ./(m + x.*Kx + f.*Kf + eps);
-    cxK = c.*Kx./(m + x.*Kx + f.*Kf + eps);
-
-    res_cm = cm - cmK./sum(cmK,3);
-    res_cx = cx - cxK./sum(cxK,3);
-
-    upd_cm = - 0.95.*res_cm + 0.25.*upd_cm;
-    upd_cx = - 0.95.*res_cx + 0.25.*upd_cx;
-
-    cm = max(0,cm + upd_cm);
-    cx = max(0,cx + upd_cx);
-
-    r = x.*cx + m.*cm + f.*cf - c;
-    r(subsolc) = 0; r(supliqc) = 0;
-    rnorm = norm(r(:))./norm(c(:));
-    it  = it+1;
-end
-
-if (it==mxit && rnorm>tol)
-    disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
-end
-
-% fix subsolidus and superliquidus conditions
-cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); f(subsol) = fq(subsol); m(subsol) = 0;
-cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); f(supliq) = fq(supliq); x(supliq) = 0;
+% % update major component phase composition
+% Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
+% Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
+% subsol  = m<=1e-9 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
+% supliq  = x<=1e-9 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
+% subsolc = repmat(subsol,1,1,cal.ncmp);
+% supliqc = repmat(supliq,1,1,cal.ncmp);
+% rnorm   = 1;  tol  = atol*10;
+% it      = 1;  mxit = 100;
+% upd_cm  = 0.*cm;  upd_cx = 0.*cx;
+% cm = cmq;  cx = cxq;
+% while rnorm>tol && it<mxit
+% 
+%     Kx = cx./(cm+eps);
+%     Kf = cf./(cm+eps);
+% 
+%     cmK = c    ./(m + x.*Kx + f.*Kf + eps);
+%     cxK = c.*Kx./(m + x.*Kx + f.*Kf + eps);
+% 
+%     res_cm = cm - cmK./sum(cmK,3);
+%     res_cx = cx - cxK./sum(cxK,3);
+% 
+%     upd_cm = - 0.95.*res_cm + 0.25.*upd_cm;
+%     upd_cx = - 0.95.*res_cx + 0.25.*upd_cx;
+% 
+%     cm = max(0,cm + upd_cm);
+%     cx = max(0,cx + upd_cx);
+% 
+%     r = x.*cx + m.*cm + f.*cf - c;
+%     r(subsolc) = 0; r(supliqc) = 0;
+%     rnorm = norm(r(:))./norm(c(:));
+%     it  = it+1;
+% end
+% 
+% if (it==mxit && rnorm>tol)
+%     disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
+% end
+% 
+% % fix subsolidus and superliquidus conditions
+% cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); f(subsol) = fq(subsol); m(subsol) = 0;
+% cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); f(supliq) = fq(supliq); x(supliq) = 0;
 
 
 % record timing

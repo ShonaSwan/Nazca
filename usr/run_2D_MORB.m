@@ -13,11 +13,11 @@ save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  100;                 % chamber depth [m]
-N         =  200;                 % number of grid points in z-direction
+D         =  200e3;               % chamber depth [m]
+N         =  100;                  % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  D;                 % chamber width (equal to h for 1-D mode) [m]
-sprate    =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
+L         =  D;                   % chamber width (equal to h for 1-D mode) [m]
+sprate    =  0.05/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 
 
 % set model timing parameters
@@ -26,11 +26,12 @@ tend      =  1*yr;                % end time for simulation [s]
 dt        =  36;                  % initial time step [s]
 
 % set initial thermo-chemical state
-T0        =  1200;                % temperature top  layer [deg C]
-T1        =  T0;                  % temperature base layer [deg C]
-c0        =  [0.10  0.19  0.38  0.27  0.02  0.04  0.005];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
+init_mode =  'MOR';
+T0        =  5;                    % temperature top  layer [deg C]
+T1        =  1350;                 % temperature base layer [deg C]
+c0        =  [0.70  0.05  0.12  0.08  0.03  0.02  0.001];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,1,1,-1,-1,-1,0]*1e-4;
+dcr       =  [1,1,1,-1,-1,-1,0]*0e-4;
 dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
 
 % set thermo-chemical boundary parameters
@@ -54,6 +55,7 @@ CFL       =  1.0;                 % (physical) time stepping courant number (mul
 rtol      =  1e-4;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
+gamma     =  0;
 
 
 %*****  RUN NAKHLA MODEL  *************************************************

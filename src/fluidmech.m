@@ -3,17 +3,17 @@ tic;
 if ~bnchm && step>0 && ~restart
 
 %***  update mixture mass density
-drhodt  = advn_rho;% + (RHO-rho)/dt;
-
-% residual of mixture mass evolution
-res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
-
-% volume source and background velocity passed to fluid-mechanics solver
-upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
-VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
+% drhodt  = advn_rho;% + (RHO-rho)/dt;
+% 
+% % residual of mixture mass evolution
+% res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
+% 
+% % volume source and background velocity passed to fluid-mechanics solver
+% upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
+% VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
 
 UBG     = - 0*mean(VolSrc,'all')./2 .* (L/2-XXu);
-WBG     = - 2*mean(VolSrc,'all')./2 .* (D/2-ZZw);
+WBG     = - 2*mean(VolSrc,'all')./2 .* (0  -ZZw);
 
 dPchmbdt  = mod_wall*mean(VolSrc,'all') - mod_wall/eta_wall*Pchmb;
 res_Pchmb = (a1*Pchmb-a2*Pchmbo-a3*Pchmboo)/dt - (b1*dPchmbdt + b2*dPchmbdto + b3*dPchmbdtoo);
@@ -22,6 +22,7 @@ upd_Pchmb = - alpha*res_Pchmb*dt/a1/3 + beta*upd_Pchmb;
 Pchmb     = Pchmb + upd_Pchmb;
 
 end
+
 
 %% 0-D run does not require fluidmech solve
 if Nz==1 && Nx==1  
@@ -80,19 +81,20 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sdright];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % top boundary
-ii  = MapW(1,:); jj = ii;
+ii  = MapW(1,2:end-1); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii))+ WBG(1,:);
+aa  = zeros(size(ii));% + WBG(1,:);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 %commenting out bottom boundary breaks the vel paramater in update
 % bottom boundary
-%ii  = MapW(end,:); jj = ii;
-%aa  = zeros(size(ii));
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-%aa  = zeros(size(ii)) + WBG(end,:);
-%IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+ii  = MapW(end,2:end-1); jj1 = ii; jj2 = MapW(end-1,2:end-1);
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+aa  = zeros(size(ii)) + WBG(end,2:end-1);
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % internal points
 ii    = MapW(2:end-1,2:end-1);
@@ -103,8 +105,8 @@ EtaP1 =  eta  (1:end-1,:      );   EtaP2 =  eta  (2:end,:      );
 %             top          ||         bottom          ||           left            ||          right
 jj1 = MapW(1:end-2,2:end-1); jj2 = MapW(3:end,2:end-1); jj3 = MapW(2:end-1,1:end-2); jj4 = MapW(2:end-1,3:end);
 
-aa  = a1.*rhofz(2:end-1,:)./dt;
-IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % inertial term
+% aa  = a1.*rhofz(2:end-1,:)./dt;
+% IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % inertial term
 
 aa  = 2/3*(EtaP1+EtaP2)/h^2 + 1/2*(EtaC1+EtaC2)/h^2;
 IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % W on stencil centre
@@ -132,8 +134,8 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 % z-RHS vector
 advn_mz = advect(rhofz(2:end-1,:).*W(2:end-1,2:end-1),(U(2:end-2,:)+U(3:end-1,:))/2,(W(1:end-1,2:end-1)+W(2:end,2:end-1))/2,h,{ADVN,''},[1,2],BCA);
 rr  = + (rhofz(2:end-1,:) - mean(rhofz(2:end-1,:),2)) .* g0 ...
-      + (a2.*rhoWo(2:end-1,:)+a3.*rhoWoo(2:end-1,:))/dt ...
-      - advn_mz;
+      + 0*(a2.*rhoWo(2:end-1,:)+a3.*rhoWoo(2:end-1,:))/dt ...
+      - 0*advn_mz;
 if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -142,49 +144,50 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
-aa  = zeros(size(ii));
+ii  = MapU(1,2:end-1); jj1 = ii; jj2 = MapU(2,2:end-1);
+aa  = zeros(size(ii)) + UBG(1,2:end-1) + 1./(1+exp(-(Xu(2:end-1)-5e3)./2e3)).*sprate*2;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+top];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
+ii  = MapU(end,2:end-1); jj1 = ii; jj2 = MapU(end-1,2:end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+bot];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-% left boundary 
+% left boundary
 ii  = MapU(:,1); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii)) + UBG(:,1);
+aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 %commenting out the right boundary again breaks vel 
 % right boundary
-%ii  = MapU(:,end); jj = ii;
-%aa  = zeros(size(ii));
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-%aa  = zeros(size(ii)) + UBG(:,end);
-%IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+ii  = MapU(:,end); jj1 = ii; jj2 = MapU(:,end-1);
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+aa  = zeros(size(ii));% + UBG(:,end);
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-if ~periodic
-    % left boundary
-    ii  = MapU(:,1); jj = ii;
-    aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-    aa  = zeros(size(ii));
-    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-
-    % right boundary 
-    ii  = MapU(:,end); jj = ii;
-    aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-    aa  = zeros(size(ii));
-    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-end
+% if ~periodic
+%     % left boundary
+%     ii  = MapU(:,1); jj = ii;
+%     aa  = zeros(size(ii));
+%     IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
+%     aa  = zeros(size(ii));
+%     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+% 
+%     % right boundary 
+%     ii  = MapU(:,end); jj = ii;
+%     aa  = zeros(size(ii));
+%     IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
+%     aa  = zeros(size(ii));
+%     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+% end
 
 
 % internal points
@@ -205,12 +208,12 @@ if periodic
 else
     jj1 = MapU(2:end-1,1:end-2); jj2 = MapU(2:end-1,3:end); jj3 = MapU(1:end-2,2:end-1); jj4 = MapU(3:end,2:end-1);
 end
-if periodic
-    aa  = (a1+gamma).*rhofx./dt;
-else
-    aa  = a1.*rhofx(:,2:end-1)./dt;
-end
-IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % inertial term
+% if periodic
+%     aa  = (a1+gamma).*rhofx./dt;
+% else
+%     aa  = a1.*rhofx(:,2:end-1)./dt;
+% end
+% IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % inertial term
 
 aa  = 2/3*(EtaP1+EtaP2)/h^2 + 1/2*(EtaC1+EtaC2)/h^2;
 IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % U on stencil centre
@@ -246,12 +249,12 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 if periodic
     advn_mx = advect(rhofx.*U(2:end-1,:),(U(2:end-1,ifx(1:end-1))+U(2:end-1,ifx(2:end)))/2,(W(:,1:end-1)+W(:,2:end))/2,h,{ADVN,''},[1,2],BCA);
     advn_mx(:,[1 end]) = repmat((advn_mx(:,1)+advn_mx(:,end))/2,1,2);
-    rr  = + (a2.*rhoUo+a3.*rhoUoo)/dt ...
-          - advn_mx;
+    rr  = + 0*(a2.*rhoUo+a3.*rhoUoo)/dt ...
+          - 0*advn_mx;
 else
     advn_mx = advect(rhofx(:,2:end-1).*U(2:end-1,2:end-1),(U(2:end-1,1:end-1)+U(2:end-1,2:end))/2,(W(:,2:end-2)+W(:,3:end-1))/2,h,{ADVN,''},[1,2],BCA);
-    rr  = + (a2.*rhoUo(:,2:end-1)+a3.*rhoUoo(:,2:end-1))/dt ...
-          - advn_mx;
+    rr  = + 0*(a2.*rhoUo(:,2:end-1)+a3.*rhoUoo(:,2:end-1))/dt ...
+          - 0*advn_mx;
 end
 if bnchm
     if periodic
@@ -405,14 +408,14 @@ IIR = [IIR; ii(:)]; AAR = [AAR; rr(:)];
 RP  = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
 % set P = 0 in fixed point
-nzp = round((Nz+2)/2);
-nxp = round((Nx+2)/2);
+nzp = Nz+1;%round((Nz+2)/2);
+nxp = Nx+1;%round((Nx+2)/2);
 np0 = MapP(nzp,nxp);
-% DD(MapP(nzp,nxp),:) = 0;
+DD(MapP(nzp,nxp),:) = 0;
 KP(MapP(nzp,nxp),:) = 0;
 KP(MapP(nzp,nxp),MapP(nzp,nxp)) = 1;
-KP(MapP(end,nxp),MapP(nzp,nxp)) = 1;
-% RP(MapP(nzp,nxp),:) = 0;
+% KP(MapP(end,nxp),MapP(nzp,nxp)) = 1;
+RP(MapP(nzp,nxp),:) = 0;
 
 if bnchm; RP(MapP(nzp,nxp),:) = P_mms(nzp,nxp); end
 
@@ -435,7 +438,7 @@ LL  = [ KV   GG  ; ...
 RR  = [RV; RP];
 
 SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt(h^2./geomean(eta(:)))) ));
+SCL = diag(sparse( 1./(SCL + 1e-9)));%sqrt(h^2./geomean(eta(:)))) ));
 
 FF  = LL*[W(:);U(:);P(:)] - RR;
 

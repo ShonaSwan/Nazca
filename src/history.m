@@ -94,13 +94,13 @@ hist.T(stp,1) = min(min(T));
 hist.T(stp,2) = mean(mean(T));
 hist.T(stp,3) = max(max(T));
 
-hist.Tsol(stp,1) = min(min(cal.Tsol));
-hist.Tsol(stp,2) = mean(mean(cal.Tsol));
-hist.Tsol(stp,3) = max(max(cal.Tsol));
+hist.Tsol(stp,1) = min(min(Tsol));
+hist.Tsol(stp,2) = mean(mean(Tsol));
+hist.Tsol(stp,3) = max(max(Tsol));
 
-hist.Tliq(stp,1) = min(min(cal.Tliq));
-hist.Tliq(stp,2) = mean(mean(cal.Tliq));
-hist.Tliq(stp,3) = max(max(cal.Tliq));
+hist.Tliq(stp,1) = min(min(Tliq));
+hist.Tliq(stp,2) = mean(mean(Tliq));
+hist.Tliq(stp,3) = max(max(Tliq));
 
 for i=1:cal.ncmp
     hist.c(stp,1,i) = min(min(c(:,:,i)));

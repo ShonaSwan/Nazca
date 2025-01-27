@@ -122,7 +122,7 @@ rho_nP  = 1./(m./rhom_nP + x./rhox_nP + f./rhof_nP);
 
 % detect convection layers
 drhoz    = gradient(mean(rho_nP,2));
-[~,zpks] = findpeaks(drhoz,'MinPeakHeight',10,'MinPeakProminence',1);
+[~,zpks] = findpeaks(drhoz,'MinPeakHeight',10,'MinPeakProminence',1); %(Something not happy here)
 nlay = length(zpks)+1;
 zlay = zeros(1,nlay+1);
 

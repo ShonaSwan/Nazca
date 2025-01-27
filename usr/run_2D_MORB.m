@@ -37,7 +37,7 @@ dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
 periodic  =  0;
 bndmode   =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
 bnd_w     =  h;                 % boundary layer width [m]
-tau_T     =  bnd_w^2/1e-6;        % wall cooling/assimilation time [s]
+tau_T     =  12*hr;        % wall cooling/assimilation time [s]
 Twall     =  [300,300,nan,nan];       % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);
 Ptop      =  2.0e8;               % top pressure [Pa]

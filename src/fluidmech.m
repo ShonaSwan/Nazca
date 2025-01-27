@@ -83,16 +83,16 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapW(1,:); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii)) + WBG(1,:);
+aa  = zeros(size(ii))+ WBG(1,:);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
+%commenting out bottom boundary breaks the vel paramater in update
 % bottom boundary
 %ii  = MapW(end,:); jj = ii;
 %aa  = zeros(size(ii));
 %IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
 %aa  = zeros(size(ii)) + WBG(end,:);
 %IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-
 
 % internal points
 ii    = MapW(2:end-1,2:end-1);
@@ -162,6 +162,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
 aa  = zeros(size(ii)) + UBG(:,1);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
+%commenting out the right boundary again breaks vel 
 % right boundary
 %ii  = MapU(:,end); jj = ii;
 %aa  = zeros(size(ii));

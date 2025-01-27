@@ -18,18 +18,23 @@ fprintf('*****  RUN NAKHLA MODEL | %s  *************\n',datetime('now'));
 fprintf('*************************************************************\n');
 fprintf('\n   run ID: %s \n\n',runID);
 
+
+%define individualy 
 load ocean;                  % load custom colormap
-run(['../cal/cal_',calID]);  % load melt model calibration
+run(['../cal/cal_',calID]);  % load melt model calibration (melt model?)
+
 if periodic % periodic sides
     BCA     =  {'','periodic'};  % boundary condition on advection (top/bot, sides)
-    BCD     =  {'','periodic'};  % boundary condition on advection (top/bot, sides)
+    BCD     =  {'','periodic'};  % boundary condition on diffusion (top/bot, sides)
 else % closed sides
-    BCA     =  {'',''};  % boundary condition on advection (top/bot, sides)
-    BCD     =  {'',''};  % boundary condition on advection (top/bot, sides) 
+    BCA     =  {'','','',''};  % boundary condition on advection (top,bot,left,right)
+    BCD     =  {'','','',''};  % boundary condition on diffusion (top,bot,left,right) 
 end
+%split side conditions into seperate inputs?
+% Where is the BDC variable called again cant find ? 
 
-Dsx = -cal.Dsx;
-Dsf =  cal.Dsf;
+Dsx = -cal.Dsx; 
+Dsf = cal.Dsf; 
 
 Delta_cnv0 = Delta_cnv;
 
@@ -102,8 +107,7 @@ if any(bnd_h)
             rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
             %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
         case 6 % mid ocean ridge set up
-             
-            topinit = 0.5 * (1 + tanh(XX / bnd_w));  % Smooth spreading profile
+            topinit = 0.5 * (1 + tanh(XX / bnd_w));  % Trying to add in the top spreading not sure if correct place to do so?
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
             leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
             rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
@@ -147,7 +151,7 @@ if ~any(bnd_h)
             leftshape = exp( ( -XX)/bnd_w);
             rightshape = exp(-(L-XX)/bnd_w);
             %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
-            topinit = topinit .* topshape; 
+            topinit = topinit .* topshape; % not sure this is right idea?
     end
     %sdsshape = max(0,sdsshape - topshape - botshape);
     leftshape = max(0,leftshape - topshape - botshape);
@@ -187,7 +191,7 @@ switch init_mode
         Tp  =  T0 + (T1-T0) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_T))/2 + dTr.*rp + dTg.*gp;  % potential temperature [C]
         c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % trace elements
+            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % composition elements?
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
@@ -197,7 +201,7 @@ switch init_mode
         Tp  =  T0 + (T1-T0) .* (ZZ/D) + dTr.*rp + dTg.*gp;  % potential temperature [C]
         c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % trace elements
+            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % composition elements?
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
@@ -269,10 +273,11 @@ SOL = [W(:);U(:);P(:)];
 % initialise auxiliary fields
 Wf  = W;  Uf  = U; 
 Wx  = W;  Ux  = U;
-Wm  = W;  Um  = U;
+Wm  = W;  Um  = U; 
 
 Re     = eps;  
-Div_V  = 0.*Tp;  advn_rho = 0.*Tp;  advn_X = 0.*Tp; advn_M = 0.*Tp; advn_F = 0.*Tp; drhodt = 0.*Tp;  drhodto = drhodt;
+Div_V  = 0.*Tp;  advn_rho = 0.*Tp;  advn_X = 0.*Tp; advn_M = 0.*Tp;
+advn_F = 0.*Tp; drhodt = 0.*Tp;  drhodto = drhodt;
 exx    = 0.*Tp;  ezz = 0.*Tp;  exz = zeros(Nz-1,Nx-1);  eII = 0.*Tp;  
 txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz-1,Nx-1);  tII = 0.*Tp; 
 eta    = ones(Nz,Nx);
@@ -291,8 +296,8 @@ Pchmb  = Pchmb0;  Pchmbo = Pchmb;  Pchmboo = Pchmbo;  dPchmbdt = Pchmb;  dPchmbd
 Pt     = Ptop + Pchmb + mean(rhom,'all').*g0.*ZZ;  Pl = Pt;
 rhof   = rhof.*(1+bPf.*(Pt-Pref));
 rhox   = rhox.*(1+bPx.*(Pt-Pref));
-rhom   = rhom.*(1+bPm.*(Pt-Pref));
-rho    = rhom;
+rhom   = rhom.*(1+bPm.*(Pt-Pref)); 
+rho    = rhom; 
 rhofz  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhofx  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhofz.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
@@ -386,18 +391,21 @@ while res > tol
     var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
     var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
     var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
-    var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt]
+    var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt](melt model ?)
     var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
     var.H2O    = var.c(:,end);                % water concentration [wt]
     var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
     cal.H2Osat = fluidsat(var); % water saturation [wt]
 
-    [var,cal] = meltmodel(var,cal,'E');
+    %Tring to work out where to turn off melt model 
+    %[var,cal] = meltmodel(var,cal,'E');
 
-    mq = reshape(var.m,Nz,Nx);
+    mq = reshape(var.m,Nz,Nx); 
     fq = reshape(var.f,Nz,Nx);
-    xq = reshape(var.x,Nz,Nx);
-    x  = xq;  m = mq;  f = fq;
+    xq = reshape(var.x,Nz,Nx); %when turning off the melt model it throws a hissy fit here need to work out why ?
+    x  = xq;  
+    m = mq; 
+    f = fq;
 
     cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
     cfq = reshape(var.cf,Nz,Nx,cal.ncmp);

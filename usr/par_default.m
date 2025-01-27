@@ -13,7 +13,7 @@ D        =  10;                  % chamber depth [m]
 L        =  10;                  % chamber width [m]
 N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
 h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-sprate    =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
+sprate   =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
 
 
 % set model timing parameters
@@ -54,7 +54,7 @@ fractres =  0.25;                % residual fraction for fractionation mode
 dPdT     =  0e5;                 % decompression rate for 0D models
 Ptop     =  125e6;               % top pressure [Pa]
 periodic =  0;                   % set side boundaries to periodic
-bndmode  =  3;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
+bndmode  =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
 bnd_w    =  h;                   % boundary layer width [m]
 bnd_h    =  [0,0,0];             % internal wall rock layer thickness [m]
 fin      =  0;                   % ingassing factor (0 = no ingassing; 1 = free flow ingassing)

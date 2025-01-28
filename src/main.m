@@ -41,11 +41,11 @@ while time <= tend && step <= Nt
     X = X./RHO.*rho;  M = M./RHO.*rho;  F = F./RHO.*rho;  RHO = X+M+F;
     C = C./sum(C,3).*rho;
 
-    % fractionation mode for 0D-models
-    if Nx==1 && Nz==1
-        Ptop = Ptop + (T-To).*dPdT;
-        fractionate; 
-    end
+    % % fractionation mode for 0D-models
+    % if Nx==1 && Nz==1
+    %     Ptop = Ptop + (T-To).*dPdT;
+    %     fractionate; 
+    % end
 
     % record model history
     history;

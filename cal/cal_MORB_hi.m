@@ -90,7 +90,6 @@ cal.r  = [40.5  3.0  3.0  8.5  8.3  3.4];
 
 % set entropy gain of fusion DeltaS [J/K]
 cal.Dsx  = 350;
-cal.Dsf  = 450;
 
 % specify melting point dependence on H2O
 cal.dTH2O = [908  1412  1428  1569  1692  2024];  % solidus shift from water content prefactor [K/wt^pH2O]
@@ -116,17 +115,14 @@ cal.rhof0   = 1000;                 % fluid ref density [kg/m3]
 cal.etax0   = [1e19,1e19,1e17,1e17,1e17,1e19,1e19,1e19,1e17,1e17,1e17,1e19,1e0]; % mem ref viscosities [Pas]
 cal.etaf0   = 0.1;                    % fluid viscosity constant [Pas]
 cal.Eax     = 300e3;                  % solid viscosity activation energy [J/mol]
-cal.AA      =[ 0.65, 0.25, 0.35; ...  % permission slopes
-               0.20, 0.20, 0.20; ...  % generally numbers between 0 and 1
-               0.20, 0.20, 0.20; ];   % increases permission slopes away from step function 
+cal.AA      =[ 0.5989, 0.1772; ...    % permission slopes
+               0.0397, 0.1182 ];      % increases permission slopes away from step function 
 
-cal.BB      =[ 0.55, 0.18, 0.27; ...  % permission step locations
-               0.64,0.012,0.348; ...  % each row sums to 1
-               0.80, 0.12, 0.08; ];   % sets midpoint of step functions
+cal.BB      =[ 0.6870, 0.3130; ...  % permission step locations
+               0.9998, 0.0002;];        % sets midpoint of step functions
 
-cal.CC      =[[0.30, 0.30, 0.40]*0.7; ... % permission step widths
-              [0.52, 0.40, 0.08]*1.1; ... % square brackets sum to 1, sets angle of step functions
-              [0.15, 0.25, 0.60]*0.7; ];  % factor increases width of step functions
+cal.CC      =[[0.9826, 0.0174]*9.1697; ... % permission step widths
+              [0.1695, 0.8305]*4.2773;];   % factor increases width of step functions
 
 % convergence tolerance
 cal.tol     = 1e-9;

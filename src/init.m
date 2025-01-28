@@ -27,16 +27,13 @@ if periodic % periodic sides
     BCA     =  {'','periodic'};  % boundary condition on advection (top/bot, sides)
     BCD     =  {'','periodic'};  % boundary condition on diffusion (top/bot, sides)
 else % closed sides
-    BCA     =  {'','','',''};  % boundary condition on advection (top,bot,left,right)
-    BCD     =  {'','','',''};  % boundary condition on diffusion (top,bot,left,right) 
+    BCA     =  {'',''};  % boundary condition on advection (top,bot,left,right)
+    BCD     =  {'',''};  % boundary condition on diffusion (top,bot,left,right) 
 end
 %split side conditions into seperate inputs?
 % Where is the BDC variable called again cant find ? 
 
 Dsx = -cal.Dsx; 
-Dsf = cal.Dsf; 
-
-Delta_cnv0 = Delta_cnv;
 
 % normalise major components to anhydrous unit sum, rescale to hydrous
 c0(1:end-1) = c0(1:end-1)./sum(c0(1:end-1)).*(1-c0(end));
@@ -84,8 +81,7 @@ MapU = reshape(1:NU,Nz+2,Nx+1) + NW;
 %sdsinit = zeros(size(XX)); %spare sides boundary variable (both left and right)
 topinit = zeros(size(ZZ)); 
 botinit = zeros(size(ZZ)); 
-leftinit = zeros(size(XX));
-rightinit = zeros(size(XX)); 
+
 if any(bnd_h)
     switch bndmode
         case 0  % none
@@ -99,31 +95,16 @@ if any(bnd_h)
         case 4 % all walls
             topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-            leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
-            rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
-            %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
-        case 5 % only walls
-            leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
-            rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
-            %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
         case 6 % mid ocean ridge set up
             topinit = 0.5 * (1 + tanh(XX / bnd_w));  % Trying to add in the top spreading not sure if correct place to do so?
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-            leftinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2;
-            rightinit = (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;
-            %sdsinit = (1+erf( ( -XX+bnd_h(3))/bnd_w))/2 + (1+erf(-(L-XX-bnd_h(3))/bnd_w))/2;%spare sides boundary variable
     end
-    %sdsinit = max(0,sdsinit-topinit-botinit);%spare sides boundary variable
-    leftinit = max(0,leftinit-topinit-botinit);
-    rightinit = max(0,rightinit-topinit-botinit);
 end
 
 % set up shape functions for transient boundary layers
-%sdsshape = zeros(size(XX)); %spare sides boundary variable (both left and right)
 topshape = zeros(size(ZZ));
 botshape = zeros(size(ZZ));
-leftshape = zeros(size(XX));
-rightshape = zeros(size(XX));
+
 if ~any(bnd_h)
     switch bndmode
         case 0  % none
@@ -137,24 +118,10 @@ if ~any(bnd_h)
         case 4 % all walls
             topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
-            leftshape = exp( ( -XX)/bnd_w);
-            rightshape = exp(-(L-XX)/bnd_w);
-            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
-        case 5 % only walls
-            leftshape = exp( ( -XX)/bnd_w);
-            rightshape = exp(-(L-XX)/bnd_w);
-            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
         case 6 % mid ocean ridge set up
             topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
-            leftshape = exp( ( -XX)/bnd_w);
-            rightshape = exp(-(L-XX)/bnd_w);
-            %sdsshape = exp( ( -XX)/bnd_w) + exp(-(L-XX)/bnd_w);%spare sides boundary variable
-            topinit = topinit .* topshape; % not sure this is right idea?
     end
-    %sdsshape = max(0,sdsshape - topshape - botshape);
-    leftshape = max(0,leftshape - topshape - botshape);
-    rightshape = max(0,rightshape - topshape - botshape);
 end
 
 bnd_S = zeros(Nz,Nx);
@@ -239,9 +206,10 @@ switch init_mode
     case 'MOR'
         sprtime = XX./sprate;
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
+
         c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % composition elements?
+            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % major elements
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
@@ -252,27 +220,18 @@ end
 % apply initial boundary layers
 if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
 if any(botinit(:)) && ~isnan(Twall(2)); Tp = Tp + (Twall(2)-Tp).*botinit; end
-if any(leftinit(:)) && ~isnan(Twall(3)); Tp = Tp + (Twall(3)-Tp).*leftinit; end
-if any(rightinit(:)) && ~isnan(Twall(4)); Tp = Tp + (Twall(4)-Tp).*rightinit; end
-%if any(sdsinit(:)) && ~isnan(Twall(3)); Tp = Tp + (Twall(3)-Tp).*sdsinit; end
 
 Tin = Tp;
 
 for i = 1:cal.ncmp
     if any(topinit(:)) && ~any(isnan(cwall(1,:))); c(:,:,i) = c(:,:,i) + (cwall(1,i)-c(:,:,i)).*topinit; end
     if any(botinit(:)) && ~any(isnan(cwall(2,:))); c(:,:,i) = c(:,:,i) + (cwall(2,i)-c(:,:,i)).*botinit; end
-    if any(leftinit(:)) && ~any(isnan(cwall(3,:))); c(:,:,i) = c(:,:,i) + (cwall(3,i)-c(:,:,i)).*leftinit; end
-    if any(rightinit(:)) && ~any(isnan(cwall(4,:))); c(:,:,i) = c(:,:,i) + (cwall(4,i)-c(:,:,i)).*rightinit; end
-    %if any(sdsinit(:)) && ~any(isnan(cwall(3,:))); c(:,:,i) = c(:,:,i) + (cwall(3,i)-c(:,:,i)).*sdsinit; end
 end
 cin = c;
 
 for i = 1:cal.ntrc
     if any(topinit(:)) && ~isnan(trcwall(1,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(1,i)-trc(:,:,i)).*topinit; end
     if any(botinit(:)) && ~isnan(trcwall(2,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(2,i)-trc(:,:,i)).*botinit; end
-    if any(leftinit(:)) && ~isnan(trcwall(3,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(3,i)-trc(:,:,i)).*leftinit; end
-    if any(rightinit(:)) && ~isnan(trcwall(4,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(4,i)-trc(:,:,i)).*rightinit; end
-    %if any(sdsinit(:)) && ~isnan(trcwall(3,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(3,i)-trc(:,:,i)).*sdsinit; end
 end
 tein = trc;
 
@@ -493,13 +452,12 @@ X    = rho.*x; Xo = X;  res_X = 0.*X;
 F    = rho.*f; Fo = F;  res_F = 0.*F;
 M    = rho.*m; Mo = M;  res_M = 0.*M;
 RHO  = X+M+F;
-S    = s.*rho + X.*Dsx + F.*Dsf;  So = S;  res_S = 0.*S;
+S    = s.*rho + X.*Dsx;  So = S;  res_S = 0.*S;
 
 % get phase entropies
-s  = (S - X.*Dsx - F.*Dsf)./rho;
+s  = (S - X.*Dsx)./rho;
 sm = s;
 sx = s + Dsx;
-sf = s + Dsf;
 
 % get trace element phase compositions
 Ktrc = zeros(Nz,Nx,cal.ntrc);

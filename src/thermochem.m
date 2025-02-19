@@ -67,6 +67,7 @@ c = C./sum(C,3);
 
 
 %*** update phase equilibrium
+%melt model (turned off for now)
 eqtime = tic;
 
 % var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
@@ -78,9 +79,8 @@ eqtime = tic;
 % var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
 % cal.H2Osat = fluidsat(var);               % water saturation [wt]
 
-%Tring to work out where to turn off melt model 
-%[var,cal]  = meltmodel(var,cal,'E'); (Melt model?)
 
+%[var,cal]  = meltmodel(var,cal,'E'); 
 % mq = reshape(var.m,Nz,Nx);
 % fq = reshape(var.f,Nz,Nx);
 % xq = reshape(var.x,Nz,Nx);

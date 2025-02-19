@@ -14,11 +14,12 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  100;                  % number of grid points in z-direction
+N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  2*D;                   % chamber width (equal to h for 1-D mode) [m]
+L         =  2*D;                 % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.05/yr;             % Half spreading rate [m/s] (modeling half the ridge)
-
+bnd_sprc  =  5e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
+bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set model timing parameters
 Nt        =  5e5;                   % number of time steps to take
@@ -36,7 +37,7 @@ dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
 
 % set thermo-chemical boundary parameters
 periodic  =  0;
-bndmode   =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
+bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
 bnd_w     =  h;                 % boundary layer width [m]
 tau_T     =  1e5*yr;        % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];       % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)

@@ -14,14 +14,14 @@ end
 
 fprintf('\n\n')
 fprintf('*************************************************************\n');
-fprintf('*****  RUN NAKHLA MODEL | %s  *************\n',datetime('now'));
+fprintf('*****  RUN NAZCA MODEL | %s  *************\n',datetime('now'));
 fprintf('*************************************************************\n');
 fprintf('\n   run ID: %s \n\n',runID);
 
 
 %define individualy 
 load ocean;                  % load custom colormap
-run(['../cal/cal_',calID]);  % load melt model calibration (melt model?)
+run(['../cal/cal_',calID]);  % load melt model calibration 
 
 if periodic % periodic sides
     BCA     =  {'','periodic'};  % boundary condition on advection (top/bot, sides)
@@ -30,9 +30,7 @@ else % closed sides
     BCA     =  {'',''};  % boundary condition on advection (top,bot,left,right)
     BCD     =  {'',''};  % boundary condition on diffusion (top,bot,left,right) 
 end
-%split side conditions into seperate inputs?
-% Where is the BDC variable called again cant find ? 
-
+ 
 Dsx = -cal.Dsx; 
 
 % normalise major components to anhydrous unit sum, rescale to hydrous
@@ -95,8 +93,8 @@ if any(bnd_h)
         case 4 % all walls
             topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-        case 6 % mid ocean ridge set up
-            topinit = 0.5 * (1 + tanh(XX / bnd_w));  % Trying to add in the top spreading not sure if correct place to do so?
+        case 5 % mid ocean ridge set up
+            topinit = 0.5 * (1 + tanh(XX / bnd_w)); 
             botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
     end
 end
@@ -118,7 +116,7 @@ if ~any(bnd_h)
         case 4 % all walls
             topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
-        case 6 % mid ocean ridge set up
+        case 5 % mid ocean ridge set up
             topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
     end
@@ -135,8 +133,7 @@ if bndmode==1 || bndmode>=3; top = +1;      % no slip top for 'top only(1)', 'to
 else;                        top = -1; end  % free slip for other types
 if bndmode>=2;               bot = +1;      % no slip bot for 'bot only(2)', 'top/bot(3)', 'all sides(4)'
 else;                        bot = -1; end  % free slip for other types
-if bndmode==5;               top = -1; bot = -1; end % free slip top/bot for 'only walls(5)'
-if bndmode==6;               sdleft = -1; sdright = -1; top = 1; bot = -1; end %Mid ocean ridge setting 
+if bndmode==5;               sdleft = -1; sdright = -1; top = 1; bot = -1; end %Mid ocean ridge setting 
 
 % set ghosted index arrays
 if periodic  % periodic side boundaries
@@ -157,7 +154,7 @@ switch init_mode
         Tp  =  T0 + (T1-T0) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_T))/2 + dTr.*rp + dTg.*gp;  % potential temperature [C]
         c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % composition elements?
+            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % major elements
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
@@ -167,7 +164,7 @@ switch init_mode
         Tp  =  T0 + (T1-T0) .* (ZZ/D) + dTr.*rp + dTg.*gp;  % potential temperature [C]
         c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % composition elements?
+            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % major elements
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
@@ -216,6 +213,9 @@ switch init_mode
             trc(:,:,i)  =  trc0(i) + (trc1(i)-trc0(i)) .* (ZZ/D) + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
         end
 end
+
+%Defining the top bounday spreading rate 's' shape function
+bnd_spr = 1./(1+exp(-(Xu(2:end-1)- bnd_sprc)./bnd_sprw)).*sprate;
 
 % apply initial boundary layers
 if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
@@ -356,6 +356,7 @@ while res > tol
     rhoref = mean(rho(:));
     T  = (Tp+273.15).*exp(aT./RhoCp.*(Pt-Pref));
 
+    %%%%The melt model %%%%
     % eqtime = tic;
     % 
     % var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]

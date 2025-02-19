@@ -2,7 +2,7 @@ tic;
 
 if ~bnchm && step>0 && ~restart
 
-% %***  update mixture mass density
+% %***  update mixture mass density (The net compressibility)
 % drhodt  = advn_rho;% + (RHO-rho)/dt;
 % 
 % % residual of mixture mass evolution
@@ -144,7 +144,7 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 % top boundary
 ii  = MapU(1,2:end-1); jj1 = ii; jj2 = MapU(2,2:end-1);
-aa  = zeros(size(ii)) + 1./(1+exp(-(Xu(2:end-1)-5e3)./2e3)).*sprate * 2; %+ UBG(1,2:end-1)
+aa  = zeros(size(ii)) + bnd_spr * 2; %+ UBG(1,2:end-1)
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+top];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
@@ -163,7 +163,6 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-%commenting out the right boundary again breaks vel 
 % right boundary
 ii  = MapU(:,end); jj1 = ii; jj2 = MapU(:,end-1);
 aa  = zeros(size(ii));

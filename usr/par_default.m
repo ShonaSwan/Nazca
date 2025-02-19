@@ -14,6 +14,8 @@ L        =  10;                  % chamber width [m]
 N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
 h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 sprate   =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
+bnd_sprc  =  5e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
+bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 
 % set model timing parameters

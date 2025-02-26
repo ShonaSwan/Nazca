@@ -334,7 +334,7 @@ else % create 2D plots
     set(fh1,'CurrentAxes',ax(12));
     imagesc(Xsc,Zsc, U(2:end-1,:      )./SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$U$ [',SpeedUnits,']'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(-0.1,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh1,'CurrentAxes',ax(13));
     imagesc(Xsc,Zsc, P); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P$ [Pa]'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
@@ -350,7 +350,7 @@ else % create 2D plots
     set(fh2,'CurrentAxes',ax(22));
     imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Si)./sum(c_oxd(:,:,1:end-1),3).*100)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['SiO$_2$ [wt\%]'],TX{:},FS{:}); set(gca,'YTickLabel',[]); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
-    text(0.5,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.3,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh2,'CurrentAxes',ax(23));
     if any(c(:,:,end),'all')
         imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.H))); axis ij equal tight; box on; cb = colorbar;
@@ -368,7 +368,7 @@ else % create 2D plots
     set(fh3,'CurrentAxes',ax(32));
     imagesc(Xsc,Zsc,mu.*100.*(mu>1e-9)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\mu$ [vol\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(-0.1,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh3,'CurrentAxes',ax(33));
     imagesc(Xsc,Zsc,Gx./rho*hr*100.*(chi>1e-9)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_x/\bar{\rho}$ [wt\%/hr]'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
@@ -384,7 +384,7 @@ else % create 2D plots
     set(fh4,'CurrentAxes',ax(42));
     imagesc(Xsc,Zsc,log10(eta)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\bar{\eta}$ [log$_{10}$ Pas]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(-0.1,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh4,'CurrentAxes',ax(43));
     imagesc(Xsc,Zsc,-(chi([1,1:end],:)+chi([1:end,end],:))/2.*wx(:,2:end-1).*1e3/SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w_\Delta^x$ [m',SpeedUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
@@ -408,7 +408,7 @@ else % create 2D plots
     set(gca,TL{:},TS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh5,'CurrentAxes',ax(52));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(0.5,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh5,'CurrentAxes',ax(53));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh5,'CurrentAxes',ax(54));
@@ -434,7 +434,7 @@ else % create 2D plots
     set(gca,'XTickLabel',[]);
     set(fh6,'CurrentAxes',ax(62));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(0.5,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.3,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh6,'CurrentAxes',ax(63));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh6,'CurrentAxes',ax(64));
@@ -460,7 +460,7 @@ else % create 2D plots
     set(gca,TL{:},TS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh7,'CurrentAxes',ax(72));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(0.5,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh7,'CurrentAxes',ax(73));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh7,'CurrentAxes',ax(74));
@@ -470,7 +470,7 @@ else % create 2D plots
     set(fh7,'CurrentAxes',ax(76));
     set(gca,'YTickLabel',[]);
 
-    % plot geochemical variables in Fig. 7
+    % plot geochemical variables in Fig. 8
     set(0,'CurrentFigure',fh8)
     for i = 1:cal.ntrc
         set(fh8,'CurrentAxes',ax(80+i));
@@ -481,7 +481,7 @@ else % create 2D plots
     set(gca,'XTickLabel',[]);
     set(fh8,'CurrentAxes',ax(82));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(0.5,1.1,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.3,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh8,'CurrentAxes',ax(83));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh8,'CurrentAxes',ax(84));

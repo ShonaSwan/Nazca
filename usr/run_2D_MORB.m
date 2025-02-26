@@ -5,7 +5,7 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB';           % run identifier
+runID     =  '2D_MORB_1';           % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  10;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -23,31 +23,31 @@ bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' fun
 
 % set model timing parameters
 Nt        =  5e5;                   % number of time steps to take
-tend      =  1e6*yr;                % end time for simulation [s]
+tend      =  1e9*yr;                % end time for simulation [s]
 dt        =  1e3*yr;                % initial time step [s]
 
 % set initial thermo-chemical state
 init_mode =  'MOR';
-T0        =  5;                    % temperature top  layer [deg C]
-T1        =  1350;                 % temperature base layer [deg C]
-c0        =  [0.70  0.05  0.12  0.08  0.03  0.02  0.001];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
+T0        =  5;                   % temperature top  layer [deg C]
+T1        =  1350;                % temperature base layer [deg C]
+c0        =  [0.85 0.15 0];       % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,1,1,-1,-1,-1,0]*1e-4;
+dcr       =  [1,-1,0]*1e-4;       %Random perturbation of the composition field
 dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
 
 % set thermo-chemical boundary parameters
 periodic  =  0;
 bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
-bnd_w     =  h;                 % boundary layer width [m]
-tau_T     =  1e5*yr;        % wall cooling/assimilation time [s]
-Twall     =  [T0,nan,nan,nan];       % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+bnd_w     =  h;                   % boundary layer width [m]
+tau_T     =  1e5*yr;              % wall cooling/assimilation time [s]
+Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);
 Ptop      =  4.0e7;               % top pressure [Pa]
 fin       =  0;
 fout      =  1;
 
 % set thermo-chemical material parameters
-calID     =  'MORB_hi';              % phase diagram calibration
+calID     =  'MORB_lo';              % phase diagram calibration
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
@@ -59,6 +59,7 @@ maxit     =  15;                  % maximum outer its
 gamma     =  0;
 dtmax     =  1e6*yr;
 etacntr   =  1e6;
+etamin    =  1e17;
 
 %*****  RUN NAKHLA MODEL  *************************************************
 run('../src/main')

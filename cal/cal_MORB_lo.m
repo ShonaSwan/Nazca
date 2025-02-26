@@ -7,14 +7,14 @@ clear cal;
 cal.noxd   = 8;
 cal.nmem   = 10;
 cal.nmsy   = 5;
-cal.ncmp   = 6;
+cal.ncmp   = 3;
 
 % label strings for all compositional representations
 cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','FeO','MgO','CaO','Na$_2$O + K$_2$O','H$_2$O'};
      elStr = {'Si','Ti','Al','Fe','Mg','Ca','Na','H'};
 cal.memStr = {'for','fay','ant','alb','dps','aug','ulv','mgt','qtz','wat'};
 cal.msyStr = {'olv','fsp','cxp','spn','qtz'};
-cal.cmpStr = {'dun','gbr','bas','tra','rhy','vol'};
+cal.cmpStr = {'dun','bas','vol'};
 
 for i = 1:cal.ncmp; cal.(cal.cmpStr{i}) = i; end
 for i = 1:cal.nmsy; cal.(cal.msyStr{i}) = i; end
@@ -22,7 +22,7 @@ for i = 1:cal.nmem; cal.(cal.memStr{i}) = i; end
 for i = 1:cal.noxd; cal.(elStr{i}) = i; end
 
 %           SiO2 TiO2 Al2O3 FeO MgO CaO Na2O K2O H2O
-cal.ioxd = [   1    2     3   4   5   6    7       9]; % oxdie indices for viscosity, density functions
+cal.ioxd = [   1    2    3   4   5   6    7       9]; % oxdie indices for viscosity, density functions
 
 % oxide composition of mineral end-members
 %                SiO2    TiO2   Al2O3     FeO     MgO     CaO    Na2O     H2O
@@ -52,10 +52,9 @@ cal.msy_mem = [1  1  0  0  0  0  0  0  0  0    % olivine (olv)
 % mineral end-member composition of melting model components
 %               for   fay   ant   alb   dps   aug   ulv   mgt   qtz    wat
 cal.cmp_mem = [94.3   5.7     0     0     0     0     0     0     0     0   % dun
-                2.6   2.6  66.6     0  28.2     0     0     0     0     0   % gbr
+           
                 6.5   5.8  30.6   4.2  29.5  19.2   4.2     0     0     0   % bas
-                  0   5.7   8.4  73.5     0  11.5   0.1   0.8     0     0   % tra
-                  0     0     0  52.7     0     0   2.2   0.1  45.0     0   % rhy
+                 
                   0     0     0     0     0     0     0     0     0 100.0]; % vol
 cal.cmp_mem = cal.cmp_mem./sum(cal.cmp_mem,2)*100;
 
@@ -73,29 +72,29 @@ for i=1:cal.ncmp
 end
 
 % set pure component melting points T_m^i at P=0
-cal.T0  = [1850  1188  1107  1012  850];
+cal.T0  = [1850   1050 ];
 
 % set first coeff. for P-dependence of T_m^i [GPa]
-cal.A   = [7.5  4.6  3.5  2.4  2.4];
+cal.A   = [7.5  2.5  ];
 
 % set second coeff. for P-dependence of T_m^i [1]
-cal.B   = [7.5  4.6  3.5  2.4  2.4];
+cal.B   = [7.5  2.5  ];
 
 % set coeff. for T-dependence of partition coefficients K^i [1/K]
-cal.r  = [37.0  3.0  4.9  9.7  3.1];
+cal.r  = [37.0  6.0  ];
 
 % set entropy gain of fusion DeltaS [J/K]
 cal.Dsx  = 350;
 cal.Dsf  = 450;
 
 % specify melting point dependence on H2O
-cal.dTH2O = [908  1414  1518  1661  1976];  % solidus shift from water content prefactor [K/wt^pH2O]
+cal.dTH2O = [900  1500 ];  % solidus shift from water content prefactor [K/wt^pH2O]
 cal.pH2O  = 0.75;                           % solidus shift from water content exponent
 
 % primary and evolved end-member compositions used in calibration
-cal.c0     = [0.090  0.297  0.414  0.169  0.030  0.005];
+%cal.c0     = [0.090  0.297  0.414  0.169  0.030  0.005];
 
-cal.c0_oxd = [50.00  1.26  15.08  9.10  10.58  11.31  2.67  0.50];
+%cal.c0_oxd = [50.00  1.26  15.08  9.10  10.58  11.31  2.67  0.50];
 
 % specify geochemical model parameters
 cal.ntrc     = 6;                    % number of trace elements
@@ -112,17 +111,14 @@ cal.rhof0   = 1000;                 % fluid ref density [kg/m3]
 cal.etax0   = [1e19,1e19,1e17,1e17,1e19,1e19,1e17,1e17,1e19,1e0]; % mem ref viscosities [Pas]
 cal.etaf0   = 0.1;                    % fluid viscosity constant [Pas]
 cal.Eax     = 300e3;                  % solid viscosity activation energy [J/mol]
-cal.AA      =[ 0.65, 0.25, 0.35; ...  % permission slopes
-               0.20, 0.20, 0.20; ...  % generally numbers between 0 and 1
-               0.20, 0.20, 0.20; ];   % increases permission slopes away from step function 
+cal.AA      =[ 0.5989, 0.1772; ...    % permission slopes
+               0.0397, 0.1182 ];      % increases permission slopes away from step function 
 
-cal.BB      =[ 0.55, 0.18, 0.27; ...  % permission step locations
-               0.64,0.012,0.348; ...  % each row sums to 1
-               0.80, 0.12, 0.08; ];   % sets midpoint of step functions
+cal.BB      =[ 0.6870, 0.3130; ...  % permission step locations
+               0.9998, 0.0002;];        % sets midpoint of step functions
 
-cal.CC      =[[0.30, 0.30, 0.40]*0.7; ... % permission step widths
-              [0.52, 0.40, 0.08]*1.1; ... % square brackets sum to 1, sets angle of step functions
-              [0.15, 0.25, 0.60]*0.7; ];  % factor increases width of step functions
+cal.CC      =[[0.9826, 0.0174]*9.1697; ... % permission step widths
+              [0.1695, 0.8305]*4.2773;];   % factor increases width of step functions
 
 % convergence tolerance
 cal.tol     = 1e-9;

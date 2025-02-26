@@ -357,33 +357,33 @@ while res > tol
     T  = (Tp+273.15).*exp(aT./RhoCp.*(Pt-Pref));
 
     %%%%The melt model %%%%
-    % eqtime = tic;
-    % 
-    % var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
-    % var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
-    % var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
-    % var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt](melt model ?)
-    % var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
-    % var.H2O    = var.c(:,end);                % water concentration [wt]
-    % var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
-    % cal.H2Osat = fluidsat(var); % water saturation [wt]
-    % 
-    % [var,cal] = meltmodel(var,cal,'E');
-    % 
-    % mq = reshape(var.m,Nz,Nx); 
-    % fq = reshape(var.f,Nz,Nx);
-    % xq = reshape(var.x,Nz,Nx); 
-    % x  = xq;  
-    % m = mq; 
-    % f = fq;
-    % 
-    % cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-    % cfq = reshape(var.cf,Nz,Nx,cal.ncmp);
-    % cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
-    % cm  = cmq; cx = cxq;  cf = cfq;
-    % 
-    % eqtime = toc(eqtime);
-    % EQtime = EQtime + eqtime;
+    eqtime = tic;
+
+    var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
+    var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
+    var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
+    var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt](melt model ?)
+    var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
+    var.H2O    = var.c(:,end);                % water concentration [wt]
+    var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
+    cal.H2Osat = fluidsat(var); % water saturation [wt]
+
+    [var,cal] = meltmodel(var,cal,'E');
+
+    mq = reshape(var.m,Nz,Nx); 
+    fq = reshape(var.f,Nz,Nx);
+    xq = reshape(var.x,Nz,Nx); 
+    x  = xq;  
+    m = mq; 
+    f = fq;
+
+    cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
+    cfq = reshape(var.cf,Nz,Nx,cal.ncmp);
+    cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+    cm  = cmq; cx = cxq;  cf = cfq;
+
+    eqtime = toc(eqtime);
+    EQtime = EQtime + eqtime;
 
     cx = cxq; cm = cmq; cf = cfq;  % set phase compositions to equilibrium/initial values for time being
      x =  xq;  m =  mq;  f =  fq;  % set phase fractions to equilibrium/initial values for time being
@@ -401,6 +401,7 @@ end
 % end
 rhoo = rho;
 dto  = dt; 
+
 
 m0  = mean(m(:)); 
 x0  = mean(x(:)); 
@@ -459,6 +460,19 @@ S    = s.*rho + X.*Dsx;  So = S;  res_S = 0.*S;
 s  = (S - X.*Dsx)./rho;
 sm = s;
 sx = s + Dsx;
+
+
+% Removing melt to get a suitable initial melt fraction
+    m = min(m,0.01); SUM = x+m;
+    x = x./SUM;  m = m./SUM; 
+    c = x.*cx + m.*cm;
+    s = x.*sx + m.*sm;
+    
+    update;
+    C = c.*rho;
+    X = x.*rho;  M = m.*rho; 
+    S = s.*rho;
+
 
 % get trace element phase compositions
 Ktrc = zeros(Nz,Nx,cal.ntrc);
@@ -563,6 +577,9 @@ if restart
         Gmo     = Gm;
         Gxo     = Gx;
         Gfo     = Gf;
+
+
+
 
         fluidmech;
         update;

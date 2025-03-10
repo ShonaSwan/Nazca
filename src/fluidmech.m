@@ -47,7 +47,7 @@ end
 % else
 
 
-%% assemble coefficients for matrix velocity diagonal and right-hand side
+%% assemble coefficients for matrix velocity diagonal and right-hand side (KV and RValmo)
 
 IIL = [];       % equation indeces into L
 JJL = [];       % variable indeces into L
@@ -255,7 +255,7 @@ KV  = sparse(IIL,JJL,AAL,NW+NU,NW+NU);
 RV  = sparse(IIR,ones(size(IIR)),AAR);
 
 
-%% assemble coefficients for gradient operator
+%% assemble coefficients for gradient operator (GG)
 
 if ~exist('GG','var') || bnchm
     IIL = [];       % equation indeces into A
@@ -263,7 +263,7 @@ if ~exist('GG','var') || bnchm
     AAL = [];       % coefficients for A
     
     
-    % coefficients for z-gradient
+    % Coefficients for z-gradient
     ii  = MapW(2:end-1,2:end-1);
     
     %         top              ||          bottom
@@ -274,7 +274,7 @@ if ~exist('GG','var') || bnchm
     IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1/h];     % one to the bottom
     
     
-    % coefficients for x-gradient
+    % Coefficients for x-gradient
     if periodic
         ii  = MapU(2:end-1,:);
     else
@@ -292,12 +292,12 @@ if ~exist('GG','var') || bnchm
     IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1/h];     % one to the right
     
     
-    % assemble coefficient matrix
+    % Assemble coefficient matrix
     GG  = sparse(IIL,JJL,AAL,NW+NU,NP);
 end
 
 
-%% assemble coefficients for divergence operator
+%% assemble coefficients for divergence operator (DD)
 
 if ~exist('DD','var') || bnchm
     IIL = [];       % equation indeces into A
@@ -317,119 +317,147 @@ if ~exist('DD','var') || bnchm
     IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; aa(:)-1/h];  % W one above
     IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; aa(:)+1/h];  % W one below
 
-    % assemble coefficient matrix
+    % Assemble coefficient matrix
     DD  = sparse(IIL,JJL,AAL,NP,NW+NU);
 end
 
+%% assemble coefficients for matrix Darcy flow diagonal and right-hand side (KF and RF)
 
-%% assemble coefficients for matrix pressure diagonal and right-hand side
-
-if ~exist('KP','var') || bnchm || lambda1+lambda2>0
-    IIL = [];       % equation indeces into A
-    JJL = [];       % variable indeces into A
-    AAL = [];       % coefficients for A
-    
-    % boundary points
-    ii  = [MapP(1,:).'; MapP(end  ,:).']; % top & bottom
-    jj1 = ii;
-    jj2 = [MapP(2,:).'; MapP(end-1,:).'];
-    
-    aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-    
-    ii  = [MapP(2:end-1,1    ); MapP(2:end-1,end)]; % left & right
-    jj1 = ii;
-    if periodic
-        jj2 = [MapP(2:end-1,end-1); MapP(2:end-1,2    )];
-    else
-        jj2 = [MapP(2:end-1,2    ); MapP(2:end-1,end-1)];
-    end
-    
-    aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-    
-    % internal points
-    ii  = MapP(2:end-1,2:end-1);
-    jj1 = MapP(1:end-2,2:end-1);
-    jj2 = MapP(3:end-0,2:end-1);
-    jj3 = MapP(2:end-1,1:end-2);
-    jj4 = MapP(2:end-1,3:end-0);
-
-    % coefficients multiplying matrix pressure P
-    aa  = zeros(size(ii)) + lambda1*eps*h^2./eta;
-    IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];    AAL = [AAL; aa(:)];  % P on stencil centre
-    
-    kP  = lambda2*h^2./eta;
-    kP1 = (kP(icz(1:end-2),:).*kP(icz(2:end-1),:)).^0.5;   kP2 = (kP(icz(2:end-1),:).*kP(icz(3:end-0),:)).^0.5;
-    kP3 = (kP(:,icx(1:end-2)).*kP(:,icx(2:end-1))).^0.5;   kP4 = (kP(:,icx(2:end-1)).*kP(:,icx(3:end-0))).^0.5;
-
-    aa  = (kP1+kP2+kP3+kP4)/h^2;
-    IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL;-aa(:)     ];      % P on stencil centre
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; kP1(:)/h^2];      % P one above
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; kP2(:)/h^2];      % P one below
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; kP3(:)/h^2];      % P one above
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; kP4(:)/h^2];      % P one below
-    
-    % assemble coefficient matrix
-    KP  = sparse(IIL,JJL,AAL,NP,NP);
-end
-
-% RHS
+IIL = [];       % equation indeces into L
+JJL = [];       % variable indeces into L
+AAL = [];       % coefficients for L
 IIR = [];       % equation indeces into R
 AAR = [];       % forcing entries for R
 
-ii  = MapP(2:end-1,2:end-1);
+% Bounday points 
+    ii  = [MapP(1,:).'; MapP(end  ,:).']; % top & bottom
+    jj1 = ii;
+    jj2 = [MapP(2,:).'; MapP(end-1,:).']; 
 
-rr  = VolSrc;
-if bnchm; rr = rr + src_P_mms(2:end-1,2:end-1); end
+    aa = zeros(size(ii));
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1]; 
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1]; 
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-IIR = [IIR; ii(:)]; AAR = [AAR; rr(:)];
+    ii  = [MapP(:,1); MapP(:,end  )]; % left & right
+    jj1 = ii;
+    jj2 = [MapP(:,2); MapP(:,end-1)];
+ 
+    aa  = zeros(size(ii));
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-% assemble right-hand side vector
-RP  = sparse(IIR,ones(size(IIR)),AAR,NP,1);
+% Internal Points
+   ii  = MapP(2:end-1,2:end-1);
+   jj1 = MapP(1:end-2,2:end-1); % Above
+   jj2 = MapP(3:end-0,2:end-1); % Below
+   jj3 = MapP(2:end-1,1:end-2); % Left
+   jj4 = MapP(2:end-1,3:end-0); % Right
 
-% set P = 0 in fixed point
-nzp = Nz+1;%round((Nz+2)/2);
-nxp = Nx+1;%round((Nx+2)/2);
-DD(MapP(nzp,nxp),:) = 0;
-KP(MapP(nzp,nxp),:) = 0;
-KP(MapP(nzp,nxp),MapP(nzp,nxp)) = 1;
-% KP(MapP(end,nxp),MapP(nzp,nxp)) = 1;
-RP(MapP(nzp,nxp),:) = 0;
+% Coefficients multiplying darcy flow matrix
 
-if bnchm; RP(MapP(nzp,nxp),:) = P_mms(nzp,nxp); end
+    KD = lambda2 * (h^2 ./ eta) .* eta;
+    KD1 = (KD(icz(1:end-2),:) .* KD(icz(2:end-1),:)).^0.5; % above
+    KD2 = (KD(icz(2:end-1),:) .* KD(icz(3:end-0),:)).^0.5; % below
+    KD3 = (KD(:,icx(1:end-2)) .* KD(:,icx(2:end-1))).^0.5; % left
+    KD4 = (KD(:,icx(2:end-1)) .* KD(:,icx(3:end-0))).^0.5; % right
 
-if bnchm
-    % set U = 0 in fixed point
-    nzu = 1;
-    nxu = round((Nx+2)/2);
-    KV(MapU(nzu,nxu),:) = 0;
-    GG(MapU(nzu,nxu),:) = 0;
-    KV(MapU(nzu,nxu),MapU(nzu  ,nxu)) = 1;
-    KV(MapU(nzu,nxu),MapU(nzu+1,nxu)) = 1;
-    RV(MapU(nzp,nxp),:) = 0;
-end
+% Diagonal 
+    aa = (KD1 + KD2 + KD3 + KD4) / h^2;
+    IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];    AAL = [AAL; -aa(:)];  
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; KD1(:) / h^2];  % Above
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; KD2(:) / h^2];  % Below
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; KD3(:) / h^2];  % Left
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; KD4(:) / h^2];  % Right
+
+% RHS
+
+%The sizes dont add up here
+
+IIR = []; AAR = [];
+ii = MapP(3:end-2, 3:end-2);
+KD_rho_g = KD .* rho * g0;
+dKD_rho_g_dz = (KD_rho_g(3:end, 2:end-1) - KD_rho_g(1:end-2, 2:end-1)) / (2 * h);
+rr = dKD_rho_g_dz .* h^2;
+IIR = [IIR; ii(:)];
+AAR = [AAR; rr(:)];
+
+KF = sparse(IIL,JJL,AAL,NP,NP);
+RF = sparse(IIR,ones(size(IIR)),AAR,NP,1);
+
+%% assemble coefficients for compressibility diagonal and right-hand side (KC and RC)
+IIL = [];       % equation indeces into L
+JJL = [];       % variable indeces into L
+AAL = [];       % coefficients for L
+IIR = [];       % equation indeces into R
+AAR = [];       % forcing entries for R
+
+% Bounday points 
+
+    ii  = [MapP(1,:).'; MapP(end  ,:).']; % top & bottom
+    jj1 = ii;
+    jj2 = [MapP(2,:).'; MapP(end-1,:).']; 
+
+    aa  = zeros(size(ii));
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1]; %Diagonal
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1]; %off Diagonal
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
+    ii  = [MapP(:,1); MapP(:,end  )]; % left & right
+    jj1 = ii;
+    jj2 = [MapP(:,2); MapP(:,end-1)];
+
+    aa  = zeros(size(ii));
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
+% Internal Points
+    ii  = MapP(2:end-1,2:end-1);
+    aa  = zeros(size(ii)) + h^2 ./lambda1; % lambda1*eps*h^2./eta;
+   
+% Coefficients multiplying compaction pressure p
+    IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % p at centre
+
+% RHS
+    rr = zeros(size(ii)); 
+    IIR = [IIR; ii(:)];
+    AAR = [AAR; rr(:)];
+
+KC = sparse(IIL,JJL,AAL,NP,NP);
+RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
+
 
 %% assemble and scale global coefficient matrix and right-hand side vector
+OO = zeros(NP, NP);
 
-LL  = [ KV   GG  ; ...
-        DD   KP ];
+LL  = [ KV   GG  GG ; ...
+        DD   KF  OO ; ...
+        DD   OO  KC ];
 
-RR  = [RV; RP];
+RR  = [RV; RF; RC];
 
+figure(1); spy(LL); title('LL');
+figure(2); spy(KV); title('KV');
+figure(3); spy(KF); title('KF');
+figure(4); spy(KC); title('KC');
+
+
+LL_unscaled = [KV GG GG; DD KF OO; DD OO KC];
 SCL = (abs(diag(LL))).^0.5;
 SCL = diag(sparse( 1./(SCL + sqrt(h^2./geomean(eta(:)))/100) ));
 
-FF  = LL*[W(:);U(:);P(:)] - RR;
+FF  = LL*[W(:);U(:);P(:);Pc(:)] - RR;
 
 LL  = SCL*LL*SCL;
 FF  = SCL*FF;
 RR  = SCL*RR;
 
 
-%% Solve linear system of equations for vx, vz, P
+
+
+%% Solve linear system of equations for vx, vz, P, Pc
 
 SOL = SCL*(LL\RR);  % update solution
 
@@ -437,6 +465,7 @@ SOL = SCL*(LL\RR);  % update solution
 W = full(reshape(SOL(MapW(:))        ,Nz+1,Nx+2));  % matrix z-velocity
 U = full(reshape(SOL(MapU(:))        ,Nz+2,Nx+1));  % matrix x-velocity
 P = full(reshape(SOL(MapP(:)+(NW+NU)),Nz+2,Nx+2));  % matrix dynamic pressure
+Pc = full(reshape(SOL(MapP(:) + (NW+NU+NP)), Nz+2, Nx+2));  % matrix compaction pressure
 
 % upd_W = - alpha*full(reshape(SOL(MapW(:))        ,Nz+1,Nx+2)) + beta*upd_W;  % matrix z-velocity
 % upd_U = - alpha*full(reshape(SOL(MapU(:))        ,Nz+2,Nx+1)) + beta*upd_U;  % matrix x-velocity
@@ -486,7 +515,7 @@ if ~bnchm
     %% update time step
     dtk = (h/2)^2/max([kc(:);(kT(:)+ks(:).*T(:))./rho(:)./cP(:)]); % diffusive time step size  
     dta =  h/2   /max(abs([Um(:).* mux(:);Wm(:).* muz(:); ...  % advective time step size
-                           Ux(:).*chix(:);Wx(:).*chiz(:)]+eps));
+                           Ux(:).*chix(:);Wx(:).*chiz(:)])); %+eps
     dtc = maxcmp./max(abs([advn_X(:)./rho(:);advn_M(:)./rho(:)]));
     dt  = min([1.1*dto,min(CFL*[dtk,dta,dtc]),dtmax]);                         % time step size
 end

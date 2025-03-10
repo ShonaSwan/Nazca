@@ -238,7 +238,8 @@ tein = trc;
 U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U;
 W   =  zeros(Nz+1,Nx+2);  WBG = W; Wi = W; wf = 0.*W; wx = 0.*W; wm = 0.*W; upd_W = 0*W;
 P   =  zeros(Nz+2,Nx+2);  Vel = 0.*Tp; upd_P = 0*P; %Div_rhoV = 0.*P;  DD = sparse(length(P(:)),length([W(:);U(:)]));
-SOL = [W(:);U(:);P(:)];
+Pc   =  zeros(Nz+2,Nx+2);
+SOL = [W(:);U(:);P(:);Pc(:)];
 
 % initialise auxiliary fields
 Wf  = W;  Uf  = U; 
@@ -538,7 +539,7 @@ if restart
     end
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','P','Pt','Pchmb','f','x','m','fq','xq','mq','phi','chi','mu','X','F','M','S','C','T','Tp','c','cm','cx','cf','TRC','trc','dSdt','dCdt','dFdt','dXdt','dMdt','drhodt','dTRCdt','Gf','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wf','wx','wm','cal');
+        load(name,'U','W','P','Pc','Pt','Pchmb','f','x','m','fq','xq','mq','phi','chi','mu','X','F','M','S','C','T','Tp','c','cm','cx','cf','TRC','trc','dSdt','dCdt','dFdt','dXdt','dMdt','drhodt','dTRCdt','Gf','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wf','wx','wm','cal');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 
@@ -593,6 +594,7 @@ if restart
         fluidmech;
         update;
         history;
+        
         output;
     end
 else

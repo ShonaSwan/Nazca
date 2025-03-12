@@ -512,7 +512,7 @@ Pc = full(reshape(SOL(MapP(:)+(NW+NU+NP)),Nz+2,Nx+2));  % matrix compaction pres
 
 if ~bnchm
 
-    % z-Darcy flux
+    % Darcy flux
     qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0); % melt segregation speed
     qDz([1,end],:) = min(1,1-[top;bot]).*qDz([2,end-1],:);
     % qDz([1,end],:) = min(1,1).*qDz([2,end-1],:);
@@ -522,24 +522,22 @@ if ~bnchm
         qDz(:,[1 end]) = qDz(:,[2 end-1]);
     end
 
-    % x-Darcy flux
+    % phase segregation speeds
+    wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed
+    wm([1,end],:) = min(1,1-[top;bot]).*wm([2,end-1],:);
+    if periodic
+        wm(:,[1 end]) = wm(:,[end-1 2]);
+    else
+        wm(:,[1 end]) = wm(:,[2 end-1]);
+    end
 
-    % % phase segregation speeds
-    % wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed
-    % wm([1,end],:) = min(1,1-[top;bot]).*wm([2,end-1],:);
-    % if periodic
-    %     wm(:,[1 end]) = wm(:,[end-1 2]);
-    % else
-    %     wm(:,[1 end]) = wm(:,[2 end-1]);
-    % end
-    % 
-    % wx(2:end-1,2:end-1) = ((rhox(1:end-1,:)+rhox(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_x(1:end-1,:).*Ksgr_x(2:end,:)).^0.5; % solid segregation speed
-    % wx([1,end],:) = min(1,1-[top;bot]).*wx([2,end-1],:);
-    % if periodic
-    %     wx(:,[1 end]) = wx(:,[end-1 2]);
-    % else
-    %     wx(:,[1 end]) = wx(:,[2 end-1]);
-    % end
+    wx(2:end-1,2:end-1) = ((rhox(1:end-1,:)+rhox(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_x(1:end-1,:).*Ksgr_x(2:end,:)).^0.5; % solid segregation speed
+    wx([1,end],:) = min(1,1-[top;bot]).*wx([2,end-1],:);
+    if periodic
+        wx(:,[1 end]) = wx(:,[end-1 2]);
+    else
+        wx(:,[1 end]) = wx(:,[2 end-1]);
+    end
 
     chiz = (chi(icz(1:end-1),icx)+chi(icz(2:end),icx))./2;
     chix = (chi(icz,icx(1:end-1))+chi(icz,icx(2:end)))./2;
@@ -547,16 +545,13 @@ if ~bnchm
     muz  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;
     mux  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;
 
-    wm = qDz./muz;
-    um = qDx./mux;
-
     % update phase velocities
     % Wf  = W + wf;  % mvp z-velocity
     % Uf  = U + 0.;  % mvp x-velocity
-    Wx  = W + 0.;  % xtl z-velocity
+    Wx  = W + wx;  % xtl z-velocity
     Ux  = U + 0.;  % xtl x-velocity
     Wm  = W + wm;  % mlt z-velocity
-    Um  = U + um;  % mlt x-velocity
+    Um  = U + 0.;  % mlt x-velocity
 
     
     %% update time step

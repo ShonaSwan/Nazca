@@ -106,8 +106,8 @@ Ksgr_x = squeeze(Ksgr(1,:,:)) + eps^2; if Nx==1; Ksgr_x = Ksgr_x.'; end
 Ksgr_m = squeeze(Ksgr(2,:,:)) + eps^2; if Nx==1; Ksgr_m = Ksgr_m.'; end
 
 % traditional two-phase coefficients
-KD     = max(1e-4,mu).^2 ./squeeze(Cv(2,:,:));  % melt segregation coeff
-zeta   = max(1e-4,mu).^2./squeeze(Cf(1,:,:));  % solid compaction coeff
+KD     = mu.^2 ./squeeze(Cv(2,:,:));  % melt segregation coeff
+zeta   = chi.^2./squeeze(Cf(1,:,:));  % solid compaction coeff
 
 if ~calibrt % skip the following if called from calibration script
 
@@ -139,7 +139,7 @@ kc  = kmin;                                                     % regularised co
 etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
 weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./bnd_sprw))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./bnd_sprw)));
-eta    = eta.^(1-weak_axis).*1e17.^weak_axis;
+eta    = min(eta,eta.*weak_axis*1e-6);
 zeta   = 1./(1./(etamax./max(1e-4,mu)) + 1./zeta) + etamin./max(1e-4,mu);
 
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...

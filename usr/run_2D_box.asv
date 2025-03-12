@@ -13,11 +13,11 @@ save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  200e3;               % chamber depth [m]
+D         =  100e3;               % chamber depth [m]
 N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  2*D;                 % chamber width (equal to h for 1-D mode) [m]
-sprate    =  0.05/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+L         =  D;                   % chamber width (equal to h for 1-D mode) [m]
+sprate    =  0.0/yr;              % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  5e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
@@ -27,20 +27,21 @@ tend      =  1e9*yr;                % end time for simulation [s]
 dt        =  1e3*yr;                % initial time step [s]
 
 % set initial thermo-chemical state
-init_mode =  'MOR';
+init_mode =  'linear';
 T0        =  5;                   % temperature top  layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
 c0        =  [0.85 0.15 0];       % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0]*1e-4;       %Random perturbation of the composition field
+dcr       =  [1,-1,0]*0e-4;       % Random perturbation of the composition field
 dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
+reactive  = 
 
 % set thermo-chemical boundary parameters
-periodic  =  0;
-bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
+periodic  =  1;
+bndmode   =  3;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
 bnd_w     =  h;                   % boundary layer width [m]
 tau_T     =  1e5*yr;              % wall cooling/assimilation time [s]
-Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+Twall     =  [nan,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);
 Ptop      =  4.0e7;               % top pressure [Pa]
 fin       =  0;
@@ -56,8 +57,6 @@ CFL       =  1.0;                 % (physical) time stepping courant number (mul
 rtol      =  1e-4;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-lambda1  =   1e6;                % zeta
-lambda2  =  1e-12;                % 
 gamma     =  0;
 dtmax     =  1e6*yr;
 etacntr   =  1e6;

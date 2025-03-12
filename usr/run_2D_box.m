@@ -29,6 +29,8 @@ dt        =  1e3*yr;                % initial time step [s]
 % set initial thermo-chemical state
 init_mode =  'linear';
 m0        =  0.02;
+dmr       =  0.00;
+dmg       =  0.00;
 T0        =  1350;                   % temperature top  layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
 c0        =  [0.85 0.15 0];       % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)

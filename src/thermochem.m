@@ -67,7 +67,9 @@ c = C./sum(C,3);
 
 
 %*** update phase equilibrium
-%melt model (turned off for now)
+
+if reactive
+
 eqtime = tic;
 
 var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
@@ -91,6 +93,7 @@ cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
 eqtime = toc(eqtime);
 EQtime = EQtime + eqtime;
 
+end 
 
 %***  update phase fraction densities
 
@@ -100,11 +103,13 @@ advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 advn_rho = advn_X+advn_F+advn_M;
 
 % phase mass transfer rates
+if reactive
 Gm  = (Gmo + (mq-m).*RHO/max(tau_r,5*dt))/2;
 Gx  = (Gxo + (xq-x).*RHO/max(tau_r,5*dt))/2; 
 
 Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,5*dt);
 Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,5*dt);
+end
 
 % total rates of change
 dXdt   = advn_X + Gx;
@@ -146,47 +151,51 @@ upd_T  = (upd_s.*rho + aT.*upd_Pt) .*T./RhoCp;
 Tp     = Tp + upd_Tp;
 T      = T  + upd_T;
 
-% % update major component phase composition
-% Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
-% Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
-% subsol  = m<=1e-9 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
-% supliq  = x<=1e-9 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
-% subsolc = repmat(subsol,1,1,cal.ncmp);
-% supliqc = repmat(supliq,1,1,cal.ncmp);
-% rnorm   = 1;  tol  = atol*10;
-% it      = 1;  mxit = 100;
-% upd_cm  = 0.*cm;  upd_cx = 0.*cx;
-% cm = cmq;  cx = cxq;
-% while rnorm>tol && it<mxit
-% 
-%     Kx = cx./(cm+eps);
-%     Kf = cf./(cm+eps);
-% 
-%     cmK = c    ./(m + x.*Kx + f.*Kf + eps);
-%     cxK = c.*Kx./(m + x.*Kx + f.*Kf + eps);
-% 
-%     res_cm = cm - cmK./sum(cmK,3);
-%     res_cx = cx - cxK./sum(cxK,3);
-% 
-%     upd_cm = - 0.95.*res_cm + 0.25.*upd_cm;
-%     upd_cx = - 0.95.*res_cx + 0.25.*upd_cx;
-% 
-%     cm = max(0,cm + upd_cm);
-%     cx = max(0,cx + upd_cx);
-% 
-%     r = x.*cx + m.*cm + f.*cf - c;
-%     r(subsolc) = 0; r(supliqc) = 0;
-%     rnorm = norm(r(:))./norm(c(:));
-%     it  = it+1;
-% end
-% 
-% if (it==mxit && rnorm>tol)
-%     disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
-% end
-% 
-% % fix subsolidus and superliquidus conditions
-% cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); f(subsol) = fq(subsol); m(subsol) = 0;
-% cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); f(supliq) = fq(supliq); x(supliq) = 0;
+if reactive
+
+% update major component phase composition
+Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
+Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
+subsol  = m<=1e-9 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
+supliq  = x<=1e-9 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
+subsolc = repmat(subsol,1,1,cal.ncmp);
+supliqc = repmat(supliq,1,1,cal.ncmp);
+rnorm   = 1;  tol  = atol*10;
+it      = 1;  mxit = 100;
+upd_cm  = 0.*cm;  upd_cx = 0.*cx;
+cm = cmq;  cx = cxq;
+while rnorm>tol && it<mxit
+
+    Kx = cx./(cm+eps);
+    Kf = cf./(cm+eps);
+
+    cmK = c    ./(m + x.*Kx + f.*Kf + eps);
+    cxK = c.*Kx./(m + x.*Kx + f.*Kf + eps);
+
+    res_cm = cm - cmK./sum(cmK,3);
+    res_cx = cx - cxK./sum(cxK,3);
+
+    upd_cm = - 0.95.*res_cm + 0.25.*upd_cm;
+    upd_cx = - 0.95.*res_cx + 0.25.*upd_cx;
+
+    cm = max(0,cm + upd_cm);
+    cx = max(0,cx + upd_cx);
+
+    r = x.*cx + m.*cm - c;
+    r(subsolc) = 0; r(supliqc) = 0;
+    rnorm = norm(r(:))./norm(c(:));
+    it  = it+1;
+end
+
+if (it==mxit && rnorm>tol)
+    disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
+end
+
+% fix subsolidus and superliquidus conditions
+cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); f(subsol) = fq(subsol); m(subsol) = 0;
+cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); f(supliq) = fq(supliq); x(supliq) = 0;
+
+end
 
 
 % record timing

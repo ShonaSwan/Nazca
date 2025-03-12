@@ -30,13 +30,11 @@ cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
 % update phase densities
 rhom0  = reshape(DensityX(reshape(cm_oxd_all,Nz*Nx,9),Tref,Pref./1e8)    ,Nz,Nx);
 rhox0  = reshape(sum(reshape(cx_mem/100,Nz*Nx,cal.nmem)./cal.rhox0,2).^-1,Nz,Nx);
-rhof0  = cal.rhof0                                                              ;
 
 rhom   = rhom0 .* (1 - aTm.*(T-Tref) + bPm.*(Pt-Pref));
 rhox   = rhox0 .* (1 - aTx.*(T-Tref) + bPx.*(Pt-Pref));
-rhof   = rhof0 .* (1 - aTf.*(T-Tref) + bPf.*(Pt-Pref));
 
-rho    = 1./(m./rhom + x./rhox + f./rhof);
+rho    = 1./(m./rhom + x./rhox);
 
 rhofz  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhofx  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
@@ -46,7 +44,6 @@ rhoU = rhofx.*U(2:end-1,:);
 
 % convert weight to volume fraction, update bulk density
 chi    = max(0,min(1, x.*rho./rhox ));
-% phi    = max(0,min(1, f.*rho./rhof ));
 mu     = max(0,min(1, m.*rho./rhom ));
 
 chi_mem = reshape(reshape(cx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
@@ -60,16 +57,16 @@ RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
 
 % update lithostatic pressure
 Pti = Pt;
-if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + P(2:end-1,2:end-1)))); else
+if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
     Pl(1,:)     = repmat(mean(rhofz(1,:),2).*g0.*h/2,1,Nx) + Ptop;
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhofz(2:end-1,:),2).*g0.*h),1,Nx);
-    Pt          = max(1e7,(1-1).*Pt + 1.*(Pl + Pcouple*(Pchmb + P(2:end-1,2:end-1))));
+    Pt          = max(1e7,(1-1).*Pt + 1.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
 end
 upd_Pt = Pt-Pti;
 
 % update effective constituent sizes
-dm = dm0.*(1-mu ).^0.5;
-dx = dx0.*(1-chi).^0.5;
+dm = dm0.*max(1e-4,min(1-1e-4,1-mu )).^0.5;
+dx = dx0.*max(1e-4,min(1-1e-4,1-chi)).^0.5;
 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);
@@ -78,13 +75,13 @@ etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(Tref+273.15)));
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);
-% kf = permute(cat(3,dx.^2./etax,dm.^2./etam,df.^2./etaf),[3,1,2]);
+kf = permute(cat(3,dx.^2./etax,dm.^2./etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
-% Mf = permute(repmat(kf,1,1,1,3),[4,1,2,3])./permute(repmat(kf,1,1,1,3),[1,4,2,3]);
+Mf = permute(repmat(kf,1,1,1,2),[4,1,2,3])./permute(repmat(kf,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-dd = max(1e-6,min(1-1e-6,permute(cat(3,dx ,dm ),[3,1,2])));
-ff = max(1e-6,min(1-1e-6,permute(cat(3,chi,mu ),[3,1,2])));
+dd = max(1e-4,min(1-1e-4,permute(cat(3,dx ,dm ),[3,1,2])));
+ff = max(1e-4,min(1-1e-4,permute(cat(3,chi,mu ),[3,1,2])));
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -95,9 +92,9 @@ Kv   = ff.*kv.*thtv;
 Cv   = Kv.*(1-ff)./dd.^2;
 
 % get volume flux and transfer coefficients
-% thtf = squeeze(prod(Mf.^Xf,2));
-% Kf   = ff.*kf.*thtf;
-% Cf   = Kf.*(1-ff)./dd.^2;
+thtf = squeeze(prod(Mf.^Xf,2));
+Kf   = ff.*kf.*thtf;
+Cf   = Kf.*(1-ff)./dd.^2;
 
 % get effective viscosity
 eta = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
@@ -108,17 +105,20 @@ Ksgr   = ff./Cv;
 Ksgr_x = squeeze(Ksgr(1,:,:)) + eps^2; if Nx==1; Ksgr_x = Ksgr_x.'; end
 Ksgr_m = squeeze(Ksgr(2,:,:)) + eps^2; if Nx==1; Ksgr_m = Ksgr_m.'; end
 
+% traditional two-phase coefficients
+KD     = mu.^2 ./squeeze(Cv(2,:,:));  % melt segregation coeff
+zeta   = chi.^2./squeeze(Cf(1,:,:));  % solid compaction coeff
+
 if ~calibrt % skip the following if called from calibration script
 
 % extract non-P-dependent density
 rhom_nP = rhom0 .* (1 - aTm.*(Tp-Tref));
 rhox_nP = rhox0 .* (1 - aTx.*(Tp-Tref));
-rhof_nP = rhof0 .* (1 - aTf.*(Tp-Tref));
 
-rho_nP  = 1./(m./rhom_nP + x./rhox_nP + f./rhof_nP);
+rho_nP  = 1./(m./rhom_nP + x./rhox_nP);
 
 Vel = sqrt(((W(1:end-1,2:end-1)+W(2:end,2:end-1))/2).^2 ...
-    + ((U(2:end-1,1:end-1)+U(2:end-1,2:end))/2).^2);
+         + ((U(2:end-1,1:end-1)+U(2:end-1,2:end))/2).^2);
 
 
 % update velocity divergence
@@ -138,6 +138,7 @@ kc  = kmin;                                                     % regularised co
 
 etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
+zeta   = 1./(1./(etamax./max(1e-4,mu)) + 1./eta) + etamin./max(1e-4,mu);
 
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;

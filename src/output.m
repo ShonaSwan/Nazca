@@ -336,7 +336,7 @@ else % create 2D plots
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$U$ [',SpeedUnits,']'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh1,'CurrentAxes',ax(13));
-    imagesc(Xsc,Zsc, P); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc, Pf); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P$ [Pa]'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     set(fh1,'CurrentAxes',ax(14));
     imagesc(Xsc,Zsc,Div_V*TimeScale); axis ij equal tight; box on; cb = colorbar;
@@ -675,9 +675,9 @@ if save_op && ~restart
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];
-    save(name,'U','W','P','Pt','Pchmb','x','m','xq','mq','chi','mu','X','F','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','Pchmb','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
     name = [outdir,'/',runID,'/',runID,'_cont'];
-    save(name,'U','W','P','Pt','Pchmb','x','m','xq','mq','chi','mu','X','F','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','Pchmb','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
     name = [outdir,'/',runID,'/',runID,'_hist'];
     save(name,'hist');
 

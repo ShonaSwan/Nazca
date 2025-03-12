@@ -42,6 +42,7 @@ c0       =  [0.04,0.12,0.44,0.24,0.14,0.02,0.005];  % components (maj comp, H2O)
 c1       =  [0.04,0.12,0.44,0.24,0.14,0.02,0.005];  % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
 dcr      =  [0,0,0,0,0,0,0];     % amplitude of random noise [wt SiO2]
 dcg      =  [0,0,0,0,0,0,0];     % amplitude of centred gaussian [wt SiO2]
+reactive =  0;                   % 1 for reactive flow, 0 for non-reactive flow (melt model on off switch)    
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
 trc0     =  [1,1,1,1,1,1];       % trace elements top layer [wt ppm]

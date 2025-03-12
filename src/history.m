@@ -54,9 +54,9 @@ hist.U(stp,1) = min(min(U(2:end-1,:)));
 hist.U(stp,2) = mean(mean(abs(U(2:end-1,:))));
 hist.U(stp,3) = max(max(U(2:end-1,:)));
 
-hist.P(stp,1) = min(min(P(2:end-1,2:end-1)));
-hist.P(stp,2) = mean(mean(abs(P(2:end-1,2:end-1))));
-hist.P(stp,3) = max(max(P(2:end-1,2:end-1)));
+hist.Pf(stp,1) = min(min(Pf(2:end-1,2:end-1)));
+hist.Pf(stp,2) = mean(mean(abs(Pf(2:end-1,2:end-1))));
+hist.Pf(stp,3) = max(max(Pf(2:end-1,2:end-1)));
 
 hist.Pchmb(stp,1) = Pchmb;
 

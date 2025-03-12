@@ -13,11 +13,11 @@ save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  200e3;               % chamber depth [m]
+D         =  50e3;               % chamber depth [m]
 N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  2*D;                 % chamber width (equal to h for 1-D mode) [m]
-sprate    =  0.05/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+L         =  D/5;                   % chamber width (equal to h for 1-D mode) [m]
+sprate    =  0.0/yr;              % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  5e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
@@ -27,21 +27,22 @@ tend      =  1e9*yr;                % end time for simulation [s]
 dt        =  1e3*yr;                % initial time step [s]
 
 % set initial thermo-chemical state
-init_mode =  'MOR';
-T0        =  5;                   % temperature top  layer [deg C]
+init_mode =  'linear';
+m0        =  0.02;
+T0        =  1350;                   % temperature top  layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
 c0        =  [0.85 0.15 0];       % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0]*1e-4;       %Random perturbation of the composition field
+dcr       =  [1,-1,0]*0e-4;       % Random perturbation of the composition field
 dr_trc    =  [0,0,1,0,0,-1];      % trace elements random noise
-reactive  =  0;                   % 1 for reactive flow, 0 for non-reactive flow (melt model on off switch)    
+reactive  =  0;                   % 1 for reactive flow, 0 for non-reactive flow (melt model on off switch)
 
 % set thermo-chemical boundary parameters
 periodic  =  0;
-bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
+bndmode   =  3;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
 bnd_w     =  h;                   % boundary layer width [m]
 tau_T     =  1e5*yr;              % wall cooling/assimilation time [s]
-Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+Twall     =  [nan,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);
 Ptop      =  4.0e7;               % top pressure [Pa]
 fin       =  0;
@@ -50,9 +51,10 @@ fout      =  1;
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';              % phase diagram calibration
 
-% grain size
-dx0 = 1e-2;
-dm0 = 1e-2;
+aTm = 0;
+aTx = 0;
+bPm = 0;
+bPx = 0;
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')

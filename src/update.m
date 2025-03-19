@@ -138,7 +138,7 @@ kc  = kmin;                                                     % regularised co
 
 etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
-weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./bnd_sprw))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./bnd_sprw)));
+weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./(2*bnd_sprw)))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./(2*bnd_sprw))));
 eta    = eta.^(1-weak_axis).*1e17.^weak_axis;
 zeta   = 1./(1./(etamax./max(1e-4,mu)) + 1./zeta) + etamin./max(1e-4,mu);
 

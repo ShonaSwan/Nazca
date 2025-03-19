@@ -24,30 +24,7 @@ Pchmb     = Pchmb + upd_Pchmb;
 end
 
 
-% %% 0-D run does not require fluidmech solve
-% if Nz==1 && Nx==1  
-%     W  = WBG; Wm = W;  Wx = W;  Wf = W;
-%     U  = UBG; Um = U;  Ux = U;  Uf = U;
-%     P  = zeros(Nz+2,Nx+2);
-%     resnorm_VP = 0;
-% else
-% 
-% if Nx==1
-%     % update 1D velocity
-%     W(:,2) = -flipud(cumsum(flipud([VolSrc*h;-WBG(end)])));
-% 
-%     % update 1D pressure
-%     Div_tz = ddz(tzz(icz,:),h);           % z-stress divergence
-%     PrsSrc = - Div_tz;
-%     P(:,2) =  flipud(cumsum(flipud([PrsSrc*h;0])));
-%     P(:,2) = P(:,2) - P(Nz/2,2);
-% 
-%     W(:,1) = W(:,2); W(:,end) = W(:,2);
-%     P(:,1) = P(:,2); P(:,end) = P(:,2);
-% else
-
-
-%% assemble coefficients for matrix velocity diagonal and right-hand side (KV and RValmo)
+%% assemble coefficients for matrix velocity diagonal and right-hand side (KV and RV)
 
 IIL = [];       % equation indeces into L
 JJL = [];       % variable indeces into L
@@ -59,40 +36,32 @@ AAR = [];       % forcing entries for R
 % assemble coefficients of z-stress divergence
     
 % left boundary
-if periodic
-    ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,end-1);
-else
-    ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
-end
+ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sdleft];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-if periodic
-    ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,2);
-else
-    ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,end-1);
-end
+ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,end-1);
 aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+sdright];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];  AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % top boundary
-ii  = MapW(1,2:end-1); jj = ii;
+ii  = MapW(1,2:end-1); jj1 = ii;  
 aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii));% + WBG(1,:);
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+%aa  = zeros(size(ii)); % + WBG(1,:);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapW(end,2:end-1); jj1 = ii; jj2 = MapW(end-1,2:end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-if strcmp(init_mode,'MOR'); IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1]; end
-aa  = zeros(size(ii)) + WBG(end,2:end-1);
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % internal points
@@ -104,9 +73,6 @@ EtaP1 =  eta  (1:end-1,:      );   EtaP2 =  eta  (2:end,:      );
 %             top          ||         bottom          ||           left            ||          right
 jj1 = MapW(1:end-2,2:end-1); jj2 = MapW(3:end,2:end-1); jj3 = MapW(2:end-1,1:end-2); jj4 = MapW(2:end-1,3:end);
 
-% aa  = a1.*rhofz(2:end-1,:)./dt;
-% IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % inertial term
-
 aa  = 2/3*(EtaP1+EtaP2)/h^2 + 1/2*(EtaC1+EtaC2)/h^2;
 IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % W on stencil centre
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL;-2/3*EtaP1(:)/h^2];      % W one above
@@ -114,11 +80,12 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL;-2/3*EtaP2(:)/h^2];      %
 IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL;-1/2*EtaC1(:)/h^2];      % W one to the left
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-1/2*EtaC2(:)/h^2];      % W one to the right
 
+
 % what shall we do with the drunken sailor...
-if ~bnchm
-    aa  = ddz(rho,h).*g0.*dt;
+ if ~bnchm
+     aa  = ddz(rho,h).*g0.*dt;
     IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)];
-end
+ end
 
 % coefficients multiplying x-velocities U
 %         top left         ||        bottom left          ||       top right       ||       bottom right
@@ -131,11 +98,8 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-% advn_mz = advect(rhofz(2:end-1,:).*W(2:end-1,2:end-1),(U(2:end-2,:)+U(3:end-1,:))/2,(W(1:end-1,2:end-1)+W(2:end,2:end-1))/2,h,{ADVN,''},[1,2],BCA);
-rr  = + (rhofz(2:end-1,:) - mean(rhofz(2:end-1,:),2)) .* g0;% ...
-      % + 0*(a2.*rhoWo(2:end-1,:)+a3.*rhoWoo(2:end-1,:))/dt ...
-      % - 0*advn_mz;
-if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1); end
+rr  = + (rhofz(2:end-1,:) - mean(rhofz(2:end-1,:),2)) .* g0;
+if bnchm; rr = rr + src_W_mms(2:end-1,:); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
@@ -144,16 +108,16 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 % top boundary
 ii  = MapU(1,2:end-1); jj1 = ii; jj2 = MapU(2,2:end-1);
-aa  = zeros(size(ii)) + bnd_spr * 2; %+ UBG(1,2:end-1)
+aa  = zeros(size(ii)) + bnd_spr;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+top];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapU(end,2:end-1); jj1 = ii; jj2 = MapU(end-1,2:end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+bot];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-bot];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
@@ -167,35 +131,18 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapU(:,end); jj1 = ii; jj2 = MapU(:,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-if strcmp(init_mode,'MOR'); IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1]; end
-aa  = zeros(size(ii));% + UBG(:,end);
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-
 % internal points
-if periodic
-    ii    = MapU(2:end-1,:);
-    EtaC1 = etaco(1:end-1,:    );  EtaC2 = etaco(2:end,:    );
-    EtaP1 = eta  (:,icx(1:end-1));  EtaP2 = eta  (:,icx(2:end));
-else
-    ii    = MapU(2:end-1,2:end-1);
-    EtaC1 = etaco(1:end-1,2:end-1);  EtaC2 = etaco(2:end,2:end-1);
-    EtaP1 = eta  (:      ,1:end-1);  EtaP2 = eta  (:      ,2:end);
-end
+ii    = MapU(2:end-1,2:end-1);
+EtaC1 = etaco(1:end-1,2:end-1);  EtaC2 = etaco(2:end,2:end-1);
+EtaP1 = eta  (:      ,1:end-1);  EtaP2 = eta  (:      ,2:end);
 
 % coefficients multiplying x-velocities U
 %            left          ||          right          ||           top             ||          bottom
-if periodic
-    jj1 = MapU(2:end-1,ifx(1:end-2)); jj2 = MapU(2:end-1,ifx(3:end)); jj3 = MapU(1:end-2,ifx(2:end-1)); jj4 = MapU(3:end,ifx(2:end-1));
-else
-    jj1 = MapU(2:end-1,1:end-2); jj2 = MapU(2:end-1,3:end); jj3 = MapU(1:end-2,2:end-1); jj4 = MapU(3:end,2:end-1);
-end
-% if periodic
-%     aa  = (a1+gamma).*rhofx./dt;
-% else
-%     aa  = a1.*rhofx(:,2:end-1)./dt;
-% end
-% IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % inertial term
+ jj1 = MapU(2:end-1,1:end-2); jj2 = MapU(2:end-1,3:end); jj3 = MapU(1:end-2,2:end-1); jj4 = MapU(3:end,2:end-1);
 
 aa  = 2/3*(EtaP1+EtaP2)/h^2 + 1/2*(EtaC1+EtaC2)/h^2;
 IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)           ];      % U on stencil centre
@@ -206,21 +153,14 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-1/2*EtaC2(:)/h^2];      %
 
 % what shall we do with the drunken sailor...
 if ~bnchm
-    if periodic
-        aa  = ddx(rho(:,icx),h).*g0.*dt;
-    else
-        aa  = ddx(rho,h).*g0.*dt;
-    end
+    aa  = ddx(rho,h).*g0.*dt;
     IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)];
 end
 
 % coefficients multiplying z-velocities W
 %         top left         ||        top right          ||       bottom left       ||       bottom right
-if periodic
-    jj1 = MapW(1:end-1,1:end-1); jj2 = MapW(1:end-1,2:end); jj3 = MapW(2:end,1:end-1); jj4 = MapW(2:end,2:end);
-else
-    jj1 = MapW(1:end-1,2:end-2); jj2 = MapW(1:end-1,3:end-1); jj3 = MapW(2:end,2:end-2); jj4 = MapW(2:end,3:end-1);
-end
+ jj1 = MapW(1:end-1,2:end-2); jj2 = MapW(1:end-1,3:end-1); jj3 = MapW(2:end,2:end-2); jj4 = MapW(2:end,3:end-1);
+
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL;-(1/2*EtaC1(:)-1/3*EtaP1(:))/h^2];  % W one to the top and left
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL;+(1/2*EtaC1(:)-1/3*EtaP2(:))/h^2];  % W one to the top and right
 IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL;+(1/2*EtaC2(:)-1/3*EtaP1(:))/h^2];  % W one to the bottom and left
@@ -228,27 +168,12 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % x-RHS vector
-% if periodic
-%     advn_mx = advect(rhofx.*U(2:end-1,:),(U(2:end-1,ifx(1:end-1))+U(2:end-1,ifx(2:end)))/2,(W(:,1:end-1)+W(:,2:end))/2,h,{ADVN,''},[1,2],BCA);
-%     advn_mx(:,[1 end]) = repmat((advn_mx(:,1)+advn_mx(:,end))/2,1,2);
-%     rr  = + 0*(a2.*rhoUo+a3.*rhoUoo)/dt ...
-%           - 0*advn_mx;
-% else
-%     advn_mx = advect(rhofx(:,2:end-1).*U(2:end-1,2:end-1),(U(2:end-1,1:end-1)+U(2:end-1,2:end))/2,(W(:,2:end-2)+W(:,3:end-1))/2,h,{ADVN,''},[1,2],BCA);
-%     rr  = + 0*(a2.*rhoUo(:,2:end-1)+a3.*rhoUoo(:,2:end-1))/dt ...
-%           - 0*advn_mx;
-% end
 rr = zeros(size(ii));
 if bnchm
-    if periodic
-        rr = rr + src_U_mms(2:end-1,:); 
-    else
-        rr = rr + src_U_mms(2:end-1,2:end-1); 
-    end
+    rr = rr + src_U_mms(2:end-1,2:end-1);
 end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
-
 
 % assemble coefficient matrix & right-hand side vector
 KV  = sparse(IIL,JJL,AAL,NW+NU,NW+NU);
@@ -275,18 +200,10 @@ if ~exist('GG','var') || bnchm
     
     
     % Coefficients for x-gradient
-    if periodic
-        ii  = MapU(2:end-1,:);
-    else
-        ii  = MapU(2:end-1,2:end-1);
-    end
+    ii  = MapU(2:end-1,2:end-1);
     
     %         left             ||           right
-    if periodic
-        jj1 = MapP(2:end-1,1:end-1); jj2 = MapP(2:end-1,2:end);
-    else
-        jj1 = MapP(2:end-1,2:end-2); jj2 = MapP(2:end-1,3:end-1);
-    end
+    jj1 = MapP(2:end-1,2:end-2); jj2 = MapP(2:end-1,3:end-1);
     aa  = zeros(size(ii));
     IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)-1/h];     % one to the left
     IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1/h];     % one to the right
@@ -330,46 +247,40 @@ IIR = [];       % equation indeces into R
 AAR = [];       % forcing entries for R
 
 % Bounday points
-ii  = MapP(1,:).'; % top & bottom
-jj1 = ii;
-jj2 = MapP(2,:).';
 
+% top boundary
+ii  = MapP(1,:).';  jj1 = ii; %jj2 = MapP(2,:).';
 aa = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1/h];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1/h];
-topdPdz = -top*(bndmode~=5)*((rhom(1  ,icx)+rhom(2    ,icx))/2-mean(rhofz(1,:)))*g0;
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:) + topdPdz(:)];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+%topdPdz = -top*(bndmode~=5)*((rhom(1  ,icx)+rhom(2    ,icx))/2-mean(rhofz(1,:)))*g0;
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];% + topdPdz(:)];
 
-ii  = MapP([end end-1]  ,:).'; % top & bottom
-jj1 = ii;
-jj2 = MapP(end-1,:).';
-
+% bottom boundary
+ii  = MapP(end ,:).';  jj1 = ii;  jj2 = MapP(end-1,:).'; 
 aa = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1/h];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1/h];
-botdPdz =  bot*(bndmode~=5)*((rhom(end,icx)+rhom(end-1,icx))/2-mean(rhofz(1,:)))*g0;
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:) + botdPdz(:)];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+%botdPdz =  bot*(bndmode~=5)*((rhom(end,icx)+rhom(end-1,icx))/2-mean(rhofz(end,:)))*g0;
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];% + botdPdz(:)];
 
-ii  = MapP(:,1); % left & right
-jj1 = ii;
-jj2 = MapP(:,2);
-
+% left boundary  
+ii  = MapP(:,1);  jj1 = ii;  jj2 = MapP(:,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-ii  = MapP(:,end  ); % left & right
-jj1 = ii;
-jj2 = MapP(:,end-1);
-
+% right boundary
+ii  = MapP(:,end  ); jj1 = ii; jj2 = MapP(:,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
+
 % Internal Points
-ii  = MapP(2:end-2,2:end-2);
+ii  = MapP(2:end-1,2:end-1);
 jj1 = MapP(1:end-2,2:end-1); % Above
 jj2 = MapP(3:end-0,2:end-1); % Below
 jj3 = MapP(2:end-1,1:end-2); % Left
@@ -377,13 +288,11 @@ jj4 = MapP(2:end-1,3:end-0); % Right
 
 % Coefficients multiplying darcy flow
 
-% Darcy coefficient KD = permeability (kphi) / melt viscosity (etam)?
-KD1 = (KD(icz(1:end-2),:) .* KD(icz(2:end-1),:)).^0.5; % above
-KD2 = (KD(icz(2:end-1),:) .* KD(icz(3:end-0),:)).^0.5; % below
-KD3 = (KD(:,icx(1:end-2)) .* KD(:,icx(2:end-1))).^0.5; % left
-KD4 = (KD(:,icx(2:end-1)) .* KD(:,icx(3:end-0))).^0.5; % right
-
-
+KD1 = (KD(icz(1:end-2), :) .* KD(icz(2:end-1), :)).^0.5; % above
+KD2 = (KD(icz(2:end-1), :) .* KD(icz(3:end-0), :)).^0.5; % below
+KD3 = (KD(: ,icx(1:end-2)) .* KD(:, icx(2:end-1))).^0.5; % left
+KD4 = (KD(: ,icx(2:end-1)) .* KD(: ,icx(3:end-0))).^0.5; % right
+ 
 aa = (KD1 + KD2 + KD3 + KD4) / h^2;
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];    AAL = [AAL; aa(:)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; -KD1(:) / h^2];  % Above
@@ -393,12 +302,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -KD4(:) / h^2];  % Right
 
 % RHS
 
-%The sizes dont add up here
-
 ii = MapP(2:end-1, 2:end-1);
 
 KD_rho_g     = KD .* (rhom - mean(rho,2)) * g0;
-dKD_rho_g_dz = ddz((KD_rho_g(icz(1:end-1),:)+KD_rho_g(icz(2:end),:))/2,h);
+dKD_rho_g_dz = ddz((KD_rho_g([1 1:end],:)+KD_rho_g([1:end end],:))/2,h);
 rr  = -dKD_rho_g_dz;
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
@@ -406,15 +313,15 @@ AAR = [AAR; rr(:)];
 KF = sparse(IIL,JJL,AAL,NP,NP);
 RF = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
-% set P = 0 in fixed point
-nzp = round((Nz+2)/2);
-nxp = round((Nx+2)/2);
-np0 = MapP(nzp,nxp);
-% KF(np0,np0) = KF(np0,np0)+1e-12;
-KF(np0,:  ) = 0;
-KF(np0,np0) = 1;
-DD(np0,:  ) = 0;
-RF(np0)     = 0;
+% % set P = 0 in fixed point
+% nzp = round((Nz+2)/2);
+% nxp = round((Nx+2)/2);
+% np0 = MapP(nzp,nxp);
+%  %KF(np0,np0) = KF(np0,np0)+1e-12;
+% KF(np0,:  ) = 0;
+% KF(np0,np0) = 1;
+% DD(np0,:  ) = 0;
+% RF(np0)     = 0;
 
 
 %% assemble coefficients for compressibility diagonal and right-hand side (KC and RC)
@@ -426,23 +333,34 @@ AAR = [];       % forcing entries for R
 
 % Bounday points
 
-ii  = [MapP(1,:).'; MapP(end  ,:).']; % top & bottom
-jj1 = ii;
-jj2 = [MapP(2,:).'; MapP(end-1,:).'];
-
-aa  = zeros(size(ii));
+% top boundary
+ii  = MapP(1,:).';  jj1 = ii; %jj2 = MapP(2,:).';
+aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-ii  = [MapP(:,1); MapP(:,end  )]; % left & right
-jj1 = ii;
-jj2 = [MapP(:,2); MapP(:,end-1)];
+% bottom boundary
+ii  = MapP(end ,:).';  jj1 = ii;  %jj2 = MapP(end-1,:).'; 
+aa = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
+% left boundary  
+ii  = MapP(:,1);  jj1 = ii;  %jj2 = MapP(:,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
+% right boundary
+ii  = MapP(:,end  ); jj1 = ii; %jj2 = MapP(:,end-1);
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
 
 % Internal Points
 ii  = MapP(2:end-1,2:end-1);
@@ -462,8 +380,6 @@ RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 OO = zeros(NP, NP);
-% OOp = OO;
-% OOp(np0,np0) = 1;
 
 LL  = [ KV   GG  GG  ; ...
         DD   KF  OO  ; ...
@@ -485,9 +401,6 @@ FF  = LL*[W(:);U(:);Pf(:);Pc(:)] - RR;
 LL  = SCL*LL*SCL;
 FF  = SCL*FF;
 RR  = SCL*RR;
-
-
-
 
 %% Solve linear system of equations for vx, vz, P, Pc
 
@@ -523,6 +436,15 @@ if ~bnchm
     end
 
     % x-Darcy flux
+
+    qDx(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddx(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0); % melt segregation speed
+    qDx([1,end],:) = min(1,1-[top;bot]).*qDx([2,end-1],:);
+    % qDx([1,end],:) = min(1,1).*qDx([2,end-1],:);
+    if periodic
+        qDx(:,[1 end]) = qDx(:,[end-1 2]);
+    else
+        qDx(:,[1 end]) = qDx(:,[2 end-1]);
+    end
 
     % % phase segregation speeds
     % wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed

@@ -346,6 +346,7 @@ while res > tol
 
     cx = cxq; cm = cmq;  % set phase compositions to equilibrium/initial values for time being
     % set phase fractions to equilibrium/initial values for time being
+ 
     m =  m0 + dmr.*rp + dmg.*gp; 
     x =  1-m;
     Tsol = 0*T;  Tliq = 0*T;

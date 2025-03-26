@@ -19,7 +19,7 @@ h         =  D/N;                 % grid spacing (equal in both dimensions, do n
 L         =  2*D;                 % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  10e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
-bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
+bnd_sprw  =  4e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set model timing parameters
 Nt        =  5e5;                   % number of time steps to take
@@ -45,7 +45,7 @@ Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [
 cwall     =  nan(3,7,7);
 Ptop      =  4.0e7;               % top pressure [Pa]
 fin       =  0;
-fout      =  1;
+fout      =  0;
 
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';              % phase diagram calibration

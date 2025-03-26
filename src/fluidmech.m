@@ -34,35 +34,36 @@ AAR = [];       % forcing entries for R
 
 
 % assemble coefficients of z-stress divergence
-    
+
+% top boundary
+ii  = MapW(1,:); jj1 = ii;  
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+aa  = zeros(size(ii));% + WBG(1,:);
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
+% bottom boundary
+ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+aa  = zeros(size(ii)) + WBG(end,:);
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
 % left boundary
-ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
+ii  = MapW(2:end-1,1); jj1 = ii; jj2 = MapW(2:end-1,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,end-1);
+ii  = MapW(2:end-1,end); jj1 = ii; jj2 = MapW(2:end-1,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];  AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
-% top boundary
-ii  = MapW(1,2:end-1); jj1 = ii;  
-aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%aa  = zeros(size(ii)); % + WBG(1,:);
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-
-% bottom boundary
-ii  = MapW(end,2:end-1); jj1 = ii; jj2 = MapW(end-1,2:end-1);
-aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-aa  = zeros(size(ii));
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % internal points
 ii    = MapW(2:end-1,2:end-1);
@@ -107,28 +108,28 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-ii  = MapU(1,2:end-1); jj1 = ii; jj2 = MapU(2,2:end-1);
-aa  = zeros(size(ii)) + bnd_spr;
+ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
+aa  = zeros(size(ii)) + bnd_spr * 2;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapU(end,2:end-1); jj1 = ii; jj2 = MapU(end-1,2:end-1);
+ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-bot];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
-ii  = MapU(:,1); jj = ii;
+ii  = MapU(2:end-1,1); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapU(:,end); jj1 = ii; jj2 = MapU(:,end-1);
+ii  = MapU(2:end-1,end); jj1 = ii; jj2 = MapU(2:end-1,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -257,27 +258,26 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];% + topdPdz(:)];
 
 % bottom boundary
-ii  = MapP(end ,:).';  jj1 = ii;  jj2 = MapP(end-1,:).'; 
+ii  = MapP(end ,:).';  jj1 = ii;  %jj2 = MapP(end-1,:).'; 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 %botdPdz =  bot*(bndmode~=5)*((rhom(end,icx)+rhom(end-1,icx))/2-mean(rhofz(end,:)))*g0;
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];% + botdPdz(:)];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; % + botdPdz(:)];
 
 % left boundary  
-ii  = MapP(:,1);  jj1 = ii;  jj2 = MapP(:,2);
+ii  = MapP(2:end-1,1);  jj1 = ii;  jj2 = MapP(2:end-1,2); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end  ); jj1 = ii; jj2 = MapP(:,end-1);
+ii  = MapP(2:end-1,end  ); jj1 = ii; %jj2 = MapP(2:end-1,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-
 
 % Internal Points
 ii  = MapP(2:end-1,2:end-1);
@@ -312,7 +312,7 @@ AAR = [AAR; rr(:)];
 
 KF = sparse(IIL,JJL,AAL,NP,NP);
 RF = sparse(IIR,ones(size(IIR)),AAR,NP,1);
-
+% 
 % % set P = 0 in fixed point
 % nzp = round((Nz+2)/2);
 % nxp = round((Nx+2)/2);
@@ -334,7 +334,7 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,:).';  jj1 = ii; %jj2 = MapP(2,:).';
+ii  = MapP([1,2],:).';  jj1 = ii; %jj2 = MapP(2,:).';
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 %IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -348,17 +348,17 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
-ii  = MapP(:,1);  jj1 = ii;  %jj2 = MapP(:,2);
+ii  = MapP(2:end-1,1);  jj1 = ii;  jj2 = MapP(2:end-1,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end  ); jj1 = ii; %jj2 = MapP(:,end-1);
+ii  = MapP(2:end-1,end  ); jj1 = ii; %jj2 = MapP(2:end-1,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
@@ -387,11 +387,6 @@ LL  = [ KV   GG  GG  ; ...
 
 RR  = [RV; RF; RC];
 
-% figure(1); spy(LL); title('LL');
-% figure(2); spy(KV); title('KV');
-% figure(3); spy(KF); title('KF');
-% figure(4); spy(KC); title('KC');
-
 
 SCL = (abs(diag(LL))).^0.5;
 SCL = diag(sparse( 1./(SCL + sqrt(h^2./geomean(eta(:)))/1000) ));
@@ -401,6 +396,7 @@ FF  = LL*[W(:);U(:);Pf(:);Pc(:)] - RR;
 LL  = SCL*LL*SCL;
 FF  = SCL*FF;
 RR  = SCL*RR;
+
 
 %% Solve linear system of equations for vx, vz, P, Pc
 
@@ -426,25 +422,17 @@ Pc = full(reshape(SOL(MapP(:)+(NW+NU+NP)),Nz+2,Nx+2));  % matrix compaction pres
 if ~bnchm
 
     % z-Darcy flux
+    
     qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0); % melt segregation speed
     qDz([1,end],:) = min(1,1-[top;bot]).*qDz([2,end-1],:);
     % qDz([1,end],:) = min(1,1).*qDz([2,end-1],:);
-    if periodic
-        qDz(:,[1 end]) = qDz(:,[end-1 2]);
-    else
-        qDz(:,[1 end]) = qDz(:,[2 end-1]);
-    end
+    qDz(:,[1 end]) = qDz(:,[2 end-1]);
+ 
 
-    % x-Darcy flux
-
-    qDx(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddx(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0); % melt segregation speed
-    qDx([1,end],:) = min(1,1-[top;bot]).*qDx([2,end-1],:);
-    % qDx([1,end],:) = min(1,1).*qDx([2,end-1],:);
-    if periodic
-        qDx(:,[1 end]) = qDx(:,[end-1 2]);
-    else
-        qDx(:,[1 end]) = qDx(:,[2 end-1]);
-    end
+    qDx(2:end-1,2:end-1) = - (KD(:,1:end-1).*KD(:,2:end)).^0.5 .*(ddx(Pf(2:end-1,2:end-1),h) - ((rhom(:,1:end-1)+rhom(:,2:end))/2 - mean(rhofz(1:end-1,2:end-1), 2)));
+    qDx(:,[1,end]) = qDx(:,[2,end-1]); % Simple extrapolation for left/right, adjust if needed
+    qDx([1 end],:) = qDx([2 end-1],:); % Top/bottom copied from interior
+    
 
     % % phase segregation speeds
     % wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed

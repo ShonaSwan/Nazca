@@ -25,6 +25,7 @@ bnd_sprw  =  4e3;                 % Width of top boundary spreading rate 'S' fun
 Nt        =  5e5;                   % number of time steps to take
 tend      =  1e9*yr;                % end time for simulation [s]
 dt        =  1e3*yr;                % initial time step [s]
+mulim     =  1e-4;                   % Setting a limint for melt fraction
 
 % set initial thermo-chemical state
 init_mode =  'MOR';

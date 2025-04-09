@@ -312,16 +312,6 @@ AAR = [AAR; rr(:)];
 
 KF = sparse(IIL,JJL,AAL,NP,NP);
 RF = sparse(IIR,ones(size(IIR)),AAR,NP,1);
-% 
-% % set P = 0 in fixed point
-% nzp = round((Nz+2)/2);
-% nxp = round((Nx+2)/2);
-% np0 = MapP(nzp,nxp);
-%  %KF(np0,np0) = KF(np0,np0)+1e-12;
-% KF(np0,:  ) = 0;
-% KF(np0,np0) = 1;
-% DD(np0,:  ) = 0;
-% RF(np0)     = 0;
 
 
 %% assemble coefficients for compressibility diagonal and right-hand side (KC and RC)
@@ -334,7 +324,7 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP([1,2],:).';  jj1 = ii; %jj2 = MapP(2,:).';
+ii  = MapP(1,:).';  jj1 = ii; %jj2 = MapP(2,:).';
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 %IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -387,20 +377,42 @@ LL  = [ KV   GG  GG  ; ...
 
 RR  = [RV; RF; RC];
 
+%% Setting Pc to zero where there is no melt 
 
+bc_ind = find(twophs(:)<=0.0) + NW+NU+NP;
+bc_val = zeros(size(bc_ind));
+
+% assemble and sort all boundary indices and values
+[BC.ind,ind]    =  sort(bc_ind);
+ BC.val         =  bc_val(ind);
+
+% extract boundary conditions to reduce problem size
+BC.free         =  1:length(LL(1,:));
+BC.free(BC.ind) =  [];
+TMP             =  LL(:,BC.ind);
+RR              =  RR - TMP*BC.val;
+LL              =  LL(BC.free,BC.free);
+RR              =  RR(BC.free);
+
+%% Scaling  
 SCL = (abs(diag(LL))).^0.5;
 SCL = diag(sparse( 1./(SCL + sqrt(h^2./geomean(eta(:)))/1000) ));
 
-FF  = LL*[W(:);U(:);Pf(:);Pc(:)] - RR;
-
 LL  = SCL*LL*SCL;
-FF  = SCL*FF;
 RR  = SCL*RR;
+
+%Residual 
+FF  = LL*SOL(BC.free) - RR;
+FF  = SCL*FF;
+
 
 
 %% Solve linear system of equations for vx, vz, P, Pc
 
-SOL = SCL*(LL\RR);  % update solution
+%SOL = SCL*(LL\RR);  % update solution
+
+SOL(BC.free) = SCL*(LL\RR);                                                      % update solution
+SOL(BC.ind ) = BC.val;                                                       % fill in boundary conditions  
 
 % map solution vector to 2D arrays
 W  = full(reshape(SOL(MapW(:))           ,Nz+1,Nx+2));  % matrix z-velocity

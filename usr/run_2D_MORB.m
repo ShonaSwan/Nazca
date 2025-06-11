@@ -14,7 +14,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  100;                 % number of grid points in z-direction
+N         =  50;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  2*D;                 % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)

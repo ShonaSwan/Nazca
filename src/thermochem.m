@@ -100,7 +100,7 @@ end
 % phase advection rates
 advn_X   = - advect(X,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-advn_rho = advn_X+advn_F+advn_M;
+advn_rho = advn_X+advn_M;
 
 % phase mass transfer rates
 if reactive

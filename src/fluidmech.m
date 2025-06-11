@@ -2,18 +2,18 @@ tic;
 
 if ~bnchm && step>0 && ~restart
 
-% %***  update mixture mass density (The net compressibility)
-% drhodt  = advn_rho;% + (RHO-rho)/dt;
-% 
-% % residual of mixture mass evolution
-% res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
-% 
-% % volume source and background velocity passed to fluid-mechanics solver
-% upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
-% VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
+%***  update mixture mass density (The net compressibility)
+drhodt  = advn_rho;% + (RHO-rho)/dt;
 
-UBG     = - 0*mean(VolSrc,'all')./2 .* (L/2-XXu);
-WBG     = - 2*mean(VolSrc,'all')./2 .* (0  -ZZw);
+% residual of mixture mass evolution
+res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
+
+% volume source and background velocity passed to fluid-mechanics solver
+upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
+VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
+
+UBG     = - 2*mean(VolSrc,'all')./2 .* (L-XXu);
+WBG     = - 0*mean(VolSrc,'all')./2 .* (0-ZZw);
 
 dPchmbdt  = mod_wall*mean(VolSrc,'all') - mod_wall/eta_wall*Pchmb;
 res_Pchmb = (a1*Pchmb-a2*Pchmbo-a3*Pchmboo)/dt - (b1*dPchmbdt + b2*dPchmbdto + b3*dPchmbdtoo);
@@ -39,7 +39,7 @@ AAR = [];       % forcing entries for R
 ii  = MapW(1,:); jj1 = ii;  
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii));% + WBG(1,:);
+aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
@@ -47,7 +47,7 @@ ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-aa  = zeros(size(ii)) + WBG(end,:);
+aa  = zeros(size(ii)); 
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
@@ -125,7 +125,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapU(2:end-1,1); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii));
+aa  = zeros(size(ii)) + UBG(2:end-1,1);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
@@ -250,20 +250,17 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,:).';  jj1 = ii; %jj2 = MapP(2,:).';
+ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-%topdPdz = -top*(bndmode~=5)*((rhom(1  ,icx)+rhom(2    ,icx))/2-mean(rhofz(1,:)))*g0;
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];% + topdPdz(:)];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end ,:).';  jj1 = ii;  %jj2 = MapP(end-1,:).'; 
+ii  = MapP(end,:);  jj1 = ii; 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-%botdPdz =  bot*(bndmode~=5)*((rhom(end,icx)+rhom(end-1,icx))/2-mean(rhofz(end,:)))*g0;
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; % + botdPdz(:)];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
 ii  = MapP(2:end-1,1);  jj1 = ii;  jj2 = MapP(2:end-1,2); 
@@ -273,10 +270,9 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(2:end-1,end  ); jj1 = ii; %jj2 = MapP(2:end-1,end-1);
+ii  = MapP(2:end-1,end); jj1 = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % Internal Points
@@ -324,17 +320,16 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,:).';  jj1 = ii; %jj2 = MapP(2,:).';
+ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end ,:).';  jj1 = ii;  %jj2 = MapP(end-1,:).'; 
+ii  = MapP(end,:);  jj1 = ii;  
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
@@ -345,10 +340,8 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(2:end-1,end  ); jj1 = ii; %jj2 = MapP(2:end-1,end-1);
-aa  = zeros(size(ii));
+ii  = MapP(2:end-1,end); jj1 = ii; aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-%IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
@@ -431,37 +424,19 @@ Pc = full(reshape(SOL(MapP(:)+(NW+NU+NP)),Nz+2,Nx+2));  % matrix compaction pres
 % end
 
 
+
 if ~bnchm
 
+ 
     % z-Darcy flux
     
     qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0); % melt segregation speed
     qDz([1,end],:) = min(1,1-[top;bot]).*qDz([2,end-1],:);
-    % qDz([1,end],:) = min(1,1).*qDz([2,end-1],:);
     qDz(:,[1 end]) = qDz(:,[2 end-1]);
- 
 
-    qDx(2:end-1,2:end-1) = - (KD(:,1:end-1).*KD(:,2:end)).^0.5 .*(ddx(Pf(2:end-1,2:end-1),h) - ((rhom(:,1:end-1)+rhom(:,2:end))/2 - mean(rhofz(1:end-1,2:end-1), 2)));
+    qDx(2:end-1,2:end-1) = - (KD(:,1:end-1).*KD(:,2:end)).^0.5 .*(ddx(Pf(2:end-1,2:end-1),h));
     qDx(:,[1,end]) = qDx(:,[2,end-1]); % Simple extrapolation for left/right, adjust if needed
     qDx([1 end],:) = qDx([2 end-1],:); % Top/bottom copied from interior
-    
-
-    % % phase segregation speeds
-    % wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed
-    % wm([1,end],:) = min(1,1-[top;bot]).*wm([2,end-1],:);
-    % if periodic
-    %     wm(:,[1 end]) = wm(:,[end-1 2]);
-    % else
-    %     wm(:,[1 end]) = wm(:,[2 end-1]);
-    % end
-    % 
-    % wx(2:end-1,2:end-1) = ((rhox(1:end-1,:)+rhox(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_x(1:end-1,:).*Ksgr_x(2:end,:)).^0.5; % solid segregation speed
-    % wx([1,end],:) = min(1,1-[top;bot]).*wx([2,end-1],:);
-    % if periodic
-    %     wx(:,[1 end]) = wx(:,[end-1 2]);
-    % else
-    %     wx(:,[1 end]) = wx(:,[2 end-1]);
-    % end
 
     chiz = (chi(icz(1:end-1),icx)+chi(icz(2:end),icx))./2;
     chix = (chi(icz,icx(1:end-1))+chi(icz,icx(2:end)))./2;
@@ -469,9 +444,10 @@ if ~bnchm
     muz  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;
     mux  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;
 
-    wm = qDz./muz;
-    um = qDx./mux;
+    wm = qDz./max(mulim,muz);
+    um = qDx./max(mulim,mux);
 
+    
     % update phase velocities
     % Wf  = W + wf;  % mvp z-velocity
     % Uf  = U + 0.;  % mvp x-velocity
@@ -492,3 +468,13 @@ end
 % end
 
 FMtime = FMtime + toc;
+
+ % % phase segregation speeds
+    % wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed
+    % wm([1,end],:) = min(1,1-[top;bot]).*wm([2,end-1],:);
+    % wm(:,[1 end]) = wm(:,[2 end-1]);
+    
+    % wx(2:end-1,2:end-1) = ((rhox(1:end-1,:)+rhox(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_x(1:end-1,:).*Ksgr_x(2:end,:)).^0.5; % solid segregation speed
+    % wx([1,end],:) = min(1,1-[top;bot]).*wx([2,end-1],:);
+    % wx(:,[1 end]) = wx(:,[2 end-1]);
+    

@@ -85,7 +85,7 @@ cal.r  = [37.0  6.0  ];
 
 % set entropy gain of fusion DeltaS [J/K]
 cal.Dsx  = 350;
-cal.Dsf  = 450;
+%cal.Dsf  = 450;
 
 % specify melting point dependence on H2O
 cal.dTH2O = [900  1500 ];  % solidus shift from water content prefactor [K/wt^pH2O]
@@ -104,12 +104,12 @@ cal.Ktrc_mem = [0.01;0.10;1.0;3.0;10.0;1.0].*ones(cal.ntrc,cal.nmem);
 % specify density parameters
 %               for  fay  ant  san  dps  aug  ulv  mgt  qtz  wat
 cal.rhox0   = [3210,4200,2680,2550,3210,3520,3930,4730, 2540,1000]; % mem ref densities [kg/m3]
-cal.rhof0   = 1000;                 % fluid ref density [kg/m3]
+%cal.rhof0   = 1000;                 % fluid ref density [kg/m3]
 
 % specify three-phase coefficient model parameters
 %              for  fay  ant  alb   dps  aug  ulv  mgt  qtz  wat
 cal.etax0   = [1e19,1e19,1e17,1e17,1e19,1e19,1e17,1e17,1e19,1e0]; % mem ref viscosities [Pas]
-cal.etaf0   = 0.1;                    % fluid viscosity constant [Pas]
+%cal.etaf0   = 0.1;                    % fluid viscosity constant [Pas]
 cal.Eax     = 300e3;                  % solid viscosity activation energy [J/mol]
 cal.AA      =[ 0.5989, 0.1772; ...    % permission slopes
                0.0397, 0.1182 ];      % increases permission slopes away from step function 

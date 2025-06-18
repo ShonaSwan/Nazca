@@ -1,51 +1,57 @@
 % initialise model run
 init;
 
-% physical time stepping loop
+%%%%  Physical Time Stepping Loop %%%%
 while time <= tend && step <= Nt
     
-    % time step info
+    % Time step info
     timing;
 
-    % store previous solution
+    % Store previous solution
     store;
     
-    % reset residuals and iteration count
+    %%%% Reset residuals and iteration count
     resnorm  = 1;
     resnorm0 = resnorm;
     iter     = 1;
     if frst; alpha = alpha/2; beta = beta/2; end
 
-    % non-linear iteration loop
+    %%%%% Non-Linear Iteration Loop %%%%
     while resnorm/resnorm0 >= rtol/(1 + frst*10) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst)
         
-        % solve thermo-chemical equations
+        %%%% solve thermo-chemical equations
         thermochem;
 
-        % solve fluid-mechanics equations
+        %%%% solve fluid-mechanics equations
         fluidmech;
 
-        % update non-linear parameters and auxiliary variables
+        %%%% update non-linear parameters and auxiliary variables
         update;
 
-        % update geochemical evolution
+        %%%% update geochemical evolution
         geochem;
 
-        % report convergence
+        %%%% report convergence
         report;
 
-        iter = iter+1;
+        %%%% Increment iteration count 
+        iter = iter+1; 
+   
+    %%%% The end of the Non-Linear Iteration Loop %%%%
     end
+    
+    %%%% Upsate phase equlibrium 
+    phseql; 
 
-    % renormalise sum of phase, component densities to bulk density
-    X = X./RHO.*rho;  M = M./RHO.*rho;   RHO = X+M;
-    C = C./sum(C,3).*rho;
+        % renormalise sum of phase, component densities to bulk density
+        % X = X./RHO.*rho;  M = M./RHO.*rho;   RHO = X+M;
+        % C = C./sum(C,3).*rho;
 
-    % % fractionation mode for 0D-models
-    % if Nx==1 && Nz==1
-    %     Ptop = Ptop + (T-To).*dPdT;
-    %     fractionate; 
-    % end
+        % % fractionation mode for 0D-models
+        % if Nx==1 && Nz==1
+        %     Ptop = Ptop + (T-To).*dPdT;
+        %     fractionate; 
+        % end
 
     % record model history
     history;
@@ -60,7 +66,8 @@ while time <= tend && step <= Nt
     time = time+dt;
     step = step+1;
     if frst; alpha = alpha*2; beta = beta*2; frst=0; end
-    
+ 
+%%%% The end of the Physical Time Stepping Loop %%%% 
 end
 
 % save final state of model

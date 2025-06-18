@@ -10,7 +10,6 @@ fprintf(1,'         min SiO2=  %1.4f;    mean SiO2= %1.4f;    max SiO2= %1.4f;  
 fprintf(1,'         min H2O =  %1.4f;    mean H2O = %1.4f;    max H2O = %1.4f;   [wt]\n\n' ,min(c_oxd(:,:,cal.H ),[],'all'),mean(c_oxd(:,:,cal.H ),'all'),max(c_oxd(:,:,cal.H ),[],'all'));
 
 fprintf(1,'         min x   =  %1.4f;    mean x   = %1.4f;    max x   = %1.4f;   [wt]\n'   ,min(x(:)  ),mean(x(:)  ),max(x(:)  ));
-fprintf(1,'         min f   =  %1.4f;    mean f   = %1.4f;    max f   = %1.4f;   [wt]\n'   ,min(f(:)  ),mean(f(:)  ),max(f(:)  ));
 fprintf(1,'         min m   =  %1.4f;    mean m   = %1.4f;    max m   = %1.4f;   [wt]\n\n' ,min(m(:)  ),mean(m(:)  ),max(m(:)  ));
 
 fprintf(1,'         min rho =  %4.1f;    mean rho = %4.1f;    max rho = %4.1f;   [kg/m3]\n'  ,min(rho(:)),mean(rho(:))   ,max(rho(:)));

@@ -2,7 +2,7 @@
 
 tic;
 
-if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; upd_F = 0; end
+if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; end
 
 %***  update heat content (entropy) density
 
@@ -21,6 +21,7 @@ if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./tau_T .* topshape; e
 if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./tau_T .* botshape; end
 bnd_S = RHO.*cP.*bnd_T ./ T;
 
+
 % total rate of change
 dSdt  = advn_S + diff_S + diss_h + bnd_S;
 
@@ -31,9 +32,10 @@ res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
 upd_S = - alpha*res_S*dt/a1 + beta*upd_S;
 S     = S + upd_S;
 
-% convert entropy density to temperature
-Tpv     = Tref*exp((S - X.*Dsx)./RhoCp);
-Tv      = Tref*exp((S - X.*Dsx)./RhoCp + aT./RhoCp.*(Pt-Pref));
+% convert entropy S to natural temperature T and potential temperature Tp
+[Tp,~ ] = StoT(Tp,S./rho,Pref+0*Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[T ,si] = StoT(T ,S./rho,       Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 
 %***  update major component densities
@@ -65,36 +67,6 @@ C     = C + upd_C;
 % convert component density to concentration
 c = C./sum(C,3);
 
-
-%*** update phase equilibrium
-
-if reactive
-
-eqtime = tic;
-
-var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
-var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
-var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
-var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt]
-var.f      = reshape(fq,Nx*Nz,1);         % bubble fraction [wt]
-var.H2O    = var.c(:,end);                % water concentration [wt]
-var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
-cal.H2Osat = fluidsat(var);               % water saturation [wt]
-
-
-[var,cal]  = meltmodel(var,cal,'E'); 
-mq = reshape(var.m,Nz,Nx);
-fq = reshape(var.f,Nz,Nx);
-xq = reshape(var.x,Nz,Nx);
-
-cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
-
-eqtime = toc(eqtime);
-EQtime = EQtime + eqtime;
-
-end 
-
 %***  update phase fraction densities
 
 % phase advection rates
@@ -104,8 +76,8 @@ advn_rho = advn_X+advn_M;
 
 % phase mass transfer rates
 if reactive
-Gm  = (Gmo + (mq-m).*RHO/max(tau_r,5*dt))/2;
-Gx  = (Gxo + (xq-x).*RHO/max(tau_r,5*dt))/2; 
+Gm  = (mq-m).*RHO/max(tau_r,5*dt);
+Gx  = (xq-x).*RHO/max(tau_r,5*dt); 
 
 Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,5*dt);
 Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,5*dt);
@@ -123,7 +95,7 @@ res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 upd_X = max(-X, - alpha*res_X*dt/a1 + beta*upd_X );
 upd_M = max(-M, - alpha*res_M*dt/a1 + beta*upd_M );
 X     = X + upd_X;
-M     = M + upd_M;
+M     = rho - X; %M + upd_M;
 
 % get dynamically evolving mixture density 
 RHO = X+M;
@@ -155,7 +127,7 @@ if reactive
 
 % update major component phase composition
 Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
-Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
+%Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
 subsol  = m<=1e-9 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
 supliq  = x<=1e-9 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
 subsolc = repmat(subsol,1,1,cal.ncmp);
@@ -167,10 +139,10 @@ cm = cmq;  cx = cxq;
 while rnorm>tol && it<mxit
 
     Kx = cx./(cm+eps);
-    Kf = cf./(cm+eps);
+    %Kf = cf./(cm+eps);
 
-    cmK = c    ./(m + x.*Kx + f.*Kf + eps);
-    cxK = c.*Kx./(m + x.*Kx + f.*Kf + eps);
+    cmK = c    ./(m + x.*Kx + eps); % + f.*Kf
+    cxK = c.*Kx./(m + x.*Kx + eps); % + f.*Kf 
 
     res_cm = cm - cmK./sum(cmK,3);
     res_cx = cx - cxK./sum(cxK,3);
@@ -184,19 +156,20 @@ while rnorm>tol && it<mxit
     r = x.*cx + m.*cm - c;
     r(subsolc) = 0; r(supliqc) = 0;
     rnorm = norm(r(:))./norm(c(:));
+
     it  = it+1;
 end
+
 
 if (it==mxit && rnorm>tol)
     disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
 end
 
 % fix subsolidus and superliquidus conditions
-cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); f(subsol) = fq(subsol); m(subsol) = 0;
-cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); f(supliq) = fq(supliq); x(supliq) = 0;
+cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); m(subsol) = 0; %f(subsol) = fq(subsol);
+cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); x(supliq) = 0; %f(supliq) = fq(supliq);
 
 end
-
 
 % record timing
 TCtime = TCtime + toc - eqtime;

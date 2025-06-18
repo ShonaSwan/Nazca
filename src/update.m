@@ -34,13 +34,14 @@ rhox0  = reshape(sum(reshape(cx_mem/100,Nz*Nx,cal.nmem)./cal.rhox0,2).^-1,Nz,Nx)
 rhom   = rhom0 .* (1 - aTm.*(T-Tref) + bPm.*(Pt-Pref));
 rhox   = rhox0 .* (1 - aTx.*(T-Tref) + bPx.*(Pt-Pref));
 
+rho0   = 1./(m./rhom0 + x./rhox0);
 rho    = 1./(m./rhom + x./rhox);
 
-rhofz  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
-rhofx  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
+rhow  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
+rhou  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 
-rhoW = rhofz.*W(:,2:end-1);
-rhoU = rhofx.*U(2:end-1,:);
+rhoW = rhow.*W(:,2:end-1);
+rhoU = rhou.*U(2:end-1,:);
 
 % convert weight to volume fraction, update bulk density
 chi    = max(0,min(1, x.*rho./rhox ));
@@ -51,15 +52,18 @@ chi_mem = chi_mem./sum(chi_mem,3);
 
 % update thermal parameters
 aT = mu.*aTm + chi.*aTx;
+bP = mu.*bPm + chi.*bPx;
 kT = mu.*kTm + chi.*kTx;
 cP = mu.*cPm + chi.*cPx;
 RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
+Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
+
 
 % update lithostatic pressure
 Pti = Pt;
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
-    Pl(1,:)     = repmat(mean(rhofz(1,:),2).*g0.*h/2,1,Nx) + Ptop;
-    Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhofz(2:end-1,:),2).*g0.*h),1,Nx);
+    Pl(1,:)     = repmat(mean(rhow(1,:),2).*g0.*h/2,1,Nx) + Ptop;
+    Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
     Pt          = max(1e7,(1-1).*Pt + 1.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
 end
 upd_Pt = Pt-Pti;

@@ -13,7 +13,6 @@ D        =  10;                  % chamber depth [m]
 L        =  10;                  % chamber width [m]
 N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
 h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-sprate   =  2.5e-8             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  5e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
@@ -25,6 +24,7 @@ yr       =  24*365.25*hr;        % conversion seconds to years
 tend     =  1*yr;                % end time for simulation [s]
 dt       =  10;                  % initial time step [s]
 dtmax    =  1e3;                 % maximum time step [s]
+sprate   =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 
 % set initial thermo-chemical state
 init_mode= 'layer';              % T initial condition mode ('layer' or 'linear')
@@ -60,8 +60,8 @@ periodic =  0;                   % set side boundaries to periodic
 bndmode  =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
 bnd_w    =  h;                   % boundary layer width [m]
 bnd_h    =  [0,0,0];             % internal wall rock layer thickness [m]
-fin      =  0;                   % ingassing factor (0 = no ingassing; 1 = free flow ingassing)
-fout     =  1;                   % outgassing factor (0 = no outgassing; 1 = free flow outgassing)
+%fin      =  0;                   % ingassing factor (0 = no ingassing; 1 = free flow ingassing)
+%fout     =  1;                   % outgassing factor (0 = no outgassing; 1 = free flow outgassing)
 tau_T    =  12*hr;               % wall cooling/assimilation time [s]
 tau_a    =  24*hr;               % wall cooling/assimilation tie [s]
 Twall    =  [300,300,nan,nan];  % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
@@ -72,22 +72,22 @@ trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elemen
 calID    =  'MORB';              % phase diagram calibration
 aTm      =  5e-5;                % melt  thermal expansivity [1/K]
 aTx      =  1e-5;                % xtal  thermal expansivity [1/K]
-aTf      =  1e-4;                % fluid thermal expansivity [1/K]
+%aTf      =  1e-4;                % fluid thermal expansivity [1/K]
 kTm      =  2;                   % melt  thermal conductivity [W/m/K]
 kTx      =  5;                   % xtal  thermal conductivity [W/m/K]
-kTf      =  0.1;                 % fluid thermal conductivity [W/m/K]
+%kTf      =  0.1;                 % fluid thermal conductivity [W/m/K]
 cPm      =  1200;                % melt  heat capacity [J/kg/K]
 cPx      =  1000;                % xtal  heat capacity [J/kg/K]
-cPf      =  2000;                % fluid heat capacity [J/kg/K]
+%cPf      =  2000;                % fluid heat capacity [J/kg/K]
 tau_r    =  0;                   % reaction time scale (set to zero for quasi-equilibrium mode)
 
 % set model buoyancy and pressure parameters
 bPx      =  1e-11;               % solid compressibility [1/Pa]
 bPm      =  3e-11;               % melt  compressibility [1/Pa]
-bPf      =  1e-9;                % fluid compressibility [1/Pa]
+%bPf      =  1e-9;                % fluid compressibility [1/Pa]
 dm0      =  1e-3;                % melt film size [m]
 dx0      =  1e-3;                % crystal size [m]
-df0      =  1e-3;                % bubble size [m]
+%df0      =  1e-3;                % bubble size [m]
 g0       =  10.;                 % gravity [m/s2]
 
 % set chamber pressure parameters

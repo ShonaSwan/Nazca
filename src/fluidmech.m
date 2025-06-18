@@ -12,7 +12,7 @@ res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
 VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
 
-UBG     = - 2*mean(VolSrc,'all')./2 .* (L-XXu);
+UBG     = - 0*mean(VolSrc,'all')./2 .* (L-XXu);
 WBG     = - 0*mean(VolSrc,'all')./2 .* (0-ZZw);
 
 dPchmbdt  = mod_wall*mean(VolSrc,'all') - mod_wall/eta_wall*Pchmb;
@@ -36,14 +36,14 @@ AAR = [];       % forcing entries for R
 % assemble coefficients of z-stress divergence
 
 % top boundary
-ii  = MapW(1,:); jj1 = ii;  
+ii  = MapW(1,(2:end-1)); jj1 = ii;  
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
+ii  = MapW(end,(2:end-1)); jj1 = ii; jj2 = MapW(end-1,(2:end-1));
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -51,14 +51,14 @@ aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
-ii  = MapW(2:end-1,1); jj1 = ii; jj2 = MapW(2:end-1,2);
+ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapW(2:end-1,end); jj1 = ii; jj2 = MapW(2:end-1,end-1);
+ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];  AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)-1];
@@ -99,7 +99,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-rr  = + (rhofz(2:end-1,:) - mean(rhofz(2:end-1,:),2)) .* g0;
+rr  = + (rhow(2:end-1,:) - mean(rhow(2:end-1,:),2)) .* g0;
 if bnchm; rr = rr + src_W_mms(2:end-1,:); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -108,28 +108,28 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
+ii  = MapU(1,(2:end-1)); jj1 = ii; jj2 = MapU(2,(2:end-1));
 aa  = zeros(size(ii)) + bnd_spr * 2;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
+ii  = MapU(end,(2:end-1)); jj1 = ii; jj2 = MapU(end-1,(2:end-1));
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
-ii  = MapU(2:end-1,1); jj = ii;
+ii  = MapU(:,1); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii)) + UBG(2:end-1,1);
+aa  = zeros(size(ii)) + UBG(:,1);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapU(2:end-1,end); jj1 = ii; jj2 = MapU(2:end-1,end-1);
+ii  = MapU(:,end); jj1 = ii; jj2 = MapU(:,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -250,27 +250,27 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
+ii  = MapP(1,(2:end-1));  jj1 = ii; jj2 = MapP(2,(2:end-1));
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,:);  jj1 = ii; 
+ii  = MapP(end,(2:end-1));  jj1 = ii; 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
-ii  = MapP(2:end-1,1);  jj1 = ii;  jj2 = MapP(2:end-1,2); 
+ii  = MapP(:,1);  jj1 = ii;  jj2 = MapP(:,2); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(2:end-1,end); jj1 = ii;
+ii  = MapP(:,end); jj1 = ii; 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
@@ -320,27 +320,28 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
+ii  = MapP(1,(2:end-1));  jj1 = ii; jj2 = MapP(2,(2:end-1));
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,:);  jj1 = ii;  
+ii  = MapP(end,(2:end-1));  jj1 = ii;  
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
-ii  = MapP(2:end-1,1);  jj1 = ii;  jj2 = MapP(2:end-1,2);
+ii  = MapP(:,1);  jj1 = ii;  jj2 = MapP(:,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(2:end-1,end); jj1 = ii; aa  = zeros(size(ii));
+ii  = MapP(:,end); jj1 = ii;
+ aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
@@ -388,8 +389,9 @@ LL              =  LL(BC.free,BC.free);
 RR              =  RR(BC.free);
 
 %% Scaling  
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
 SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt(h^2./geomean(eta(:)))/1000) ));
+SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); h./etagh(:); zeros(length(SCL)-NW-NU-NP,1)]) )));
 
 LL  = SCL*LL*SCL;
 RR  = SCL*RR;
@@ -430,7 +432,7 @@ if ~bnchm
  
     % z-Darcy flux
     
-    qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0); % melt segregation speed
+    qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhow(2:end-1,:),2)).*g0); % melt segregation speed
     qDz([1,end],:) = min(1,1-[top;bot]).*qDz([2,end-1],:);
     qDz(:,[1 end]) = qDz(:,[2 end-1]);
 

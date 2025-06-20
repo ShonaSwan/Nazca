@@ -342,8 +342,17 @@ while res > tol
       % Removing melt to get a suitable initial melt fraction
       m = min(m,0.01); SUM = x+m;
       x = x./SUM;  m = m./SUM; 
+      
+    % trying to update the cm and cx so they match m and x
+      m_vec = reshape(m, Nx*Nz, 1);
+      x_vec = reshape(x, Nx*Nz, 1);
+      var.cm = max(0, min(1, var.c ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
+      var.cx = max(0, min(1, var.c .* cal.Kx ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
+      cm = reshape(var.cm, Nx, Nz, cal.ncmp);
+      cx = reshape(var.cx, Nx, Nz, cal.ncmp);
       c = x.*cx + m.*cm;
       s = x.*sx + m.*sm;
+
       
     res  = norm(Pt(:)-Ptii(:),2)./norm(Pt(:),2) ...
         + norm( T(:)-Ti  (:),2)./norm( T(:),2);

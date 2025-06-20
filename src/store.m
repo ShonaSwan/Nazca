@@ -22,5 +22,5 @@
 
 [Gmo,Gxo] = deal(Gm,Gx);
 
-so  = s;
 dto = dt;
+Pto = Pt;

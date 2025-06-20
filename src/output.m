@@ -379,7 +379,7 @@ else % create 2D plots
     % plot density, rheology, and segregation speeds in Fig. 4
     set(0,'CurrentFigure',fh4)
     set(fh4,'CurrentAxes',ax(41));
-    imagesc(Xsc,Zsc,log10(sqrt(KD.*zeta))); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,(sqrt(KD.*zeta))); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['log$_{10}$ $\delta_c$ [m]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh4,'CurrentAxes',ax(42));
     imagesc(Xsc,Zsc,log10(eta)); axis ij equal tight; box on; cb = colorbar;

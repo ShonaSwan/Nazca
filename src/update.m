@@ -84,8 +84,8 @@ Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]
 Mf = permute(repmat(kf,1,1,1,2),[4,1,2,3])./permute(repmat(kf,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-dd = max(eps^0.5,min(1-eps^0.5,permute(cat(3,dx ,dm ),[3,1,2])));
-ff = max(eps^0.5,min(1-eps^0.5,permute(cat(3,chi,mu ),[3,1,2])));
+dd = max(mulim,min(1-mulim,permute(cat(3,dx ,dm ),[3,1,2])));
+ff = max(mulim,min(1-mulim,permute(cat(3,chi,mu ),[3,1,2])));
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -110,8 +110,8 @@ Ksgr_x = squeeze(Ksgr(1,:,:)) + eps^2; if Nx==1; Ksgr_x = Ksgr_x.'; end
 Ksgr_m = squeeze(Ksgr(2,:,:)) + eps^2; if Nx==1; Ksgr_m = Ksgr_m.'; end
 
 % traditional two-phase coefficients
-KD     = max(eps^0.5,mu ).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
-zeta   = max(eps^0.5,chi).^2./squeeze(Cf(1,:,:));  % solid compaction coeff
+KD     = max(mulim,mu ).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
+zeta   = max(mulim,chi).^2./squeeze(Cf(1,:,:));  % solid compaction coeff
 
 %Extracted bounday conditions
 twophs = double(mu(icz,icx)>=mulim);
@@ -148,7 +148,7 @@ etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
 weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./(2*bnd_sprw)))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./(2*bnd_sprw))));
 eta    = eta.^(1-weak_axis).*1e17.^weak_axis;
-zeta   = 1./(1./(etamax./max(eps^0.5,mu)) + 1./zeta) + etamin./max(eps^0.5,mu);
+zeta   = 1./(1./(etamax./max(mulim,mu)) + 1./zeta) + etamin./max(mulim,mu);
 
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;

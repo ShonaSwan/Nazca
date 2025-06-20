@@ -270,9 +270,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end); jj1 = ii; 
+ii  = MapP(:,end); jj1 = ii;  jj2 = MapP(:,end-1); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % Internal Points
@@ -371,6 +372,11 @@ LL  = [ KV   GG  GG  ; ...
 
 RR  = [RV; RF; RC];
 
+%% prepare scaling matrix
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
+SCL = (abs(diag(LL))).^0.5;
+SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); h./etagh(:); h./etagh(:);]) )));
+
 %% Setting Pc to zero where there is no melt 
 
 bc_ind = find(twophs(:)<=0.0) + NW+NU+NP;
@@ -387,12 +393,9 @@ TMP             =  LL(:,BC.ind);
 RR              =  RR - TMP*BC.val;
 LL              =  LL(BC.free,BC.free);
 RR              =  RR(BC.free);
+SCL             =  SCL(BC.free,BC.free);
 
 %% Scaling  
-etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
-SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); h./etagh(:); zeros(length(SCL)-NW-NU-NP,1)]) )));
-
 LL  = SCL*LL*SCL;
 RR  = SCL*RR;
 

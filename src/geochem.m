@@ -21,9 +21,9 @@ for i = 1:cal.ntrc
     dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);
 
     % get trace element assimilation
-    if ~isnan(trcwall(1,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(1,i)-TRC(:,:,i)).*mu./tau_a .* topshape; end
-    if ~isnan(trcwall(2,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(2,i)-TRC(:,:,i)).*mu./tau_a .* botshape; end
-    if ~isnan(trcwall(3,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(3,i)-TRC(:,:,i)).*mu./tau_a .* sdsshape; end
+    if ~isnan(trcwall(1,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (rho.*trcwall(1,i)-TRC(:,:,i)).*mu./tau_a .* topshape; end
+    if ~isnan(trcwall(2,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (rho.*trcwall(2,i)-TRC(:,:,i)).*mu./tau_a .* botshape; end
+    if ~isnan(trcwall(3,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (rho.*trcwall(3,i)-TRC(:,:,i)).*mu./tau_a .* sdsshape; end
 end
 
 % get total rate of change
@@ -37,4 +37,4 @@ upd_TRC = - alpha*res_TRC*dt/a1 + beta*upd_TRC;
 TRC     = TRC + upd_TRC;
 
 % convert from densites to concentrations
-for i = 1:cal.ntrc; trc(:,:,i) = TRC(:,:,i)./RHO; end
+for i = 1:cal.ntrc; trc(:,:,i) = TRC(:,:,i)./rho; end

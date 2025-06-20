@@ -319,45 +319,47 @@ while res > tol
         cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
         cm  = cmq; cx = cxq;
     
+        sm = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;
+
         eqtime = toc(eqtime);
         EQtime = EQtime + eqtime;
 
         update;
 
-      % T  = Tp.*exp(Adbt.*(Pt-Pref));
-      % sm = cPm.*log(Tp./T0);  sx = sm+Dsx;  sf = sx+Dsf;
+        % Removing melt to get a suitable initial melt fraction
+        if it>5
+            m = min(m,max(m*0.9,0.01)); SUM = x+m;
+            x = x./SUM;  m = m./SUM;
+            c = x.*cx + m.*cm;
+            s = x.*sx + m.*sm;
+            rho = 1./(m./rhom  + x./rhox);
+        else
+            s = x.*sx + m.*sm;
+        end
 
         X    = rho.*x; Xo = X;  res_X = 0.*X;
         M    = rho.*m; Mo = M;  res_M = 0.*M;
-        RHO  = X+M;
-        C    = M.*cm + X.*cx;
+        C    = rho.*c;
+        S    = rho.*s;
 
-        sm = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;
-        S  = M.*sm + X.*sx;
+        [Tp,~ ] = StoT(Tp,S./rho,Pref+0*Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [T ,si] = StoT(T ,S./rho,       Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        sm = si(:,:,1); sx = si(:,:,2);
 
-       [Tp,~ ] = StoT(Tp,S./rho,Pref+0*Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-       [T ,si] = StoT(T ,S./rho,       Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-       sm = si(:,:,1); sx = si(:,:,2);
- 
-      % Removing melt to get a suitable initial melt fraction
-      m = min(m,0.01); SUM = x+m;
-      x = x./SUM;  m = m./SUM; 
-      
-    % trying to update the cm and cx so they match m and x
-      m_vec = reshape(m, Nx*Nz, 1);
-      x_vec = reshape(x, Nx*Nz, 1);
-      var.cm = max(0, min(1, var.c ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
-      var.cx = max(0, min(1, var.c .* cal.Kx ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
-      cm = reshape(var.cm, Nx, Nz, cal.ncmp);
-      cx = reshape(var.cx, Nx, Nz, cal.ncmp);
-      c = x.*cx + m.*cm;
-      s = x.*sx + m.*sm;
+        % % trying to update the cm and cx so they match m and x
+        % m_vec = reshape(m, Nx*Nz, 1);
+        % x_vec = reshape(x, Nx*Nz, 1);
+        % var.cm = max(0, min(1, var.c ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
+        % var.cx = max(0, min(1, var.c .* cal.Kx ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
+        % cm = reshape(var.cm, Nx, Nz, cal.ncmp);
+        % cx = reshape(var.cx, Nx, Nz, cal.ncmp);
 
-      
-    res  = norm(Pt(:)-Ptii(:),2)./norm(Pt(:),2) ...
-        + norm( T(:)-Ti  (:),2)./norm( T(:),2);
 
-    it = it+1;
+
+        res  = norm(Pt(:)-Ptii(:),2)./norm(Pt(:),2) ...
+            + norm( T(:)-Ti  (:),2)./norm( T(:),2);
+
+        it = it+1;
 
 end
 

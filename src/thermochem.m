@@ -19,7 +19,7 @@ diss_h = 0*diss ./ T;
 bnd_T = zeros(size(S));
 if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./tau_T .* topshape; end
 if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./tau_T .* botshape; end
-bnd_S = RHO.*cP.*bnd_T ./ T;
+bnd_S = rho.*cP.*bnd_T ./ T;
 
 
 % total rate of change
@@ -50,8 +50,8 @@ diff_C = diffus(cm,M.*kc,h,[1,2],BCD) + diffus(cx,X.*kc,h,[1,2],BCD);
 % boundary layers
 bnd_C = zeros(size(C));
 for i = 1:cal.ncmp
-    if ~isnan(cwall(1)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(1,i)-C(:,:,i)).*mu./tau_a .* topshape; end
-    if ~isnan(cwall(2)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(2,i)-C(:,:,i)).*mu./tau_a .* botshape; end
+    if ~isnan(cwall(1)); bnd_C(:,:,i) = bnd_C(:,:,i) + (rho.*cwall(1,i)-C(:,:,i)).*mu./tau_a .* topshape; end
+    if ~isnan(cwall(2)); bnd_C(:,:,i) = bnd_C(:,:,i) + (rho.*cwall(2,i)-C(:,:,i)).*mu./tau_a .* botshape; end
 end
 
 % total rate of change
@@ -76,11 +76,11 @@ advn_rho = advn_X+advn_M;
 
 % phase mass transfer rates
 if reactive
-Gm  = (mq-m).*RHO/max(tau_r,5*dt);
-Gx  = (xq-x).*RHO/max(tau_r,5*dt); 
+Gm  = (mq-m).*rho/max(tau_r,5*dt);
+Gx  = (xq-x).*rho/max(tau_r,5*dt); 
 
-Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,5*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,5*dt);
+Gmc = (cmq.*mq-cm.*m).*rho/max(tau_r,5*dt);
+Gxc = (cxq.*xq-cx.*x).*rho/max(tau_r,5*dt);
 end
 
 % total rates of change
@@ -95,23 +95,20 @@ res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 upd_X = max(-X, - alpha*res_X*dt/a1 + beta*upd_X );
 upd_M = max(-M, - alpha*res_M*dt/a1 + beta*upd_M );
 X     = X + upd_X;
-M     = rho - X; %M + upd_M;
-
-% get dynamically evolving mixture density 
-RHO = X+M;
+M     = rho - X;
 
 %***  update phase fractions and component concentrations
 
 % update phase fractions
-x = X./RHO; 
-m = M./RHO;
+x = X./rho; 
+m = M./rho;
 
 hasx = x >= eps^0.5;
 hasm = m >= eps^0.5;
 
 % update phase entropies
 si = sm;
-s  = (S - X.*Dsx)./RHO;
+s  = (S - X.*Dsx)./rho;
 sm = s;
 sx = s + Dsx;
 upd_s = s-si;

@@ -60,17 +60,12 @@ Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 
 % update lithostatic pressure
-Pti = Pt;
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
     Pl(1,:)     = repmat(mean(rhow(1,:),2).*g0.*h/2,1,Nx) + Ptop;
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
-    Pt          = max(1e7,(1-1).*Pt + 1.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
+    Pt          = max(1e7,(1-alpha).*Pt + alpha.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
 end
-upd_Pt = Pt-Pti;
-
-% update effective constituent sizes
-dm = dm0.*(1-mu ).^0.5;
-dx = dx0.*(1-chi).^0.5;
+Px = Pc(2:end-1,2:end-1)./(1-mu) + Pf(2:end-1,2:end-1);
 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);
@@ -79,13 +74,12 @@ etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(Tref+273.15)));
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);
-kf = permute(cat(3,dx.^2./etax,dm.^2./etam),[3,1,2]);
+kf = permute(cat(3,dx0.^2./etax,dm0.^2./etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
 Mf = permute(repmat(kf,1,1,1,2),[4,1,2,3])./permute(repmat(kf,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-dd = max(mulim,min(1-mulim,permute(cat(3,dx ,dm ),[3,1,2])));
-ff = max(mulim,min(1-mulim,permute(cat(3,chi,mu ),[3,1,2])));
+ff = max(eps^0.5,min(1-eps^0.5,permute(cat(3,chi,mu ),[3,1,2])));
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -93,28 +87,22 @@ Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
 % get momentum flux and transfer coefficients
 thtv = squeeze(prod(Mv.^Xf,2));
 Kv   = ff.*kv.*thtv;
-Cv   = Kv.*(1-ff)./dd.^2;
+Cv   = Kv.*(1-ff)./[dx0;dm0].^2;
 
 % get volume flux and transfer coefficients
 thtf = squeeze(prod(Mf.^Xf,2));
 Kf   = ff.*kf.*thtf;
-Cf   = Kf.*(1-ff)./dd.^2;
+Cf   = Kf.*(1-ff)./[dx0;dm0].^2;
 
 % get effective viscosity
 eta = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
-% get segregation cofficients
-Ksgr   = ff./Cv;
-
-Ksgr_x = squeeze(Ksgr(1,:,:)) + eps^2; if Nx==1; Ksgr_x = Ksgr_x.'; end
-Ksgr_m = squeeze(Ksgr(2,:,:)) + eps^2; if Nx==1; Ksgr_m = Ksgr_m.'; end
-
 % traditional two-phase coefficients
-KD     = max(mulim,mu ).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
-zeta   = max(mulim,chi).^2./squeeze(Cf(1,:,:));  % solid compaction coeff
+KD     = max(eps^0.5,mu ).^2./squeeze(Cv(2,:,:)+eps^2);  % melt segregation coeff
+zeta   = max(eps^0.5,chi).^2./squeeze(Cf(1,:,:)+eps^2);  % solid compaction coeff
 
 %Extracted bounday conditions
-twophs = double(mu(icz,icx)>=mulim);
+twophs = double(mu(icz,icx)>mulim);
 
 
 if ~calibrt % skip the following if called from calibration script
@@ -148,7 +136,9 @@ etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
 weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./(2*bnd_sprw)))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./(2*bnd_sprw))));
 eta    = eta.^(1-weak_axis).*1e17.^weak_axis;
-zeta   = 1./(1./(etamax./max(mulim,mu)) + 1./zeta) + etamin./max(mulim,mu);
+zetamax = 1./(1./(eta./mulim) + 1./(etamax./max(mulim,mu)));
+zetamin = etamin./max(mulim,mu);
+zeta   = 1./(1./zetamax + 1./zeta) + zetamin;
 
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
@@ -159,7 +149,7 @@ Re     = Vel.*D/10./( eta       ./rho    );
 Rum    = abs(wm(1:end-1,2:end-1)+wm(2:end,2:end-1))/2./Vel;
 Pr     = (eta./rho)./((kT+ks.*T)./rho./cP);
 Sc     = (eta./rho)./( kc                 );
-deltam = sqrt(mu .*Ksgr_m.*eta./(1-chi));
+delta  = sqrt(KD.*zeta);
 
 % update stresses
 txx = eta   .* exx;                                                        % x-normal stress
@@ -179,8 +169,8 @@ else
          + exx.*txx + ezz.*tzz ...
          + 2.*(exz(1:end-1,1:end-1)+exz(2:end,1:end-1)+exz(1:end-1,2:end)+exz(2:end,2:end))./4 ...
             .*(txz(1:end-1,1:end-1)+txz(2:end,1:end-1)+txz(1:end-1,2:end)+txz(2:end,2:end))./4 ...
-         +  mu./Ksgr_m .* ((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))./2).^2 ...
-         + chi./Ksgr_x .* ((wx(1:end-1,2:end-1)+wx(2:end,2:end-1))./2).^2;
+         +  KD .* ((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))./2).^2 ...
+         +  KD .* ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))./2).^2;
 end
 
 UDtime = UDtime + toc;

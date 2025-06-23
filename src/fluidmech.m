@@ -341,9 +341,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end); jj1 = ii;
+ii  = MapP(:,end); jj1 = ii;  jj2 = MapP(:,end-1);
  aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
@@ -464,10 +465,8 @@ if ~bnchm
     
     %% update time step
     dtk = (h/2)^2/max([kc(:);(kT(:)+ks(:).*T(:))./rho(:)./cP(:)]); % diffusive time step size  
-    dta =  h/2   /max(abs([Um(:).* mux(:);Wm(:).* muz(:); ...  % advective time step size
-                           Ux(:).*chix(:);Wx(:).*chiz(:)])); %+eps
-    dtc = maxcmp./max(abs([advn_X(:)./rho(:);advn_M(:)./rho(:)]));
-    dt  = min([1.1*dto,min(CFL*[dtk,dta,dtc]),dtmax]);                         % time step size
+    dta =  h/2   /max(abs([Um(:);Wm(:);Ux(:);Wx(:)]));  % advective time step size
+    dt  = min([1.1*dto,min(CFL*[dtk,dta]),dtmax]);                         % time step size
 end
 
 % end

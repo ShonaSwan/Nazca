@@ -287,7 +287,7 @@ a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 res  = 1;  tol = 1e-9;  it = 1;
 
 while res > tol
-    Ptii = Pt; Ti = T; xi = xq; 
+    Pti = Pt; Ti = T; xi = xq; 
 
     % %%%%The melt model %%%%
 
@@ -325,9 +325,11 @@ while res > tol
         EQtime = EQtime + eqtime;
 
         update;
+        Pf(2:end-1,2:end-1) = Pt;
+        Px = Pt;
 
         % Removing melt to get a suitable initial melt fraction
-        if it>5
+        if it>10
             m = min(m,max(m*0.9,0.01)); SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
@@ -337,27 +339,17 @@ while res > tol
             s = x.*sx + m.*sm;
         end
 
-        X    = rho.*x; Xo = X;  res_X = 0.*X;
-        M    = rho.*m; Mo = M;  res_M = 0.*M;
+        X    = rho.*x;
+        M    = rho.*m;  RHO = X+M;
         C    = rho.*c;
         S    = rho.*s;
 
-        [Tp,~ ] = StoT(Tp,S./rho,Pref+0*Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-        [T ,si] = StoT(T ,S./rho,       Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pf(2:end-1,2:end-1),Px)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [T ,si] = StoT(T ,S./rho,cat(3,Pf(2:end-1,2:end-1),Px)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
         sm = si(:,:,1); sx = si(:,:,2);
 
-        % % trying to update the cm and cx so they match m and x
-        % m_vec = reshape(m, Nx*Nz, 1);
-        % x_vec = reshape(x, Nx*Nz, 1);
-        % var.cm = max(0, min(1, var.c ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
-        % var.cx = max(0, min(1, var.c .* cal.Kx ./ (m_vec + x_vec.*cal.Kx + 1e-16)));
-        % cm = reshape(var.cm, Nx, Nz, cal.ncmp);
-        % cx = reshape(var.cx, Nx, Nz, cal.ncmp);
-
-
-
-        res  = norm(Pt(:)-Ptii(:),2)./norm(Pt(:),2) ...
-            + norm( T(:)-Ti  (:),2)./norm( T(:),2);
+        res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
+             + norm( T(:)-Ti  (:),2)./norm( T(:),2);
 
         it = it+1;
 

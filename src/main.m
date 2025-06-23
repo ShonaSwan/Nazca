@@ -43,16 +43,6 @@ while time <= tend && step <= Nt
     %%%% Upsate phase equlibrium 
     phseql; 
 
-        % renormalise sum of phase, component densities to bulk density
-        % X = X./RHO.*rho;  M = M./RHO.*rho;   RHO = X+M;
-        % C = C./sum(C,3).*rho;
-
-        % % fractionation mode for 0D-models
-        % if Nx==1 && Nz==1
-        %     Ptop = Ptop + (T-To).*dPdT;
-        %     fractionate; 
-        % end
-
     % record model history
     history;
 

@@ -55,7 +55,7 @@ calID     =  'MORB_lo';              % phase diagram calibration
 dx0 = 3e-3;
 dm0 = 3e-3;
 aTm = 5e-5;
-aTx = 2e-5;
+aTx = 1e-5;
 bPm = 3e-11;
 bPx = 1e-11;
 
@@ -70,6 +70,7 @@ gamma     =  0;
 dtmax     =  1e6*yr;
 etacntr   =  1e6;
 etamin    =  1e17;
+alpha     =  0.6;
 
 %*****  RUN NAKHLA MODEL  *************************************************
 run('../src/main')

@@ -44,39 +44,4 @@ if iter >= max_iter
     warning('Maximum iterations reached for S to T. Solution may not have converged.');
 end
 
-% Tp = T;
-% 
-% resnorm  = 1;
-% iter     = 0;
-% 
-% while resnorm >= tol && iter < max_iter
-%     iter = iter + 1;
-% 
-%     % Intermediate terms with broadcasting
-%     a = aT .* (Tp-T0);           % 3D: (nz, nx, nphs)
-% 
-%     % Phase-specific entropy s^i
-%     spi = s0 + cP.*log(Tp/T0);
-% 
-%     % Residual f(T)
-%     r = sum(f .* spi, 3) - s;  % 2D: (nz, nx)
-% 
-%     % Derivative ds^i/dT        
-%     dspi_dT = cP./Tp;
-% 
-%     % Derivative f'(T)
-%     dr_dTp = sum(f .* dspi_dT, 3);    % 2D: (nz, nx)
-% 
-%     % Newton update
-%     Tp = Tp - r ./ dr_dTp;
-% 
-%     % residual norm
-%     resnorm = norm(r./dr_dTp)./norm(Tp);
-% 
-% end
-
-% Convergence feedback
-if iter >= max_iter
-    warning('Maximum iterations reached for S to Tp. Solution may not have converged.');
-end
 end

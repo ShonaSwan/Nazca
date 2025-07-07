@@ -344,8 +344,8 @@ while res > tol
         C    = rho.*c;
         S    = rho.*s;
 
-        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pf(2:end-1,2:end-1),Px)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-        [T ,si] = StoT(T ,S./rho,cat(3,Pf(2:end-1,2:end-1),Px)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
         sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
@@ -355,6 +355,7 @@ while res > tol
 
 end
 
+Pto  = Pt;
 To   = T;  
 Tpo  = Tp;
 So   = S;  

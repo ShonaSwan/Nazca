@@ -10,7 +10,7 @@ if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; end
 advn_S = - advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  % melt  advection
          - advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
-diff_S = diffus(T,kT./T,h,[1,2],BCD) + diffus(Tp,ks,h,[1,2],BCD);
+diff_S = diffus(T,kT./T,h,[1,2],BCD);% + diffus(Tp,ks,h,[1,2],BCD);
 
 % heat dissipation (switch this off for now)
 diss_h = 0*diss ./ T;
@@ -33,8 +33,8 @@ upd_S = - alpha*res_S*dt/a1 + beta*upd_S;
 S     = S + upd_S;
 
 % convert entropy S to natural temperature T and potential temperature Tp
-[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pf(2:end-1,2:end-1),Px)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-[T ,si] = StoT(T ,S./RHO,cat(3,Pf(2:end-1,2:end-1),Px)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 

@@ -102,7 +102,7 @@ KD     = max(eps^0.5,mu ).^2./squeeze(Cv(2,:,:)+eps^2);  % melt segregation coef
 zeta   = max(eps^0.5,chi).^2./squeeze(Cf(1,:,:)+eps^2);  % solid compaction coeff
 
 %Extracted bounday conditions
-twophs = double(mu(icz,icx)>mulim);
+twophs = double(mu(icz,icx)>=mulim);
 
 
 if ~calibrt % skip the following if called from calibration script

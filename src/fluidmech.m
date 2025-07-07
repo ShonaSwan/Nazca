@@ -257,9 +257,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,(2:end-1));  jj1 = ii; 
+ii  = MapP(end,(2:end-1));  jj1 = ii; jj2 = MapP((2:end-1),2); 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+% IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
@@ -328,9 +329,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,(2:end-1));  jj1 = ii;  
+ii  = MapP(end,(2:end-1));  jj1 = ii;  jj2 = MapP((2:end-1),2);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
@@ -376,7 +378,7 @@ RR  = [RV; RF; RC];
 %% prepare scaling matrix
 etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
 SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); h./etagh(:); h./etagh(:);]) )));
+SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); 1./etagh(:); 0./etagh(:);]) )));
 
 %% Setting Pc to zero where there is no melt 
 

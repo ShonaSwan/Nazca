@@ -13,17 +13,17 @@ advn_S = - advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  
 diff_S = diffus(T,kT./T,h,[1,2],BCD);% + diffus(Tp,ks,h,[1,2],BCD);
 
 % heat dissipation (switch this off for now)
-diss_h = 0*diss ./ T;
+diss_h = diss ./ T;
 
 % boundary layers
 bnd_T = zeros(size(S));
-if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./tau_T .* topshape; end
-if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./tau_T .* botshape; end
+if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./(tau_T+dt) .* topshape; end
+if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./(tau_T+dt) .* botshape; end
 bnd_S = RHO.*cP.*bnd_T ./ T;
 
 
 % total rate of change
-dSdt  = advn_S + diff_S + diss_h + bnd_S;
+dSdt  = advn_S + diff_S + diss_h + bnd_S +sm.*Gem + sx.*Gex;
 
 % residual of entropy evolution
 res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
@@ -55,7 +55,7 @@ for i = 1:cal.ncmp
 end
 
 % total rate of change
-dCdt = advn_C + diff_C + bnd_C;                                            
+dCdt = advn_C + diff_C + bnd_C + Gemc + Gexc;                                            
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -67,16 +67,21 @@ C     = C + upd_C;
 % convert component density to concentration
 c = C./sum(C,3);
 
+
+%*** update phase equilibrium if full reactive coupling on
+if Rcouple; phseql; end
+
+
 %***  update phase fraction densities
 
 % phase advection rates
 advn_X   = - advect(X,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-advn_rho = advn_X+advn_M;
+drhodt   = advn_X+advn_M+Gem+Gex;
 
 % total rates of change
-dXdt   = advn_X + Gx;
-dMdt   = advn_M + Gm;
+dXdt   = advn_X + Gx + Gex;
+dMdt   = advn_M + Gm + Gem;
 
 % residual of phase density evolution
 res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);
@@ -146,4 +151,4 @@ cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); x(supliq) = 0;
 end
 
 % record timing
-TCtime = TCtime + toc - eqtime;
+TCtime = TCtime + toc - eqtime.*Rcouple;

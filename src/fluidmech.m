@@ -2,24 +2,16 @@ tic;
 
 if ~bnchm && step>0 && ~restart
 
-%***  update mixture mass density (The net compressibility)
-drhodt  = advn_rho;% + (RHO-rho)/dt;
-
 % residual of mixture mass evolution
 res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
 % volume source and background velocity passed to fluid-mechanics solver
 upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
+upd_rho(end,:) = 0;  upd_rho(:,end) = 0;
 VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
 
 UBG     = - 0*mean(VolSrc,'all')./2 .* (L-XXu);
 WBG     = - 0*mean(VolSrc,'all')./2 .* (0-ZZw);
-
-dPchmbdt  = mod_wall*mean(VolSrc,'all') - mod_wall/eta_wall*Pchmb;
-res_Pchmb = (a1*Pchmb-a2*Pchmbo-a3*Pchmboo)/dt - (b1*dPchmbdt + b2*dPchmbdto + b3*dPchmbdtoo);
-
-upd_Pchmb = - alpha*res_Pchmb*dt/a1/3 + beta*upd_Pchmb;
-Pchmb     = Pchmb + upd_Pchmb;
 
 end
 
@@ -99,7 +91,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-rr  = + (rhow(2:end-1,:) - mean(rhow(2:end-1,:),2)) .* g0;
+rr  = + (rhow(2:end-1,:) - rhoxw(2:end-1,:)) .* g0;
 if bnchm; rr = rr + src_W_mms(2:end-1,:); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -118,7 +110,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapU(end,(2:end-1)); jj1 = ii; jj2 = MapU(end-1,(2:end-1));
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
@@ -250,28 +242,28 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,(2:end-1));  jj1 = ii; jj2 = MapP(2,(2:end-1));
+ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,(2:end-1));  jj1 = ii; jj2 = MapP((2:end-1),2); 
+ii  = MapP(end,:);  jj1 = ii; jj2 = MapP(end-1,:); 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 % IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
-ii  = MapP(:,1);  jj1 = ii;  jj2 = MapP(:,2); 
+ii  = MapP((2:end-1),1);  jj1 = ii;  jj2 = MapP((2:end-1),2); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end); jj1 = ii;  jj2 = MapP(:,end-1); 
+ii  = MapP((2:end-1),end); jj1 = ii;  jj2 = MapP((2:end-1),end-1); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -285,7 +277,7 @@ jj3 = MapP(2:end-1,1:end-2); % Left
 jj4 = MapP(2:end-1,3:end-0); % Right
 
 % Coefficients multiplying darcy flow
-
+% KD  = KD.*twophs(2:end-1,2:end-1);
 KD1 = (KD(icz(1:end-2), :) .* KD(icz(2:end-1), :)).^0.5; % above
 KD2 = (KD(icz(2:end-1), :) .* KD(icz(3:end-0), :)).^0.5; % below
 KD3 = (KD(: ,icx(1:end-2)) .* KD(:, icx(2:end-1))).^0.5; % left
@@ -302,9 +294,9 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -KD4(:) / h^2];  % Right
 
 ii = MapP(2:end-1, 2:end-1);
 
-KD_rho_g     = KD .* (rhom - mean(rho,2)) * g0;
+KD_rho_g     = KD .* (rhom - rhox) * g0;
 dKD_rho_g_dz = ddz((KD_rho_g([1 1:end],:)+KD_rho_g([1:end end],:))/2,h);
-rr  = -dKD_rho_g_dz;
+rr  = -dKD_rho_g_dz + VolSrc;
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
 
@@ -322,29 +314,29 @@ AAR = [];       % forcing entries for R
 % Bounday points
 
 % top boundary
-ii  = MapP(1,(2:end-1));  jj1 = ii; jj2 = MapP(2,(2:end-1));
+ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,(2:end-1));  jj1 = ii;  jj2 = MapP((2:end-1),2);
+ii  = MapP(end,:);  jj1 = ii;  jj2 = MapP(end-1,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
-ii  = MapP(:,1);  jj1 = ii;  jj2 = MapP(:,2);
+ii  = MapP((2:end-1),1);  jj1 = ii;  jj2 = MapP((2:end-1),2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end); jj1 = ii;  jj2 = MapP(:,end-1);
- aa  = zeros(size(ii));
+ii  = MapP((2:end-1),end); jj1 = ii;  jj2 = MapP((2:end-1),end-1);
+aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
@@ -365,6 +357,14 @@ AAR = [AAR; rr(:)];
 KC = sparse(IIL,JJL,AAL,NP,NP);
 RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
+% % set P = 0 in fixed point
+% nzp = round((Nz+2)/2);
+% nxp = round((Nx+2)/2);
+% np0 = MapP(nzp,nxp);
+% KF(np0,:  ) = 0;
+% KF(np0,np0) = 1;
+% DD(np0,:  ) = 0;
+% RF(np0    ) = 0;
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 OO = zeros(NP, NP);
@@ -376,9 +376,9 @@ LL  = [ KV   GG  GG  ; ...
 RR  = [RV; RF; RC];
 
 %% prepare scaling matrix
-etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
+scl = ones(Nz+2,Nx+2);  scl(2:end-1,2:end-1) = 1./eta;
 SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); 1./etagh(:); 0./etagh(:);]) )));
+SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); scl(:); 0.*scl(:);]) )));
 
 %% Setting Pc to zero where there is no melt 
 

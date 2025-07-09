@@ -37,6 +37,8 @@ rhox   = rhox0 .* (1 - aTx.*(T-Tref) + bPx.*(Pt-Pref));
 rho0   = 1./(m./rhom0 + x./rhox0);
 rho    = 1./(m./rhom + x./rhox);
 
+rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;
+
 rhow  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhou  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 
@@ -58,6 +60,8 @@ cP = mu.*cPm + chi.*cPx;
 RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
 Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
+%Extracted bounday conditions
+twophs = double(mu(icz,icx)>=mulim);
 
 % update lithostatic pressure
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
@@ -74,9 +78,9 @@ etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(Tref+273.15)));
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);
-kf = permute(cat(3,dx0.^2./etax,dm0.^2./etam),[3,1,2]);
+% kf = permute(cat(3,dx0.^2./etax,dm0.^2./etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
-Mf = permute(repmat(kf,1,1,1,2),[4,1,2,3])./permute(repmat(kf,1,1,1,2),[1,4,2,3]);
+% Mf = permute(repmat(kf,1,1,1,2),[4,1,2,3])./permute(repmat(kf,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
 ff = max(eps^0.5,min(1-eps^0.5,permute(cat(3,chi,mu ),[3,1,2])));
@@ -90,19 +94,24 @@ Kv   = ff.*kv.*thtv;
 Cv   = Kv./[dx0; dm0].^2;
 
 % get volume flux and transfer coefficients
-thtf = squeeze(prod(Mf.^Xf,2));
-Kf   = ff.*kf.*thtf;
-Cf   = Kf./[dx0; dm0].^2;
+% thtf = squeeze(prod(Mf.^Xf,2));
+% Kf   = ff.*kf.*thtf;
+% Cf   = Kf./[dx0; dm0].^2;
 
 % get effective viscosity
-eta = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
+eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
+
+% get yield viscosity
+etay   = 1e8./(eII + eps^1.25) + etamin;
+eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
 
 % traditional two-phase coefficients
-KD     = max(eps^0.5,mu ).^2./squeeze(Cv(2,:,:)+eps^2);  % melt segregation coeff
-zeta   = max(eps^0.5,chi).^2./squeeze(Cf(1,:,:)+eps^2);  % solid compaction coeff
+KD     = (mu+mulim).^2./squeeze(Cv(2,:,:)+eps);  % melt segregation coeff
+zeta0  = eta./(mu+mulim);  % solid compaction coeff
 
-%Extracted bounday conditions
-twophs = double(mu(icz,icx)>=mulim);
+% get yield viscosity
+zetay  = (1e7+(1-twophs(2:end-1,2:end-1)).*Pt)./(max(0,Div_V)+eps^1.25) + etamin./(mu+mulim);
+zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 
 if ~calibrt % skip the following if called from calibration script
@@ -134,10 +143,8 @@ kc  = kmin;                                                     % regularised co
 
 etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
-weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./(2*bnd_sprw)))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./(2*bnd_sprw))));
-eta    = eta.^(1-weak_axis).*1e17.^weak_axis;
-zetamax = 1./(1./(eta./mulim) + 1./(etamax./max(mulim,mu)));
-zetamin = etamin./max(mulim,mu);
+zetamax = 1./(1./(eta./mulim) + 1./(etamax./(mu+mulim)));
+zetamin = etamin./(mu+mulim);
 zeta   = 1./(1./zetamax + 1./zeta) + zetamin;
 
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...

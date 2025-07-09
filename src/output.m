@@ -206,14 +206,16 @@ else % create 2D plots
     end 
     colormap(ocean);
     fh = axb + 2*axh + 1*avs + axt;
-    fw = axl + 2*axw + 1*ahs + axr;
+    fw = axl + 3*axw + 2*ahs + axr;
     set(fh1,UN{:},'Position',[1 1 fw fh]);
     set(fh1,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
     set(fh1,'Color','w','InvertHardcopy','off','Resize','off');
     ax(11) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+1*axh+1*avs axw axh]);
     ax(12) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+1*axh+1*avs axw axh]);
-    ax(13) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+0*axh+0*avs axw axh]);
-    ax(14) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+0*axh+0*avs axw axh]);
+    ax(13) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+1*axh+1*avs axw axh]);
+    ax(14) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+0*axh+0*avs axw axh]);
+    ax(15) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+0*axh+0*avs axw axh]);
+    ax(16) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
     if ~exist('fh2','var'); fh2 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh2); clf;
@@ -313,7 +315,7 @@ else % create 2D plots
     colormap(ocean);
     fh = axb + 3*axh + 2*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
-    set(fh8,UN{:},'Position',[11 11 fw fh]);
+    set(fh8,UN{:},'Position',[15 15 fw fh]);
     set(fh8,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
     set(fh8,'Color','w','InvertHardcopy','off','Resize','off');
     ax(81) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+2*axh+2*avs axw axh]);
@@ -329,18 +331,24 @@ else % create 2D plots
     % plot velocity-pressure solution in Fig. 1
     set(0,'CurrentFigure',fh1)
     set(fh1,'CurrentAxes',ax(11));
-    imagesc(Xsc,Zsc,-W(:      ,2:end-1)./SpeedScale); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,-W./SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$W$ [',SpeedUnits,']'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh1,'CurrentAxes',ax(12));
-    imagesc(Xsc,Zsc, U(2:end-1,:      )./SpeedScale); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc, U./SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$U$ [',SpeedUnits,']'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh1,'CurrentAxes',ax(13));
-    imagesc(Xsc,Zsc, Pf/1e6); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P_f$ [MPa]'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
+    imagesc(Xsc,Zsc, (Pf+Pc)./1e6); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P$ [MPa]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh1,'CurrentAxes',ax(14));
-    imagesc(Xsc,Zsc, Pc/1e6); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P_c$ [MPa]'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
+    imagesc(Xsc,Zsc,-qDz./SpeedScale); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{D,z}$ [',SpeedUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    set(fh1,'CurrentAxes',ax(15));
+    imagesc(Xsc,Zsc,-qDx./SpeedScale); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{D,x}$ [',SpeedUnits,']'],TX{:},FS{:});  xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
+    set(fh1,'CurrentAxes',ax(16));
+    imagesc(Xsc,Zsc, max(-1e8,min(1e8,Pc))/1e6); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P_c$ [MPa]'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
 
     % plot temperature and composition in Fig. 2
     set(0,'CurrentFigure',fh2)
@@ -350,47 +358,47 @@ else % create 2D plots
     set(fh2,'CurrentAxes',ax(22));
     imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Si)./sum(c_oxd(:,:,1:end-1),3).*100)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['SiO$_2$ [wt\%]'],TX{:},FS{:}); set(gca,'YTickLabel',[]); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
-    text(0.5,1.3,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh2,'CurrentAxes',ax(23));
     if any(c(:,:,end),'all')
         imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.H))); axis ij equal tight; box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['H$_2$O [wt\%]'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
     else
-        imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Fe)./sum(c_oxd(:,:,1:end-1),3).*100)); axis ij equal tight; box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['FeO [wt\%]'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
+        imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Mg)./sum(c_oxd(:,:,1:end-1),3).*100)); axis ij equal tight; box on; cb = colorbar;
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['MgO [wt\%]'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
     end
 
     % plot phase fractions and reaction rates in Fig. 3
     set(0,'CurrentFigure',fh3)
     set(fh3,'CurrentAxes',ax(31));
-    imagesc(Xsc,Zsc,chi.*100.*(chi>1e-9) ); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\chi$ [vol\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    imagesc(Xsc,Zsc,m.*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$m$ [wt\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh3,'CurrentAxes',ax(32));
-    imagesc(Xsc,Zsc,mu.*100.*(mu>1e-9)); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\phi$ [vol\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
+    imagesc(Xsc,Zsc,Div_V); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\nabla \cdot \mathbf{v}$ [1/s]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh3,'CurrentAxes',ax(33));
-    imagesc(Xsc,Zsc,Gx./rho*hr*100.*(chi>1e-9)); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_x/\bar{\rho}$ [wt\%/hr]'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
+    imagesc(Xsc,Zsc,Gm./rho*TimeScale*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_m/\bar{\rho}$ [wt\%/',TimeUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     set(fh3,'CurrentAxes',ax(34));
-    imagesc(Xsc,Zsc,Gm./rho*hr*100.*(mu>1e-9)); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_m/\bar{\rho}$ [wt\%/hr]'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
+    imagesc(Xsc,Zsc,(Gem+Gex)./rho*TimeScale*100); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_e/\bar{\rho}$ [wt\%/',TimeUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
 
     % plot density, rheology, and segregation speeds in Fig. 4
     set(0,'CurrentFigure',fh4)
     set(fh4,'CurrentAxes',ax(41));
-    imagesc(Xsc,Zsc,delta); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['log$_{10}$ $\delta_c$ [m]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    imagesc(Xsc,Zsc,log10(max(1e-18,KD))); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['log$_{10}$ $K_D$ [m$^2$/Pas]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh4,'CurrentAxes',ax(42));
     imagesc(Xsc,Zsc,log10(eta)); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\bar{\eta}$ [log$_{10}$ Pas]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\eta$ [log$_{10}$ Pas]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh4,'CurrentAxes',ax(43));
-    imagesc(Xsc,Zsc,-qDz(:,2:end-1).*1e3/SpeedScale); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{D,z}$ [m',SpeedUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
+    imagesc(Xsc,Zsc,max(h,delta)./SpaceScale); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\delta$ [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh4,'CurrentAxes',ax(44));
-    imagesc(Xsc,Zsc,-qDx(2:end-1,:).*1e3/SpeedScale.*(any(mu(:)>1e-9))); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{D,x}$ [m',SpeedUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
+    imagesc(Xsc,Zsc,log10(zeta)); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\zeta$ [log$_{10}$ Pas]'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
 
     % plot pseudo-component composition in Fig. 5
     set(0,'CurrentFigure',fh5)
@@ -434,7 +442,7 @@ else % create 2D plots
     set(gca,'XTickLabel',[]);
     set(fh6,'CurrentAxes',ax(62));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(0.5,1.3,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh6,'CurrentAxes',ax(63));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh6,'CurrentAxes',ax(64));
@@ -600,7 +608,9 @@ if plot_cv
     else; set(0, 'CurrentFigure', fh13); clf;
     end 
     subplot(3,1,1);
-    plot(hist.time/TimeScale,hist.DM./hist.sumM,'k-',LW{:}); hold on; axis tight; box on;
+    plot(hist.time/TimeScale,hist.DM./hist.sumM,'k--',LW{:}); hold on; axis tight; box on;
+    plot(hist.time/TimeScale,hist.DX./hist.sumM,'k-.',LW{:});
+    plot(hist.time/TimeScale,hist.DB./hist.sumM,'k-',LW{:});
     ylabel('consv. $M$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
     subplot(3,1,2);
     plot(hist.time/TimeScale,hist.DS./hist.sumS,'k-',LW{:}); hold on; axis tight; box on;
@@ -614,7 +624,9 @@ if plot_cv
     else; set(0, 'CurrentFigure', fh14); clf;
     end 
     subplot(3,1,1);
-    plot(hist.time/TimeScale,hist.EM,'k-',LW{:}); hold on; axis tight; box on;
+    plot(hist.time/TimeScale,hist.EM,'k--',LW{:}); hold on; axis tight; box on;
+    plot(hist.time/TimeScale,hist.EX,'k-.',LW{:});
+    plot(hist.time/TimeScale,hist.EB,'k-',LW{:});
     ylabel('error $M$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
     subplot(3,1,2);
     plot(hist.time/TimeScale,hist.ES,'k-',LW{:}); hold on; axis tight; box on;

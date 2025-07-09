@@ -113,8 +113,7 @@ if ~any(bnd_h)
             topshape = exp( ( -ZZ)/bnd_w);
             botshape = exp(-(D-ZZ)/bnd_w);
         case 5 % mid ocean ridge set up
-            topshape = exp( ( -ZZ)/bnd_w);
-            botshape = exp(-(D-ZZ)/bnd_w);
+            topshape = exp( ( -ZZ+h/2)/bnd_w);
     end
 end
 
@@ -190,7 +189,7 @@ switch init_mode
         trc = trci;
 
     case 'MOR'
-        sprtime = XX./sprate;
+        sprtime = XX./sprate + 1e5*yr;
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
 
         c = zeros(Nz,Nx,cal.ncmp);
@@ -204,7 +203,7 @@ switch init_mode
 end
 
 %Defining the top bounday spreading rate 's' shape function
-bnd_spr = 1./(1+exp(-(Xu(2:end-1) - bnd_sprc)./bnd_sprw)).*sprate;
+bnd_spr = (1-exp(-Xu(2:end-1)./bnd_sprw)) .* sprate;
 
 % apply initial boundary layers
 if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
@@ -239,8 +238,8 @@ Div_V  = 0.*Tp;  advn_rho = 0.*Tp;  advn_X = 0.*Tp; advn_M = 0.*Tp;
 drhodt = 0.*Tp;  drhodto = drhodt; 
 exx    = 0.*Tp;  ezz = 0.*Tp;  exz = zeros(Nz-1,Nx-1);  eII = 0.*Tp;
 txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz-1,Nx-1);  tII = 0.*Tp;
-eta    = ones(Nz,Nx);
-etamax = min(eta(:)) .* etacntr;
+eta    = 1e21.*ones(Nz,Nx);
+zeta   = 100.*eta;
 VolSrc = 0.*Tp;
 kW     = 0.*Tp;
 Tref   = T1;%min(cal.T0)+273.15;
@@ -305,20 +304,20 @@ while res > tol
         [var,cal] = leappart(var,cal,'E');
 
 
-         Tsol   = reshape(cal.Tsol,Nz,Nx);
-         Tliq   = reshape(cal.Tliq,Nz,Nx);
-         H2Osat = reshape(cal.H2Osat,Nz,Nx);
-    
-         mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);
-         xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);
-         mq = mq./(mq+xq);
-         xq = xq./(mq+xq);
-         x  = xq;  m = mq;
+        Tsol   = reshape(cal.Tsol,Nz,Nx);
+        Tliq   = reshape(cal.Tliq,Nz,Nx);
+        H2Osat = reshape(cal.H2Osat,Nz,Nx);
+
+        mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);
+        xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);
+        mq = mq./(mq+xq);
+        xq = xq./(mq+xq);
+        x  = xq;  m = mq;
 
         cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
         cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
         cm  = cmq; cx = cxq;
-    
+
         sm = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;
 
         eqtime = toc(eqtime);
@@ -329,8 +328,9 @@ while res > tol
         Px = Pt;
 
         % Removing melt to get a suitable initial melt fraction
-        if it>10
-            m = min(m,max(m*0.9,0.01)); SUM = x+m;
+        if it>10 && any(m(:)>minit)
+            m = m*0.9;
+            SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
             s = x.*sx + m.*sm;
@@ -420,7 +420,10 @@ end
 TRCo = TRC;
 
 % initialise phase change rates
-Gx  = 0.*x; Gm  = 0.*m;
+Gx  = 0.*x; Gm  = 0.*m; 
+Gem = 0.*m; Gex = 0.*x; 
+Gemc = 0.*c; Gexc = 0.*c;
+Gemt = 0.*trc; Gext = 0.*trc;
 
 % initialise auxiliary variables
 dSdt   = 0.*T;  dSdto  = dSdt; diss_h = 0.*T;
@@ -451,9 +454,12 @@ step    = 0;
 time    = 0;
 iter    = 0;
 hist    = [];
-dsumMdt = 0; dsumMdto = 0;
-dsumSdt = 0; dsumSdto = 0;
-dsumCdt = 0; dsumCdto = 0;
+dsumSdto = 0;  dsumSdt = 0;
+dsumBdto = 0;  dsumBdt = 0;
+dsumMdto = 0;  dsumMdt = 0;
+dsumXdto = 0;  dsumXdt = 0;
+dsumCdto = 0;  dsumCdt = 0;
+dsumTdto = 0;  dsumTdt = 0;
 
 % overwrite fields from file if restarting run
 if restart

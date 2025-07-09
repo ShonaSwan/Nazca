@@ -10,7 +10,7 @@ if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; end
 advn_S = - advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  % melt  advection
          - advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
-diff_S = diffus(T,kT./T,h,[1,2],BCD) + diffus(Tp,ks,h,[1,2],BCD);
+diff_S = diffus(T,kT./T,h,[1,2],BCD);% + diffus(Tp,ks,h,[1,2],BCD);
 
 % heat dissipation (switch this off for now)
 diss_h = 0*diss ./ T;
@@ -33,8 +33,8 @@ upd_S = - alpha*res_S*dt/a1 + beta*upd_S;
 S     = S + upd_S;
 
 % convert entropy S to natural temperature T and potential temperature Tp
-[Tp,~ ] = StoT(Tp,S./rho,Pref+0*Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-[T ,si] = StoT(T ,S./rho,       Pt,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 
@@ -74,15 +74,6 @@ advn_X   = - advect(X,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 advn_rho = advn_X+advn_M;
 
-% phase mass transfer rates
-if reactive
-Gm  = (mq-m).*RHO/max(tau_r,5*dt);
-Gx  = (xq-x).*RHO/max(tau_r,5*dt); 
-
-Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,5*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,5*dt);
-end
-
 % total rates of change
 dXdt   = advn_X + Gx;
 dMdt   = advn_M + Gm;
@@ -95,41 +86,25 @@ res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 upd_X = max(-X, - alpha*res_X*dt/a1 + beta*upd_X );
 upd_M = max(-M, - alpha*res_M*dt/a1 + beta*upd_M );
 X     = X + upd_X;
-M     = rho - X; %M + upd_M;
-
-% get dynamically evolving mixture density 
-RHO = X+M;
+M     = M + upd_M;
 
 %***  update phase fractions and component concentrations
 
 % update phase fractions
+RHO = X + M;
 x = X./RHO; 
 m = M./RHO;
 
 hasx = x >= eps^0.5;
 hasm = m >= eps^0.5;
 
-% update phase entropies
-si = sm;
-s  = (S - X.*Dsx)./RHO;
-sm = s;
-sx = s + Dsx;
-upd_s = s-si;
-
-% update temperature
-upd_Tp = (upd_s.*rho             ) .*T./RhoCp;
-upd_T  = (upd_s.*rho + aT.*upd_Pt) .*T./RhoCp;
-
-Tp     = Tp + upd_Tp;
-T      = T  + upd_T;
-
 if reactive
 
 % update major component phase composition
 Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
 %Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
-subsol  = m<=1e-9 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
-supliq  = x<=1e-9 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
+subsol  = m<=eps^0.5 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
+supliq  = x<=eps^0.5 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
 subsolc = repmat(subsol,1,1,cal.ncmp);
 supliqc = repmat(supliq,1,1,cal.ncmp);
 rnorm   = 1;  tol  = atol*10;
@@ -139,10 +114,9 @@ cm = cmq;  cx = cxq;
 while rnorm>tol && it<mxit
 
     Kx = cx./(cm+eps);
-    %Kf = cf./(cm+eps);
 
-    cmK = c    ./(m + x.*Kx + eps); % + f.*Kf
-    cxK = c.*Kx./(m + x.*Kx + eps); % + f.*Kf 
+    cmK = c    ./(m + x.*Kx + eps); 
+    cxK = c.*Kx./(m + x.*Kx + eps); 
 
     res_cm = cm - cmK./sum(cmK,3);
     res_cx = cx - cxK./sum(cxK,3);
@@ -166,8 +140,8 @@ if (it==mxit && rnorm>tol)
 end
 
 % fix subsolidus and superliquidus conditions
-cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); m(subsol) = 0; %f(subsol) = fq(subsol);
-cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); x(supliq) = 0; %f(supliq) = fq(supliq);
+cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); m(subsol) = 0;
+cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); x(supliq) = 0;
 
 end
 

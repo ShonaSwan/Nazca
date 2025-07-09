@@ -257,9 +257,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,(2:end-1));  jj1 = ii; 
+ii  = MapP(end,(2:end-1));  jj1 = ii; jj2 = MapP((2:end-1),2); 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+% IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
@@ -270,9 +271,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end); jj1 = ii; 
+ii  = MapP(:,end); jj1 = ii;  jj2 = MapP(:,end-1); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % Internal Points
@@ -327,9 +329,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapP(end,(2:end-1));  jj1 = ii;  
+ii  = MapP(end,(2:end-1));  jj1 = ii;  jj2 = MapP((2:end-1),2);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
@@ -340,9 +343,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapP(:,end); jj1 = ii;
+ii  = MapP(:,end); jj1 = ii;  jj2 = MapP(:,end-1);
  aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
@@ -371,6 +375,11 @@ LL  = [ KV   GG  GG  ; ...
 
 RR  = [RV; RF; RC];
 
+%% prepare scaling matrix
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
+SCL = (abs(diag(LL))).^0.5;
+SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); 1./etagh(:); 0./etagh(:);]) )));
+
 %% Setting Pc to zero where there is no melt 
 
 bc_ind = find(twophs(:)<=0.0) + NW+NU+NP;
@@ -387,12 +396,9 @@ TMP             =  LL(:,BC.ind);
 RR              =  RR - TMP*BC.val;
 LL              =  LL(BC.free,BC.free);
 RR              =  RR(BC.free);
+SCL             =  SCL(BC.free,BC.free);
 
 %% Scaling  
-etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
-SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); h./etagh(:); zeros(length(SCL)-NW-NU-NP,1)]) )));
-
 LL  = SCL*LL*SCL;
 RR  = SCL*RR;
 
@@ -461,10 +467,8 @@ if ~bnchm
     
     %% update time step
     dtk = (h/2)^2/max([kc(:);(kT(:)+ks(:).*T(:))./rho(:)./cP(:)]); % diffusive time step size  
-    dta =  h/2   /max(abs([Um(:).* mux(:);Wm(:).* muz(:); ...  % advective time step size
-                           Ux(:).*chix(:);Wx(:).*chiz(:)])); %+eps
-    dtc = maxcmp./max(abs([advn_X(:)./rho(:);advn_M(:)./rho(:)]));
-    dt  = min([1.1*dto,min(CFL*[dtk,dta,dtc]),dtmax]);                         % time step size
+    dta =  h/2   /max(abs([Um(:);Wm(:);Ux(:);Wx(:)]));  % advective time step size
+    dt  = min([1.1*dto,min(CFL*[dtk,dta]),dtmax]);                         % time step size
 end
 
 % end

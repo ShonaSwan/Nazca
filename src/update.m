@@ -60,13 +60,12 @@ Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 
 % update lithostatic pressure
-Pti = Pt;
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
     Pl(1,:)     = repmat(mean(rhow(1,:),2).*g0.*h/2,1,Nx) + Ptop;
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
-    Pt          = max(1e7,(1-1).*Pt + 1.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
+    Pt          = max(1e7,(1-alpha).*Pt + alpha.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
 end
-upd_Pt = Pt-Pti;
+Px = Pc(2:end-1,2:end-1)./(1-mu) + Pf(2:end-1,2:end-1);
 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);
@@ -98,12 +97,9 @@ Cf   = Kf./[dx0; dm0].^2;
 % get effective viscosity
 eta = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
-% get segregation cofficients
-Ksgr   = ff./Cv;
-
 % traditional two-phase coefficients
-KD     = max(mulim,mu ).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
-zeta   = max(mulim,chi).^2./squeeze(Cf(1,:,:));  % solid compaction coeff
+KD     = max(eps^0.5,mu ).^2./squeeze(Cv(2,:,:)+eps^2);  % melt segregation coeff
+zeta   = max(eps^0.5,chi).^2./squeeze(Cf(1,:,:)+eps^2);  % solid compaction coeff
 
 %Extracted bounday conditions
 twophs = double(mu(icz,icx)>=mulim);
@@ -140,7 +136,9 @@ etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
 weak_axis = (1 - 1./(1+exp(-(XX - bnd_sprc)./(2*bnd_sprw)))) .* (1 - 1./(1+exp(-(ZZ - bnd_sprc)./(2*bnd_sprw))));
 eta    = eta.^(1-weak_axis).*1e17.^weak_axis;
-zeta   = 1./(1./(etamax./max(eps^0.5,mu)) + 1./zeta) + etamin./max(eps^0.5,mu);
+zetamax = 1./(1./(eta./mulim) + 1./(etamax./max(mulim,mu)));
+zetamin = etamin./max(mulim,mu);
+zeta   = 1./(1./zetamax + 1./zeta) + zetamin;
 
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
@@ -151,6 +149,7 @@ Re     = Vel.*D/10./( eta       ./rho    );
 Rum    = abs(wm(1:end-1,2:end-1)+wm(2:end,2:end-1))/2./Vel;
 Pr     = (eta./rho)./((kT+ks.*T)./rho./cP);
 Sc     = (eta./rho)./( kc                 );
+delta  = sqrt(KD.*zeta);
 
 % update stresses
 txx = eta   .* exx;                                                        % x-normal stress
@@ -170,7 +169,8 @@ else
          + exx.*txx + ezz.*tzz ...
          + 2.*(exz(1:end-1,1:end-1)+exz(2:end,1:end-1)+exz(1:end-1,2:end)+exz(2:end,2:end))./4 ...
             .*(txz(1:end-1,1:end-1)+txz(2:end,1:end-1)+txz(1:end-1,2:end)+txz(2:end,2:end))./4 ...
-         +  KD .* ((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))./2).^2;;
+         +  KD .* ((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))./2).^2 ...
+         +  KD .* ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))./2).^2;
 end
 
 UDtime = UDtime + toc;

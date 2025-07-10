@@ -95,7 +95,7 @@ Cv   = Kv./dx0.^2;
 eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
 % get yield viscosity
-etay   = 1e8./(eII + eps^1.25) + etamin;
+etay   = tyield./(eII + eps^1.25) + etamin;
 eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
 
 % traditional two-phase coefficients
@@ -103,7 +103,7 @@ KD     = (mu+eps).^2./squeeze(Cv(2,:,:)+eps);  % melt segregation coeff
 zeta0  = eta./(mu+mulim);  % solid compaction coeff
 
 % get yield viscosity
-zetay  = (1e7+(1-twophs(2:end-1,2:end-1)).*Pt)./(max(0,Div_V)+eps^1.25) + etamin./(mu+mulim);
+zetay  = (pyield+(1-twophs(2:end-1,2:end-1)).*Pt)./(max(0,Div_V)+eps^1.25) + etamin./(mu+mulim);
 zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % extract potential density

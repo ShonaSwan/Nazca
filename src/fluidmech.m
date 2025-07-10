@@ -110,7 +110,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapU(end,(2:end-1)); jj1 = ii; jj2 = MapU(end-1,(2:end-1));
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
@@ -277,7 +277,6 @@ jj3 = MapP(2:end-1,1:end-2); % Left
 jj4 = MapP(2:end-1,3:end-0); % Right
 
 % Coefficients multiplying darcy flow
-% KD  = KD.*twophs(2:end-1,2:end-1);
 KD1 = (KD(icz(1:end-2), :) .* KD(icz(2:end-1), :)).^0.5; % above
 KD2 = (KD(icz(2:end-1), :) .* KD(icz(3:end-0), :)).^0.5; % below
 KD3 = (KD(: ,icx(1:end-2)) .* KD(:, icx(2:end-1))).^0.5; % left
@@ -357,28 +356,41 @@ AAR = [AAR; rr(:)];
 KC = sparse(IIL,JJL,AAL,NP,NP);
 RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
-% % set P = 0 in fixed point
-% nzp = round((Nz+2)/2);
-% nxp = round((Nx+2)/2);
-% np0 = MapP(nzp,nxp);
-% KF(np0,:  ) = 0;
-% KF(np0,np0) = 1;
-% DD(np0,:  ) = 0;
-% RF(np0    ) = 0;
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 OO = zeros(NP, NP);
 
-LL  = [ KV   GG  GG  ; ...
-        DD   KF  OO  ; ...
-        DD   OO  KC  ];
+% Sizes of blocks
+[n1, m1] = size(KV);
+[n2, m2] = size(KF);
+[n3, m3] = size(KC);
+
+% Total size
+Ntot = n1 + n2 + n3;
+Mtot = m1 + m2 + m3;
+
+% Preallocate LL as sparse
+if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(GG) + nnz(KF) + nnz(KC) + nnz(DD);  end
+LL = spalloc(Ntot, Mtot, total_nnz);
+
+% Assign blocks
+LL(1:n1,           1:m1         ) = KV;
+LL(1:n1,     m1+1:m1+m2         ) = GG;
+LL(1:n1, m1+m2+1:end            ) = GG;
+
+LL(n1+1:n1+n2,     1:m1         ) = DD;
+LL(n1+1:n1+n2, m1+1:m1+m2       ) = KF;
+
+LL(n1+n2+1:end,    1:m1         ) = DD;
+LL(n1+n2+1:end, m1+m2+1:end     ) = KC;
 
 RR  = [RV; RF; RC];
 
+
 %% prepare scaling matrix
-scl = ones(Nz+2,Nx+2);  scl(2:end-1,2:end-1) = 1./eta;
-SCL = (abs(diag(LL))).^0.5;
-SCL = diag(sparse( 1./(SCL + sqrt([zeros(NU+NW,1); scl(:); 0.*scl(:);]) )));
+
+SCL = spdiags(1 ./ max(abs(LL), [], 2) , 0, size(LL,1), size(LL,1));
+
 
 %% Setting Pc to zero where there is no melt 
 
@@ -398,22 +410,24 @@ LL              =  LL(BC.free,BC.free);
 RR              =  RR(BC.free);
 SCL             =  SCL(BC.free,BC.free);
 
-%% Scaling  
-LL  = SCL*LL*SCL;
-RR  = SCL*RR;
+
+%% Scaling coefficient matrix
+
+LL = SCL * LL;
+RR = SCL * RR;
 
 %Residual 
 FF  = LL*SOL(BC.free) - RR;
-FF  = SCL*FF;
 
 
+%% Solve linear system of equations for W, U, Pf, Pc
 
-%% Solve linear system of equations for vx, vz, P, Pc
+p     = colamd(LL);       % or symrcm(A) for symmetric matrices
+xx(p) = LL(:,p) \ RR;     % solve permuted system
 
-%SOL = SCL*(LL\RR);  % update solution
-
-SOL(BC.free) = SCL*(LL\RR);                                                      % update solution
-SOL(BC.ind ) = BC.val;                                                       % fill in boundary conditions  
+SOL(BC.free) = xx.';      % update solution
+SOL(BC.ind ) = BC.val;    % fill in boundary conditions  
+clear xx;
 
 % map solution vector to 2D arrays
 W  = full(reshape(SOL(MapW(:))           ,Nz+1,Nx+2));  % matrix z-velocity
@@ -421,33 +435,18 @@ U  = full(reshape(SOL(MapU(:))           ,Nz+2,Nx+1));  % matrix x-velocity
 Pf = full(reshape(SOL(MapP(:)+(NW+NU   )),Nz+2,Nx+2));  % matrix dynamic pressure
 Pc = full(reshape(SOL(MapP(:)+(NW+NU+NP)),Nz+2,Nx+2));  % matrix compaction pressure
 
-% upd_W = - alpha*full(reshape(SOL(MapW(:))        ,Nz+1,Nx+2)) + beta*upd_W;  % matrix z-velocity
-% upd_U = - alpha*full(reshape(SOL(MapU(:))        ,Nz+2,Nx+1)) + beta*upd_U;  % matrix x-velocity
-% upd_P = - alpha*full(reshape(SOL(MapP(:)+(NW+NU)),Nz+2,Nx+2)) + beta*upd_P;  % matrix dynamic pressure
-% 
-% W = W + upd_W;
-% U = U + upd_U;
-% P = P + upd_P;
-
-% end
-
-
 
 if ~bnchm
 
- 
     % z-Darcy flux
-    
     qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhow(2:end-1,:),2)).*g0); % melt segregation speed
     qDz([1,end],:) = min(1,1-[top;bot]).*qDz([2,end-1],:);
     qDz(:,[1 end]) = qDz(:,[2 end-1]);
 
+    % x-Darcy flux
     qDx(2:end-1,2:end-1) = - (KD(:,1:end-1).*KD(:,2:end)).^0.5 .*(ddx(Pf(2:end-1,2:end-1),h));
     qDx(:,[1,end]) = qDx(:,[2,end-1]); % Simple extrapolation for left/right, adjust if needed
     qDx([1 end],:) = qDx([2 end-1],:); % Top/bottom copied from interior
-
-    chiz = (chi(icz(1:end-1),icx)+chi(icz(2:end),icx))./2;
-    chix = (chi(icz,icx(1:end-1))+chi(icz,icx(2:end)))./2;
 
     muz  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;
     mux  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;
@@ -455,20 +454,12 @@ if ~bnchm
     wm = qDz./max(mulim,muz);
     um = qDx./max(mulim,mux);
 
-    
     % update phase velocities
-    % Wf  = W + wf;  % mvp z-velocity
-    % Uf  = U + 0.;  % mvp x-velocity
     Wx  = W + 0.;  % xtl z-velocity
     Ux  = U + 0.;  % xtl x-velocity
     Wm  = W + wm;  % mlt z-velocity
     Um  = U + um;  % mlt x-velocity
 
-    
-    %% update time step
-    dtk = (h/2)^2/max([kc(:);(kT(:)+ks(:).*T(:))./rho(:)./cP(:)]); % diffusive time step size  
-    dta =  h/2   /max(abs([Um(:);Wm(:);Ux(:);Wx(:)]));  % advective time step size
-    dt  = min([1.1*dto,min(CFL*[dtk,dta]),dtmax]);                         % time step size
 end
 
 % end

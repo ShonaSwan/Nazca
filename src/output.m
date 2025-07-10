@@ -394,7 +394,7 @@ else % create 2D plots
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\eta$ [log$_{10}$ Pas]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh4,'CurrentAxes',ax(43));
-    imagesc(Xsc,Zsc,max(h,delta)./SpaceScale); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,delta./SpaceScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\delta$ [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh4,'CurrentAxes',ax(44));
     imagesc(Xsc,Zsc,log10(zeta)); axis ij equal tight; box on; cb = colorbar;

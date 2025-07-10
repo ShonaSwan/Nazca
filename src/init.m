@@ -271,9 +271,7 @@ Tp   = (Tp+273.15); %T = Tp;
 T    = Tp.*exp(Adbt.*(Pt-Pref));
 sm   = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;  
 x    = xq;  m = mq; mu = m; chi = x;
-
-%rhoref = mean(rho(:));
-
+dto  = dt;
 
 % get volume fractions and bulk density
 step    = 0;
@@ -329,7 +327,7 @@ while res > tol
 
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
-            m = m*0.9;
+            m = m * (minit./max(m(:)))^0.25;
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
@@ -344,8 +342,8 @@ while res > tol
         C    = rho.*c;
         S    = rho.*s;
 
-        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
         sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
@@ -363,43 +361,6 @@ Mo   = M;
 Co   = C;
 Xo   = X;
 rhoo = rho;
-dto  = dt;
-
-m0  = mean(m(:));
-x0  = mean(x(:));
-cx0 = squeeze(mean(mean(cx,1),2)).';
-cm0 = squeeze(mean(mean(cm,1),2)).';
-
-cm0_mem = cm0*cal.cmp_mem;
-cx0_mem = cx0*cal.cmp_mem;
-c0_mem =  c0*cal.cmp_mem;
-
-cm0_oxd = cm0*cal.cmp_oxd;
-cx0_oxd = cx0*cal.cmp_oxd;
-c0_oxd =  c0*cal.cmp_oxd;
-
-rhox0 = mean(rhox(:));
-
-cm0_oxd_all = zeros(1,9);
-cm0_oxd_all(:,cal.ioxd) = cm0_oxd;
-etam0 = Giordano08(cm0_oxd_all,T0);
-rhom0 = DensityX(cm0_oxd_all,T0,Ptop);
-
-cm1_oxd = (0.99.*cm0_mem(1,:) + 0.01.*cal.cmp_mem(end-1,:))*cal.mem_oxd/100;
-cm2_oxd = (0.99.*cm0_mem(1,:) - 0.01.*cal.cmp_mem(end-1,:))*cal.mem_oxd/100;
-
-cm1_oxd_all = zeros(1,9);
-cm1_oxd_all(:,cal.ioxd) = cm1_oxd;
-cm2_oxd_all = zeros(1,9);
-cm2_oxd_all(:,cal.ioxd) = cm2_oxd;
-
-rho0 = (x0./rhox0 + m0./rhom0).^-1;
-
-fprintf('    initial T   : %4.3f \n'  ,T0);
-fprintf('    initial SiO2: %4.3f \n'  ,c0_oxd(1)./sum(c0_oxd(1:end-1)).*100);
-fprintf('    initial H2O : %4.3f \n'  ,c0_oxd(end));
-fprintf('    initial m   : %4.3f \n'  ,m0);
-
 
 % get trace element phase compositions
 Ktrc = zeros(Nz,Nx,cal.ntrc);

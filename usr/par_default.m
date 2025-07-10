@@ -23,7 +23,7 @@ hr       =  3600;                % conversion seconds to hours
 yr       =  24*365.25*hr;        % conversion seconds to years
 tend     =  1*yr;                % end time for simulation [s]
 dt       =  10;                  % initial time step [s]
-dtmax    =  1e3;                 % maximum time step [s]
+dtmax    =  1e6*yr;              % maximum time step [s]
 sprate   =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 
 % set initial thermo-chemical state
@@ -72,13 +72,10 @@ trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elemen
 calID    =  'MORB';              % phase diagram calibration
 aTm      =  5e-5;                % melt  thermal expansivity [1/K]
 aTx      =  1e-5;                % xtal  thermal expansivity [1/K]
-%aTf      =  1e-4;                % fluid thermal expansivity [1/K]
 kTm      =  2;                   % melt  thermal conductivity [W/m/K]
 kTx      =  5;                   % xtal  thermal conductivity [W/m/K]
-%kTf      =  0.1;                 % fluid thermal conductivity [W/m/K]
 cPm      =  1200;                % melt  heat capacity [J/kg/K]
 cPx      =  1000;                % xtal  heat capacity [J/kg/K]
-%cPf      =  2000;                % fluid heat capacity [J/kg/K]
 tau_r    =  0;                   % reaction time scale (set to zero for quasi-equilibrium mode)
 
 % set model buoyancy and pressure parameters

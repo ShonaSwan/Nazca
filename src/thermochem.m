@@ -33,8 +33,8 @@ upd_S = - alpha*res_S*dt/a1 + beta*upd_S;
 S     = S + upd_S;
 
 % convert entropy S to natural temperature T and potential temperature Tp
-[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 

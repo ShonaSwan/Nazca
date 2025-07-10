@@ -69,7 +69,7 @@ if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
     Pt          = max(1e7,(1-alpha).*Pt + alpha.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
 end
-Px = Pc(2:end-1,2:end-1)./(1-mu) + Pf(2:end-1,2:end-1);
+Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mu);
 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);
@@ -78,12 +78,10 @@ etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(Tref+273.15)));
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);
-% kf = permute(cat(3,dx0.^2./etax,dm0.^2./etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
-% Mf = permute(repmat(kf,1,1,1,2),[4,1,2,3])./permute(repmat(kf,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-ff = max(eps^0.5,min(1-eps^0.5,permute(cat(3,chi,mu ),[3,1,2])));
+ff = max(eps,min(1-eps,permute(cat(3,chi,mu ),[3,1,2])));
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -91,12 +89,7 @@ Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
 % get momentum flux and transfer coefficients
 thtv = squeeze(prod(Mv.^Xf,2));
 Kv   = ff.*kv.*thtv;
-Cv   = Kv./[dx0; dm0].^2;
-
-% get volume flux and transfer coefficients
-% thtf = squeeze(prod(Mf.^Xf,2));
-% Kf   = ff.*kf.*thtf;
-% Cf   = Kf./[dx0; dm0].^2;
+Cv   = Kv./dx0.^2;
 
 % get effective viscosity
 eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
@@ -106,17 +99,14 @@ etay   = 1e8./(eII + eps^1.25) + etamin;
 eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
 
 % traditional two-phase coefficients
-KD     = (mu+mulim).^2./squeeze(Cv(2,:,:)+eps);  % melt segregation coeff
+KD     = (mu+eps).^2./squeeze(Cv(2,:,:)+eps);  % melt segregation coeff
 zeta0  = eta./(mu+mulim);  % solid compaction coeff
 
 % get yield viscosity
 zetay  = (1e7+(1-twophs(2:end-1,2:end-1)).*Pt)./(max(0,Div_V)+eps^1.25) + etamin./(mu+mulim);
 zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
-
-if ~calibrt % skip the following if called from calibration script
-
-% extract non-P-dependent density
+% extract potential density
 rhom_nP = rhom0 .* (1 - aTm.*(Tp-Tref));
 rhox_nP = rhox0 .* (1 - aTx.*(Tp-Tref));
 
@@ -124,7 +114,6 @@ rho_nP  = 1./(m./rhom_nP + x./rhox_nP);
 
 Vel = sqrt(((W(1:end-1,2:end-1)+W(2:end,2:end-1))/2).^2 ...
          + ((U(2:end-1,1:end-1)+U(2:end-1,2:end))/2).^2);
-
 
 % update velocity divergence
 Div_V = ddz(W(:,2:end-1),h) + ddx(U(2:end-1,:),h);                         % get velocity divergence
@@ -180,5 +169,9 @@ else
          +  KD .* ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))./2).^2;
 end
 
+% update time step
+dtk = (h/2)^2/max([kc(:);(kT(:)+ks(:).*T(:))./rho(:)./cP(:)]); % diffusive time step size
+dta =  h/2   /max(abs([Um(:);Wm(:);Ux(:);Wx(:)]));             % advective time step size
+dt  = min([1.1*dto,min(CFL*[dtk,dta]),dtmax]);                 % time step size
+
 UDtime = UDtime + toc;
-end

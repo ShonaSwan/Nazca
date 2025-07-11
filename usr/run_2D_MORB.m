@@ -16,8 +16,8 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 D         =  200e3;               % chamber depth [m]
 N         =  160;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  1.5*D;               % chamber width (equal to h for 1-D mode) [m]
-sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+L         =  1.0*D;               % chamber width (equal to h for 1-D mode) [m]
+sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
@@ -49,7 +49,7 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 calID     =  'MORB_lo';           % phase diagram calibration
 tau_r     =  0;                   % phase change reaction time (set to 0 to tie to dt)
 tau_e     =  0;                   % extraction/eruption time (set to 0 to tie to dt)
-mthr      =  0.10;                % threshold melt fraction for extraction/eruption
+mthr      =  0.20;                % threshold melt fraction for extraction/eruption
 minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
@@ -60,8 +60,9 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  1e8;                 % yield stress for shear failure [Pa]
-pyield    =  1e7;                 % yield pressure for tensile failure [Pa]
+tyield    =  3e8;                 % yield stress for shear failure [Pa]
+pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e18;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
@@ -69,7 +70,7 @@ ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fr
 CFL       =  0.5;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-4;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
-maxit     =  10;                  % maximum outer its
+maxit     =  12;                  % maximum outer its
 alpha     =  0.6;                 % iterative step size
 gamma     =  0.1;                 % relaxing parameter for viscosity update
 etacntr   =  1e6;                 % maximum viscosity contrast

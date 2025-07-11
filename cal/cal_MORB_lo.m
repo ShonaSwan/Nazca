@@ -103,7 +103,7 @@ cal.rhox0   = [3210,4200,2680,2550,3210,3520,3930,4730, 2540,1000]; % mem ref de
 
 % specify three-phase coefficient model parameters
 %              for  fay  ant  alb   dps  aug  ulv  mgt  qtz  wat
-cal.etax0   = [1e19,1e19,1e17,1e17,1e19,1e19,1e17,1e17,1e19,1e0]; % mem ref viscosities [Pas]
+cal.etax0   = [1e19,1e19,1e17,1e17,1e20,1e20,1e17,1e17,1e20,1e0]; % mem ref viscosities [Pas]
 cal.Eax     = 300e3;                  % solid viscosity activation energy [J/mol]
 cal.AA      =[ 0.5989, 0.1772; ...    % permission slopes
                0.0397, 0.1182 ];      % increases permission slopes away from step function 

@@ -21,20 +21,20 @@ mq = mq./(mq+xq);
 xq = xq./(mq+xq);
 
 % phase mass transfer rates
-Gm  = (mq-m).*RHO/max(tau_r,3*dt);
-Gx  = (xq-x).*RHO/max(tau_r,3*dt); 
+Gm  = (mq-m).*RHO/max(tau_r,10*dt);
+Gx  = (xq-x).*RHO/max(tau_r,10*dt); 
 
-Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,3*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,3*dt);
+Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,10*dt);
+Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,10*dt);
 
 % extract and erupt melt
-Gem = min(0,mthr-m).*RHO/max(tau_e,3*dt);
+Gem = min(0,mthr-m).*RHO/max(tau_e,10*dt);
 Gex = topshape.*(-sum(Gem,1))./sum(topshape,1);
 for i=1:4; Gex = Gex + diffus(Gex,1/8*ones(size(rp)),1,[1,2],BCD); end
 
 Gemc = cm.*Gem;
 Gexc = topshape.*(-sum(Gemc,1))./sum(topshape,1);
-for i=1:4; Gexc = Gexc + diffus(Gexc,1/8*ones(size(rp)),1,[1,2],BCD); end
+for i=1:5; Gexc = Gexc + diffus(Gexc,1/8*ones(size(rp)),1,[1,2],BCD); end
 
 Gemt = trcm.*Gem;
 Gext = topshape.*(-sum(Gemt,1))./sum(topshape,1);

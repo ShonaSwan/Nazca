@@ -6,7 +6,7 @@ if ~bnchm && step>0 && ~restart
 res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
 % volume source and background velocity passed to fluid-mechanics solver
-upd_rho = - res_rho./b1./rho; % + beta*upd_rho;
+upd_rho = - alpha*res_rho./b1./rho; % + beta*upd_rho;
 upd_rho(end,:) = 0;  upd_rho(:,end) = 0;
 VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
 
@@ -358,7 +358,6 @@ RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
 
 %% assemble and scale global coefficient matrix and right-hand side vector
-OO = zeros(NP, NP);
 
 % Sizes of blocks
 [n1, m1] = size(KV);

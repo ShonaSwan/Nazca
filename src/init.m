@@ -137,6 +137,10 @@ if bndmode==5;               sdleft = -1; sdright = -1; top = 1; bot = -1; end %
     ifz = [2,1:Nz+1,Nz];
 
 % initialise solution fields
+
+% Calculating the crustal thickness 
+Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
+%Hc = Hcmin - 1e6;%max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));   
 switch init_mode
     case 'layer'
         Tp  =  T0 + (T1-T0) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_T))/2 + dTr.*rp + dTg.*gp;  % potential temperature [C]
@@ -189,18 +193,21 @@ switch init_mode
         trc = trci;
 
     case 'MOR'
-        sprtime = XX./sprate + 1e5*yr;
+        sprtime = XX./sprate + minage;
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
 
-        c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % major elements
+            c(:,:,i)  =  c0(i) + (c_crust(i)-c0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % major elements
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
-            trc(:,:,i)  =  trc0(i) + (trc1(i)-trc0(i)) .* (ZZ/D) + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
+            trc(:,:,i)  =  trc0(i) + (trc_crust(i)-trc0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
         end
-end
+
+    
+        
+end 
+
 
 %Defining the top bounday spreading rate 's' shape function
 bnd_spr = (1-exp(-Xu(2:end-1)./bnd_sprw)) .* sprate;
@@ -251,10 +258,10 @@ c0_oxd_all(:,cal.ioxd) = c0_oxd;
 rhom0   = mean(cal.rhox0-500).*ones(size(Tp));
 rhox0   = mean(cal.rhox0).*ones(size(Tp)); 
 Pchmb  = Pchmb0;  Pchmbo = Pchmb;  Pchmboo = Pchmbo;  dPchmbdt = Pchmb;  dPchmbdto = dPchmbdt; dPchmbdtoo = dPchmbdto;  upd_Pchmb = dPchmbdt;
-Pt     = Ptop + Pchmb + mean(rhom0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
+Pt     = Ptop + Pchmb + mean(rhox0(:)+1000).*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
 rhox   = rhox0.*(1+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1+bPm.*(Pt-Pref));
-rho    = rhom;
+rho    = rhox;
 rhow  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhou  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhow.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
@@ -268,7 +275,7 @@ kT   = kTm;
 cP   = cPm; RhoCp = rho.*cP;
 Adbt = aT./RhoCp;
 Tp   = (Tp+273.15); %T = Tp;
-T    = Tp.*exp(Adbt.*(Pt-Pref));
+T    = Tp;
 sm   = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;  
 x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
@@ -281,10 +288,10 @@ TCtime  = 0;
 UDtime  = 0;
 a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
-res  = 1;  tol = 1e-9;  it = 1;
+res  = 1;  tol = 1e-9;  it = 1;  relax = 0.5;
 
 while res > tol
-    Pti = Pt; Ti = T; xi = xq; 
+    Pti = Pt; Ti = T; xi = xq;          
 
     % %%%%The melt model %%%%
 
@@ -322,12 +329,13 @@ while res > tol
         EQtime = EQtime + eqtime;
 
         update;
+        Pt = (1-relax).*Pt + relax.*Pti;
         Pf(2:end-1,2:end-1) = Pt;
         Px = Pt;
 
         % Removing melt to get a suitable initial melt fraction
-        if it>10 && any(m(:)>minit)
-            m = m * (minit./max(m(:)))^0.25;
+        if it>5 && any(m(:)>minit)
+            m = m * (minit./max(m(:)))^0.1;
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
@@ -344,6 +352,8 @@ while res > tol
 
         [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+        T = (1-relax).*T + relax.*Ti;
+
         sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...

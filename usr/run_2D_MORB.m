@@ -18,6 +18,7 @@ N         =  160;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.0*D;               % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+Hcmin     =  6e3;                 % Minimum crustal thickness 
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
@@ -29,12 +30,19 @@ mulim     =  1e-6;                % Setting a limint for melt fraction
 
 % set initial thermo-chemical state
 init_mode =  'MOR';
+minage    =  7e5*yr;
 T0        =  5;                   % temperature top  layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
-c0        =  [0.81 0.18 0.01 0];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
+wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
+c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
+c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,-1,0,0]*1e-4;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
+
+% set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
+trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
+trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
 
 % set thermo-chemical boundary parameters
 periodic  =  0;

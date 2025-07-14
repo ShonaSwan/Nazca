@@ -203,7 +203,7 @@ switch init_mode
 end
 
 %Defining the top bounday spreading rate 's' shape function
-bnd_spr = (1-exp(-Xu(2:end-1)./bnd_sprw)) .* sprate;
+bnd_spr = (1-exp(-Xu./bnd_sprw)) .* sprate;
 
 % apply initial boundary layers
 if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
@@ -281,7 +281,7 @@ TCtime  = 0;
 UDtime  = 0;
 a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
-res  = 1;  tol = 1e-9;  it = 1;
+res  = 1;  tol = 1e-9;  it = 1; iter = 1;
 
 while res > tol
     Pti = Pt; Ti = T; xi = xq; 
@@ -413,7 +413,7 @@ upd_TRC = 0.*TRC;
 frst    = 1;
 step    = 0;
 time    = 0;
-iter    = 0;
+iter    = 2;
 hist    = [];
 dsumSdto = 0;  dsumSdt = 0;
 dsumBdto = 0;  dsumBdt = 0;

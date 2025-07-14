@@ -61,7 +61,7 @@ RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
 Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 %Extracted bounday conditions
-twophs = double(mu(icz,icx)>=mulim);
+if iter==1; twophs = double(mu(icz,icx)>=mulim); end  % update two-phase masking once per time step
 
 % update lithostatic pressure
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
@@ -81,7 +81,7 @@ kv = permute(cat(3,etax,etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-ff = max(eps,min(1-eps,permute(cat(3,chi,mu ),[3,1,2])));
+ff = max(mulim,min(1-mulim,permute(cat(3,chi,mu ),[3,1,2])));
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -99,7 +99,7 @@ etay   = tyield./(eII + eps^1.25) + etaymin;
 eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
 
 % traditional two-phase coefficients
-KD     = (mu+eps).^2./squeeze(Cv(2,:,:)+eps);  % melt segregation coeff
+KD     = (mu+mulim).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
 zeta0  = eta./(mu+mulim);  % solid compaction coeff
 
 % get yield viscosity

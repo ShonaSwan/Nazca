@@ -7,7 +7,7 @@ res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
 % volume source and background velocity passed to fluid-mechanics solver
 upd_rho = - alpha*res_rho./b1./rho; % + beta*upd_rho;
-upd_rho(end,:) = 0;  upd_rho(:,end) = 0;
+% upd_rho([1 end],:) = 0;  upd_rho(:,[1 end]) = 0;
 VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
 
 UBG     = - 0*mean(VolSrc,'all')./2 .* (L-XXu);
@@ -28,14 +28,14 @@ AAR = [];       % forcing entries for R
 % assemble coefficients of z-stress divergence
 
 % top boundary
-ii  = MapW(1,(2:end-1)); jj1 = ii;  
+ii  = MapW(1,:); jj1 = ii;  
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapW(end,(2:end-1)); jj1 = ii; jj2 = MapW(end-1,(2:end-1));
+ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -43,14 +43,14 @@ aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
-ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
+ii  = MapW((2:end-1),1); jj1 = ii; jj2 = MapW((2:end-1),2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,end-1);
+ii  = MapW((2:end-1),end); jj1 = ii; jj2 = MapW((2:end-1),end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];  AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)-1];
@@ -91,7 +91,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-rr  = + (rhow(2:end-1,:) - rhoxw(2:end-1,:)) .* g0;
+rr  = + (rhow(2:end-1,:) - mean(rhow(2:end-1,:),2)) .* g0;
 if bnchm; rr = rr + src_W_mms(2:end-1,:); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -100,28 +100,28 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-ii  = MapU(1,(2:end-1)); jj1 = ii; jj2 = MapU(2,(2:end-1));
+ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
 aa  = zeros(size(ii)) + bnd_spr * 2;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapU(end,(2:end-1)); jj1 = ii; jj2 = MapU(end-1,(2:end-1));
+ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
-ii  = MapU(:,1); jj = ii;
+ii  = MapU((2:end-1),1); jj = ii;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
-aa  = zeros(size(ii)) + UBG(:,1);
+aa  = zeros(size(ii));% + UBG((2:end-1),1);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapU(:,end); jj1 = ii; jj2 = MapU(:,end-1);
+ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
@@ -252,7 +252,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapP(end,:);  jj1 = ii; jj2 = MapP(end-1,:); 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-% IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
@@ -277,6 +277,7 @@ jj3 = MapP(2:end-1,1:end-2); % Left
 jj4 = MapP(2:end-1,3:end-0); % Right
 
 % Coefficients multiplying darcy flow
+% KD(mu<mulim) = 0;
 KD1 = (KD(icz(1:end-2), :) .* KD(icz(2:end-1), :)).^0.5; % above
 KD2 = (KD(icz(2:end-1), :) .* KD(icz(3:end-0), :)).^0.5; % below
 KD3 = (KD(: ,icx(1:end-2)) .* KD(:, icx(2:end-1))).^0.5; % left
@@ -366,29 +367,24 @@ RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
 % Total size
 Ntot = n1 + n2 + n3;
-Mtot = m1 + m2 + m3;
 
 % Preallocate LL as sparse
-if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(GG) + nnz(KF) + nnz(KC) + nnz(DD);  end
-LL = spalloc(Ntot, Mtot, total_nnz);
+if ~exist('total_nnz','var'); total_nnz = nnz(KV) + 2*nnz(GG) + nnz(KF) + nnz(KC) + 2*nnz(DD);  end
+LL = spalloc(Ntot, Ntot, total_nnz);
 
 % Assign blocks
-LL(1:n1,           1:m1         ) = KV;
-LL(1:n1,     m1+1:m1+m2         ) = GG;
-LL(1:n1, m1+m2+1:end            ) = GG;
+LL(1:n1,       1:m1      ) = KV;
+LL(1:n1,    m1+1:m1+m2   ) = GG;
+LL(1:n1, m1+m2+1:m1+m2+m3) = GG;
 
-LL(n1+1:n1+n2,     1:m1         ) = DD;
-LL(n1+1:n1+n2, m1+1:m1+m2       ) = KF;
+LL(n1+1:n1+n2,    1:m1    ) = DD;
+LL(n1+1:n1+n2, m1+1:m1+m2 ) = KF;
 
-LL(n1+n2+1:end,    1:m1         ) = DD;
-LL(n1+n2+1:end, m1+m2+1:end     ) = KC;
+LL(n1+n2+1:n1+n2+n3,       1:m1      ) = DD;
+LL(n1+n2+1:n1+n2+n3, m1+m2+1:m1+m2+m3) = KC;
 
 RR  = [RV; RF; RC];
 
-
-%% prepare scaling matrix
-
-SCL = spdiags(1 ./ max(abs(LL), [], 2) , 0, size(LL,1), size(LL,1));
 
 
 %% Setting Pc to zero where there is no melt 
@@ -407,26 +403,29 @@ TMP             =  LL(:,BC.ind);
 RR              =  RR - TMP*BC.val;
 LL              =  LL(BC.free,BC.free);
 RR              =  RR(BC.free);
-SCL             =  SCL(BC.free,BC.free);
 
 
 %% Scaling coefficient matrix
 
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
+scl = ([zeros(NU+NW,1); 1./etagh(:); zeros(NP,1)]);
+scl(BC.ind) = [];
+SCL = (abs(diag(LL)) + scl).^0.5;  
+SCL = spdiags(1./SCL, 0, length(SCL), length(SCL));
+
 LL = SCL * LL;
 RR = SCL * RR;
-
-%Residual 
-FF  = LL*SOL(BC.free) - RR;
 
 
 %% Solve linear system of equations for W, U, Pf, Pc
 
-p     = colamd(LL);       % or symrcm(A) for symmetric matrices
-xx(p) = LL(:,p) \ RR;     % solve permuted system
+if iter==2; pcol = colamd(LL); end             % update column permutation for sparsity pattern once per time step
+dLL        = decomposition(LL(:,pcol), 'lu');  % get LU-decomposition for consistent performance of LL \ RR
+SS(pcol,1) = dLL \ RR;                         % solve permuted decomposed system
 
-SOL(BC.free) = xx.';      % update solution
+SOL(BC.free) =  SS;       % update solution
 SOL(BC.ind ) = BC.val;    % fill in boundary conditions  
-clear xx;
+clear SS;                 % clear temporary solution vector
 
 % map solution vector to 2D arrays
 W  = full(reshape(SOL(MapW(:))           ,Nz+1,Nx+2));  % matrix z-velocity

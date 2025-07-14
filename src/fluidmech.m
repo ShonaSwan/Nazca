@@ -1,19 +1,30 @@
 tic;
 
+% define dimensional scales
+h0    = D/10;
+e0    = 1e18;
+Drho0 = 500;
+p0    = Drho0*g0*h0;
+u0    = Drho0*g0*h0^2./e0;
+KD0   = h0^2/e0;
+t0    = h0/u0;
+
 if ~bnchm && step>0 && ~restart
 
 % residual of mixture mass evolution
 res_rho = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
 % volume source and background velocity passed to fluid-mechanics solver
-upd_rho = - alpha*res_rho./b1./rho; % + beta*upd_rho;
-% upd_rho([1 end],:) = 0;  upd_rho(:,[1 end]) = 0;
+upd_rho = - alpha*res_rho./b1./rho;
 VolSrc  = VolSrc + upd_rho;  % correct volume source term by scaled residual
 
 UBG     = - 0*mean(VolSrc,'all')./2 .* (L-XXu);
 WBG     = - 0*mean(VolSrc,'all')./2 .* (0-ZZw);
 
 end
+
+% nondimensionalise parameters
+h      = h/h0;
 
 
 %% assemble coefficients for matrix velocity diagonal and right-hand side (KV and RV)
@@ -59,8 +70,8 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % internal points
 ii    = MapW(2:end-1,2:end-1);
-EtaC1 =  etaco(2:end-1,1:end-1);   EtaC2 =  etaco(2:end-1,2:end);
-EtaP1 =  eta  (1:end-1,:      );   EtaP2 =  eta  (2:end,:      );
+EtaC1 =  etaco(2:end-1,1:end-1)/e0;   EtaC2 =  etaco(2:end-1,2:end)/e0;
+EtaP1 =  eta  (1:end-1,:      )/e0;   EtaP2 =  eta  (2:end,:      )/e0;
 
 % coefficients multiplying z-velocities W
 %             top          ||         bottom          ||           left            ||          right
@@ -75,10 +86,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-1/2*EtaC2(:)/h^2];      %
 
 
 % what shall we do with the drunken sailor...
- if ~bnchm
-     aa  = ddz(rho,h).*g0.*dt;
-    IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)];
- end
+ % if ~bnchm
+ %     aa  = ddz(rho,h).*g0/(Drho0*g0).*dt/t0;
+ %    IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)];
+ % end
 
 % coefficients multiplying x-velocities U
 %         top left         ||        bottom left          ||       top right       ||       bottom right
@@ -91,7 +102,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-rr  = + (rhow(2:end-1,:) - mean(rhow(2:end-1,:),2)) .* g0;
+rr  = + ((rhow(2:end-1,:) - mean(rhow(2:end-1,:),2)) .* g0)/(Drho0*g0);
 if bnchm; rr = rr + src_W_mms(2:end-1,:); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -101,7 +112,7 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 % top boundary
 ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
-aa  = zeros(size(ii)) + bnd_spr * 2;
+aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
@@ -130,8 +141,8 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % internal points
 ii    = MapU(2:end-1,2:end-1);
-EtaC1 = etaco(1:end-1,2:end-1);  EtaC2 = etaco(2:end,2:end-1);
-EtaP1 = eta  (:      ,1:end-1);  EtaP2 = eta  (:      ,2:end);
+EtaC1 = etaco(1:end-1,2:end-1)/e0;  EtaC2 = etaco(2:end,2:end-1)/e0;
+EtaP1 = eta  (:      ,1:end-1)/e0;  EtaP2 = eta  (:      ,2:end)/e0;
 
 % coefficients multiplying x-velocities U
 %            left          ||          right          ||           top             ||          bottom
@@ -145,10 +156,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL;-1/2*EtaC1(:)/h^2];      %
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-1/2*EtaC2(:)/h^2];      % U one below
 
 % what shall we do with the drunken sailor...
-if ~bnchm
-    aa  = ddx(rho,h).*g0.*dt;
-    IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)];
-end
+% if ~bnchm
+%     aa  = ddx(rho,h).*g0/(Drho0*g0).*dt/t0;
+%     IIL = [IIL; ii(:)]; JJL = [JJL;  ii(:)];   AAL = [AAL; aa(:)];
+% end
 
 % coefficients multiplying z-velocities W
 %         top left         ||        top right          ||       bottom left       ||       bottom right
@@ -278,10 +289,10 @@ jj4 = MapP(2:end-1,3:end-0); % Right
 
 % Coefficients multiplying darcy flow
 % KD(mu<mulim) = 0;
-KD1 = (KD(icz(1:end-2), :) .* KD(icz(2:end-1), :)).^0.5; % above
-KD2 = (KD(icz(2:end-1), :) .* KD(icz(3:end-0), :)).^0.5; % below
-KD3 = (KD(: ,icx(1:end-2)) .* KD(:, icx(2:end-1))).^0.5; % left
-KD4 = (KD(: ,icx(2:end-1)) .* KD(: ,icx(3:end-0))).^0.5; % right
+KD1 = (KD(icz(1:end-2), :) .* KD(icz(2:end-1), :)).^0.5 / KD0; % above
+KD2 = (KD(icz(2:end-1), :) .* KD(icz(3:end-0), :)).^0.5 / KD0; % below
+KD3 = (KD(: ,icx(1:end-2)) .* KD(:, icx(2:end-1))).^0.5 / KD0; % left
+KD4 = (KD(: ,icx(2:end-1)) .* KD(: ,icx(3:end-0))).^0.5 / KD0; % right
  
 aa = (KD1 + KD2 + KD3 + KD4) / h^2;
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];    AAL = [AAL; aa(:)];
@@ -294,9 +305,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -KD4(:) / h^2];  % Right
 
 ii = MapP(2:end-1, 2:end-1);
 
-KD_rho_g     = KD .* (rhom - rhox) * g0;
+KD_rho_g     = KD/KD0 .* (rhox - rhom) * g0/(Drho0*g0);
 dKD_rho_g_dz = ddz((KD_rho_g([1 1:end],:)+KD_rho_g([1:end end],:))/2,h);
-rr  = -dKD_rho_g_dz + VolSrc;
+rr  = dKD_rho_g_dz + VolSrc*t0;
+rr(end,end) = 0;  % avoid conflict with boundary conditions at lower right corner (Div.v = 0)
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
 
@@ -344,7 +356,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % Internal Points
 ii  = MapP(2:end-1,2:end-1);
-aa  = zeros(size(ii)) + 1./zeta;
+aa  = zeros(size(ii)) + e0./zeta;
 
 % Coefficients multiplying compaction pressure p
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
@@ -407,13 +419,13 @@ RR              =  RR(BC.free);
 
 %% Scaling coefficient matrix
 
-etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta;
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta/e0;
 scl = ([zeros(NU+NW,1); 1./etagh(:); zeros(NP,1)]);
 scl(BC.ind) = [];
 SCL = (abs(diag(LL)) + scl).^0.5;  
 SCL = spdiags(1./SCL, 0, length(SCL), length(SCL));
 
-LL = SCL * LL;
+LL = SCL * LL * SCL;
 RR = SCL * RR;
 
 
@@ -423,7 +435,7 @@ if iter==2; pcol = colamd(LL); end             % update column permutation for s
 dLL        = decomposition(LL(:,pcol), 'lu');  % get LU-decomposition for consistent performance of LL \ RR
 SS(pcol,1) = dLL \ RR;                         % solve permuted decomposed system
 
-SOL(BC.free) =  SS;       % update solution
+SOL(BC.free) = SCL * SS;       % update solution
 SOL(BC.ind ) = BC.val;    % fill in boundary conditions  
 clear SS;                 % clear temporary solution vector
 
@@ -432,6 +444,14 @@ W  = full(reshape(SOL(MapW(:))           ,Nz+1,Nx+2));  % matrix z-velocity
 U  = full(reshape(SOL(MapU(:))           ,Nz+2,Nx+1));  % matrix x-velocity
 Pf = full(reshape(SOL(MapP(:)+(NW+NU   )),Nz+2,Nx+2));  % matrix dynamic pressure
 Pc = full(reshape(SOL(MapP(:)+(NW+NU+NP)),Nz+2,Nx+2));  % matrix compaction pressure
+
+% redimensionalise solution and parameters
+W      = W *u0;
+U      = U *u0;
+Pf     = Pf*p0;
+Pc     = Pc*p0;
+
+h      = h*h0;
 
 
 if ~bnchm
@@ -460,16 +480,4 @@ if ~bnchm
 
 end
 
-% end
-
 FMtime = FMtime + toc;
-
- % % phase segregation speeds
-    % wm(2:end-1,2:end-1) = ((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_m(1:end-1,:).*Ksgr_m(2:end,:)).^0.5; % melt segregation speed
-    % wm([1,end],:) = min(1,1-[top;bot]).*wm([2,end-1],:);
-    % wm(:,[1 end]) = wm(:,[2 end-1]);
-    
-    % wx(2:end-1,2:end-1) = ((rhox(1:end-1,:)+rhox(2:end,:))/2-mean(rhofz(2:end-1,:),2)).*g0.*(Ksgr_x(1:end-1,:).*Ksgr_x(2:end,:)).^0.5; % solid segregation speed
-    % wx([1,end],:) = min(1,1-[top;bot]).*wx([2,end-1],:);
-    % wx(:,[1 end]) = wx(:,[2 end-1]);
-    

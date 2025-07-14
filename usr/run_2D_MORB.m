@@ -5,7 +5,7 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB_N100';           % run identifier
+runID     =  '2D_MORB_N200';           % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  20;                   % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -14,10 +14,10 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  100;                 % number of grid points in z-direction
+N         =  200;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % chamber width (equal to h for 1-D mode) [m]
-sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
@@ -73,7 +73,7 @@ atol      =  1e-7;                % outer its absolute tolerance
 maxit     =  12;                  % maximum outer its
 alpha     =  0.6;                 % iterative step size
 gamma     =  0.1;                 % relaxing parameter for viscosity update
-etacntr   =  1e6;                 % maximum viscosity contrast
+etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling

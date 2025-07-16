@@ -258,7 +258,7 @@ c0_oxd_all(:,cal.ioxd) = c0_oxd;
 rhom0   = mean(cal.rhox0-500).*ones(size(Tp));
 rhox0   = mean(cal.rhox0).*ones(size(Tp)); 
 Pchmb  = Pchmb0;  Pchmbo = Pchmb;  Pchmboo = Pchmbo;  dPchmbdt = Pchmb;  dPchmbdto = dPchmbdt; dPchmbdtoo = dPchmbdto;  upd_Pchmb = dPchmbdt;
-Pt     = Ptop + Pchmb + mean(rhox0(:)+1000).*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
+Pt     = Ptop + Pchmb + mean(rhom0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
 rhox   = rhox0.*(1+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1+bPm.*(Pt-Pref));
 rho    = rhox;
@@ -275,7 +275,7 @@ kT   = kTm;
 cP   = cPm; RhoCp = rho.*cP;
 Adbt = aT./RhoCp;
 Tp   = (Tp+273.15); %T = Tp;
-T    = Tp;
+T    = Tp.*exp(Adbt.*(Pt-Pref));
 sm   = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;  
 x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
@@ -288,7 +288,7 @@ TCtime  = 0;
 UDtime  = 0;
 a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
-res  = 1;  tol = 1e-9;  it = 1;  relax = 0.5;
+res  = 1;  tol = 1e-9;  it = 1;
 
 while res > tol
     Pti = Pt; Ti = T; xi = xq;          
@@ -329,13 +329,12 @@ while res > tol
         EQtime = EQtime + eqtime;
 
         update;
-        Pt = (1-relax).*Pt + relax.*Pti;
         Pf(2:end-1,2:end-1) = Pt;
         Px = Pt;
 
         % Removing melt to get a suitable initial melt fraction
-        if it>5 && any(m(:)>minit)
-            m = m * (minit./max(m(:)))^0.1;
+        if it>10 && any(m(:)>minit)
+            m = m * (minit./max(m(:)))^0.25;
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
@@ -352,8 +351,7 @@ while res > tol
 
         [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-        T = (1-relax).*T + relax.*Ti;
-
+       
         sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...

@@ -371,8 +371,8 @@ else % create 2D plots
     % plot phase fractions and reaction rates in Fig. 3
     set(0,'CurrentFigure',fh3)
     set(fh3,'CurrentAxes',ax(31));
-    imagesc(Xsc,Zsc,m.*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$m$ [wt\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    imagesc(Xsc,Zsc,log10((m+mulim).*100)); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$m$ [log$_{10}$ wt\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh3,'CurrentAxes',ax(32));
     imagesc(Xsc,Zsc,Div_V); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\nabla \cdot \mathbf{v}$ [1/s]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
@@ -687,9 +687,9 @@ if save_op && ~restart
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];
-    save(name,'U','W','Pf','Pc','Pt','Pchmb','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','VolSrc','Div_V','qDz','qDx','wx','wm','cal');
     name = [outdir,'/',runID,'/',runID,'_cont'];
-    save(name,'U','W','Pf','Pc','Pt','Pchmb','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','VolSrc','Div_V','qDz','qDx','wx','wm','cal');
     name = [outdir,'/',runID,'/',runID,'_hist'];
     save(name,'hist');
 

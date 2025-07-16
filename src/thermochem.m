@@ -10,9 +10,9 @@ if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; end
 advn_S = - advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  % melt  advection
          - advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
-diff_S = diffus(T,kT./T,h,[1,2],BCD);% + diffus(Tp,ks,h,[1,2],BCD);
+diff_S = diffus(T,kT./T,h,[1,2],BCD);
 
-% heat dissipation (switch this off for now)
+% heat dissipation
 diss_h = diss ./ T;
 
 % boundary layers
@@ -33,8 +33,8 @@ upd_S = - alpha*res_S*dt/a1 + beta*upd_S;
 S     = S + upd_S;
 
 % convert entropy S to natural temperature T and potential temperature Tp
-[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
+[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
+[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 
@@ -77,21 +77,21 @@ if Rcouple; phseql; end
 % phase advection rates
 advn_X   = - advect(X,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-drhodt   = advn_X+advn_M+Gem+Gex;
 
 % total rates of change
 dXdt   = advn_X + Gx + Gex;
 dMdt   = advn_M + Gm + Gem;
+drhodt = advn_X + advn_M + Gem + Gex;
 
 % residual of phase density evolution
 res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);
 res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 
 % semi-implicit update of phase fraction densities
-upd_X = max(-X, - alpha*res_X*dt/a1 + beta*upd_X );
-upd_M = max(-M, - alpha*res_M*dt/a1 + beta*upd_M );
-X     = X + upd_X;
-M     = M + upd_M;
+upd_X = - alpha*res_X*dt/a1 + beta*upd_X;
+upd_M = - alpha*res_M*dt/a1 + beta*upd_M;
+X     = max(eps,min(rho-eps,X + upd_X));
+M     = max(eps,min(rho-eps,M + upd_M));
 
 %***  update phase fractions and component concentrations
 
@@ -107,7 +107,6 @@ if reactive
 
 % update major component phase composition
 Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
-%Kf      = reshape(cal.Kf,Nz,Nx,cal.ncmp);
 subsol  = m<=eps^0.5 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
 supliq  = x<=eps^0.5 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
 subsolc = repmat(subsol,1,1,cal.ncmp);
@@ -123,14 +122,8 @@ while rnorm>tol && it<mxit
     cmK = c    ./(m + x.*Kx + eps); 
     cxK = c.*Kx./(m + x.*Kx + eps); 
 
-    res_cm = cm - cmK./sum(cmK,3);
-    res_cx = cx - cxK./sum(cxK,3);
-
-    upd_cm = - 0.95.*res_cm + 0.25.*upd_cm;
-    upd_cx = - 0.95.*res_cx + 0.25.*upd_cx;
-
-    cm = max(0,cm + upd_cm);
-    cx = max(0,cx + upd_cx);
+    cm  = cm./sum(cm,3);
+    cx  = cx./sum(cx,3);
 
     r = x.*cx + m.*cm - c;
     r(subsolc) = 0; r(supliqc) = 0;

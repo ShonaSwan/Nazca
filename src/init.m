@@ -14,7 +14,7 @@ end
 
 fprintf('\n\n')
 fprintf('*************************************************************\n');
-fprintf('*****  RUN NAZCA MODEL | %s  *************\n',datetime('now'));
+fprintf('*****  RUN NAZCA MODEL | %s  **************\n',datetime('now'));
 fprintf('*************************************************************\n');
 fprintf('\n   run ID: %s \n\n',runID);
 
@@ -27,7 +27,7 @@ run(['../cal/cal_',calID]);  % load melt model calibration
     BCA     =  {'',''};  % boundary condition on advection (top,bot,left,right)
     BCD     =  {'',''};  % boundary condition on diffusion (top,bot,left,right)
 
-Dsx = -cal.Dsx;
+Dsm = cal.Dsx;
 
 % normalise major components to anhydrous unit sum, rescale to hydrous
 c0(1:end-1) = c0(1:end-1)./sum(c0(1:end-1)).*(1-c0(end));
@@ -210,7 +210,7 @@ end
 
 
 %Defining the top bounday spreading rate 's' shape function
-bnd_spr = (1-exp(-Xu(2:end-1)./bnd_sprw)) .* sprate;
+bnd_spr = (1-exp(-Xu./bnd_sprw)) .* sprate;
 
 % apply initial boundary layers
 if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
@@ -249,9 +249,9 @@ eta    = 1e21.*ones(Nz,Nx);
 zeta   = 100.*eta;
 VolSrc = 0.*Tp;
 kW     = 0.*Tp;
-Tref   = T1;%min(cal.T0)+273.15;
+Tref   = min(cal.T0) + 273.15;
 Pref   = 1e5;
-sref   = 0e3; % entropy refernce 
+sref   = 0e3; % reference entropy 
 c0_oxd = c0*cal.cmp_oxd;
 c0_oxd_all = zeros(size(c0,1),9);
 c0_oxd_all(:,cal.ioxd) = c0_oxd;
@@ -276,7 +276,7 @@ cP   = cPm; RhoCp = rho.*cP;
 Adbt = aT./RhoCp;
 Tp   = (Tp+273.15); %T = Tp;
 T    = Tp.*exp(Adbt.*(Pt-Pref));
-sm   = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;  
+sm   = cPm.*log(Tp./Tref) + Dsm;  sx = cPx.*log(Tp./Tref);  
 x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
 
@@ -288,7 +288,7 @@ TCtime  = 0;
 UDtime  = 0;
 a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
-res  = 1;  tol = 1e-9;  it = 1;
+res  = 1;  tol = 1e-9;  it = 1; iter = 1;
 
 while res > tol
     Pti = Pt; Ti = T; xi = xq;          
@@ -323,7 +323,9 @@ while res > tol
         cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
         cm  = cmq; cx = cxq;
 
-        sm = cPm.*log(Tp./Tref);  sx = cPx.*log(Tp./Tref) + Dsx;
+        sref = 0;
+        sm   = cPm.*log(Tp./Tref) + Dsm;  
+        sx   = cPx.*log(Tp./Tref);
 
         eqtime = toc(eqtime);
         EQtime = EQtime + eqtime;
@@ -349,9 +351,8 @@ while res > tol
         C    = rho.*c;
         S    = rho.*s;
 
-        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref;sref+Dsx],Tref,Pref);
-       
+        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
+        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
         sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
@@ -421,7 +422,7 @@ upd_TRC = 0.*TRC;
 frst    = 1;
 step    = 0;
 time    = 0;
-iter    = 0;
+iter    = 2;
 hist    = [];
 dsumSdto = 0;  dsumSdt = 0;
 dsumBdto = 0;  dsumBdt = 0;
@@ -440,7 +441,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','P','Pc','Pt','Pchmb','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','rho','eta','eII','tII','dt','time','step','VolSrc','wx','wm','cal');
+        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','VolSrc','Div_V','qDz','qDx','wx','wm','cal');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 
@@ -448,6 +449,7 @@ if restart
         RHO = X+M; 
      
         update;
+        phseql;
         store;
         fluidmech;
         update;

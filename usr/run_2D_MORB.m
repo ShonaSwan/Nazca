@@ -5,7 +5,7 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB';           % run identifier
+runID     =  '2D_MORB_N100';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  10;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -14,7 +14,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  160;                 % number of grid points in z-direction
+N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.0*D;               % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -26,7 +26,7 @@ bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' fun
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
-mulim     =  1e-6;                % Setting a limint for melt fraction
+mulim     =  1e-4;                % Setting a limint for melt fraction
 
 % set initial thermo-chemical state
 init_mode =  'MOR';
@@ -37,7 +37,7 @@ wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative
 c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
 c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0,0]*1e-4;     % Random perturbation of the composition field
+dcr       =  [1,-1,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
@@ -68,22 +68,22 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  3e8;                 % yield stress for shear failure [Pa]
-pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
-etaymin   =  1e18;                % minimum yield viscosity
+tyield    =  1e8;                 % yield stress for shear failure [Pa]
+pyield    =  5e7;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e20;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL       =  0.5;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
-rtol      =  1e-4;                % outer its relative tolerance
+CFL       =  1.0;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
+rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
-maxit     =  12;                  % maximum outer its
-alpha     =  0.6;                 % iterative step size
-gamma     =  0.1;                 % relaxing parameter for viscosity update
-etacntr   =  1e6;                 % maximum viscosity contrast
-etamin    =  1e17;                % minimum viscosity
-Rcouple   =  1;                   % switch on for full reactive coupling
+maxit     =  15;                  % maximum outer its
+alpha     =  0.50;                 % iterative step size
+gamma     =  0.25;                 % relaxing parameter for viscosity update
+etacntr   =  1e5;                 % maximum viscosity contrast
+etamin    =  1e18;                % minimum viscosity
+Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
 
 %*****  RUN NAKHLA MODEL  *************************************************

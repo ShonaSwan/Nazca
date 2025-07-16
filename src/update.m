@@ -28,14 +28,14 @@ cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
  c_oxd_all(:,:,cal.ioxd) = c_oxd;
 
 % update phase densities
-rhom0  = reshape(DensityX(reshape(cm_oxd_all,Nz*Nx,9),Tref,Pref./1e8)    ,Nz,Nx);
+rhom0  = reshape(DensityX(reshape(cm_oxd_all,Nz*Nx,9),293,Pref./1e8)    ,Nz,Nx);
 rhox0  = reshape(sum(reshape(cx_mem/100,Nz*Nx,cal.nmem)./cal.rhox0,2).^-1,Nz,Nx);
 
-rhom   = rhom0 .* (1 - aTm.*(T-Tref) + bPm.*(Pt-Pref));
-rhox   = rhox0 .* (1 - aTx.*(T-Tref) + bPx.*(Pt-Pref));
+rhom   = rhom0 .* (1 - aTm.*(T-293) + bPm.*(Pt-Pref));
+rhox   = rhox0 .* (1 - aTx.*(T-293) + bPx.*(Pt-Pref));
 
 rho0   = 1./(m./rhom0 + x./rhox0);
-rho    = 1./(m./rhom + x./rhox);
+rho    = 1./(m./rhom  + x./rhox );
 
 rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;
 
@@ -61,7 +61,7 @@ RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
 Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 %Extracted bounday conditions
-twophs = double(mu(icz,icx)>=mulim);
+if iter==1; twophs = double(mu(icz,icx)>=mulim); end  % update two-phase masking once per time step
 
 % update lithostatic pressure
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
@@ -72,16 +72,16 @@ end
 Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mu);
 
 % update pure phase viscosities
-etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);
+etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
 etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
-etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(Tref+273.15)));
+etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-ff = max(eps,min(1-eps,permute(cat(3,chi,mu ),[3,1,2])));
+ff = max(mulim,min(1-mulim,permute(cat(3,chi,mu ),[3,1,2])));
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -96,19 +96,21 @@ eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
 % get yield viscosity
 etay   = tyield./(eII + eps^1.25) + etaymin;
+for i=1:2; etay = etay + diffus(etay,1/8*ones(size(rp)),1,[1,2],BCD); end
 eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
 
 % traditional two-phase coefficients
-KD     = (mu+eps).^2./squeeze(Cv(2,:,:)+eps);  % melt segregation coeff
+KD     = (mu+mulim).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
 zeta0  = eta./(mu+mulim);  % solid compaction coeff
 
 % get yield viscosity
-zetay  = (pyield+(1-twophs(2:end-1,2:end-1)).*Pt)./(max(0,Div_V)+eps^1.25) + etaymin./(mu+mulim);
+zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./(mu+mulim);
+for i=1:2; zetay = zetay + diffus(zetay,1/8*ones(size(rp)),1,[1,2],BCD); end
 zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % extract potential density
-rhom_nP = rhom0 .* (1 - aTm.*(Tp-Tref));
-rhox_nP = rhox0 .* (1 - aTx.*(Tp-Tref));
+rhom_nP = rhom0 .* (1 - aTm.*(Tp-293));
+rhox_nP = rhox0 .* (1 - aTx.*(Tp-293));
 
 rho_nP  = 1./(m./rhom_nP + x./rhox_nP);
 

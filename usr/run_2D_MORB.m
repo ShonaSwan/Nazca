@@ -5,16 +5,16 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB_N200';           % run identifier
+runID     =  '2D_MORB_N100';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  20;                   % output frame plotted/saved every 'nop' time steps
+nop       =  10;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  200;                 % number of grid points in z-direction
+N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -60,19 +60,19 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  3e8;                 % yield stress for shear failure [Pa]
-pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
-etaymin   =  1e18;                % minimum yield viscosity
+tyield    =  1e8;                 % yield stress for shear failure [Pa]
+pyield    =  5e7;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e20;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL       =  0.5;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
+CFL       =  1.0;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
-maxit     =  12;                  % maximum outer its
-alpha     =  0.6;                 % iterative step size
-gamma     =  0.1;                 % relaxing parameter for viscosity update
+maxit     =  15;                  % maximum outer its
+alpha     =  0.50;                 % iterative step size
+gamma     =  0.25;                 % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling

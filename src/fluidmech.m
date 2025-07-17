@@ -41,12 +41,21 @@ aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
-aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wbot];
-aa  = zeros(size(ii)); 
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+if bndmode == 1 % Plume set up 
+    ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
+    aa  = zeros(size(ii)) + bnd_pl(icx) / pl_rate * 2;
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wbot];
+    %aa  = zeros(size(ii)); 
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+else 
+    ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
+    aa = zeros(size(ii));
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wbot];
+    aa  = zeros(size(ii)); 
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+end 
 
 % left boundary
 ii  = MapW((2:end-1),1); jj1 = ii; jj2 = MapW((2:end-1),2);
@@ -99,11 +108,19 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
-aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+if bndmode == 0 % Mid ocean Ridge set up 
+    ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
+    aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+else
+    ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
+    aa  = zeros(size(ii));
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
+    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];    
+end
 
 % bottom boundary
 ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
@@ -290,9 +307,13 @@ ii = MapP(2:end-1, 2:end-1);
 KD_rho_g     = KD .* (rhox - rhom) * g0/(KD0*Drho0*g0);
 dKD_rho_g_dz = ddz((KD_rho_g([1 1:end],:)+KD_rho_g([1:end end],:))/2,h/h0);
 rr  = dKD_rho_g_dz + VolSrc*t0;
+if bndmode == 0
 rr(end,end) = 0;  % avoid conflict with boundary conditions at lower right corner (Div.v = 0)
+end
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
+
+
 
 KF = sparse(IIL,JJL,AAL,NP,NP);
 RF = sparse(IIR,ones(size(IIR)),AAR,NP,1);

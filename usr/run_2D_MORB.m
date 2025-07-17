@@ -21,6 +21,9 @@ sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the
 Hcmin     =  6e3;                 % Minimum crustal thickness 
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
+pl_width  = 50e3;                % Plume Width in meters [m]
+pl_rate   = 0.05/ yr;            % Plume inflow rate [m/s]
+pl_center = L / 2;                % Temp variable center of domain for plume center
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
@@ -29,24 +32,26 @@ dt        =  1e2*yr;              % initial time step [s]
 mulim     =  1e-4;                % Setting a limint for melt fraction
 
 % set initial thermo-chemical state
-init_mode =  'MOR';
+init_mode =  'plume';               % Model settings 'MOR' mid ocean ridge and 'plume'a mantle plume set up
 minage    =  7e5*yr;
 T0        =  5;                   % temperature top  layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
+Tplume    =  1500;                % temperature of plume   [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
 c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
 c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
+c_plume   =  [0.85 0.14 0.01 0];  % dunite, basalt, rhyolite, water
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,-1,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
-trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
-trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
-
+trc0      =  [ 1.0, 1.0,1.0, 1.0, 1.0,1.0]; % trace elements and Isotopes system layer [wt ppm]
+trc_crust =  [ 0.1, 0.1,0.5,10.0,10.0,0.5]; % trace elements and Isotopes crust layer [wt ppm]
+trc_plume =  [10.0,10.0,2.0, 0.1, 0.1,2.0]; % trace elements and Isotopes plume [wt ppm]
 % set thermo-chemical boundary parameters
 periodic  =  0;
-bndmode   =  0;                   % boundary assimilation mode (0 = Mid-Ocean Ridge setup, 1 = Plume setup)
+bndmode   =  1;                   % boundary assimilation mode (0 = Mid-Ocean Ridge setup, 1 = Plume setup)
 bnd_w     =  h;                   % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)

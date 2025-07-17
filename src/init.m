@@ -90,14 +90,17 @@ bnd_V = zeros(Nz,Nx);
 
 % Boundary condition options:
 % -1 = free slip, +1 = No slip, 0 = No gradient/Symetrical
-if bndmode==0; %Mid Ocean Ridge
+if bndmode == 0; %Mid Ocean Ridge
 Wtop  =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
 Utop  = +1;  Ubot  = -1;  Uleft  =  0;  Uright  = -1;
 Pftop = -1;  Pfbot = +1;  Pfleft = -1;  Pfright = -1;
-Pcall    = -1;
+Pcall = -1;
 
 elseif bndmode == 1; % Mantle Plume
- 
+Wtop  =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
+Utop  =  0;  Ubot  = -1;  Uleft  =  0;  Uright  =  0;
+Pftop = -1;  Pfbot = +1;  Pfleft = -1;  Pfright = -1;
+Pcall = -1;
 
 else; %Error Message 
  disp(['Invalid Bndmode']);
@@ -114,60 +117,26 @@ end
 
 % Calculating the crustal thickness 
 Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
-%Hc = Hcmin - 1e6;   
+%Hc = Hcmin - 1e6; 
+
 switch init_mode
-    case 'layer'
-        Tp  =  T0 + (T1-T0) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_T))/2 + dTr.*rp + dTg.*gp;  % potential temperature [C]
-        c = zeros(Nz,Nx,cal.ncmp);
-        for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % major elements
-        end
-        trc = zeros(Nz,Nx,cal.ntrc);
-        for i = 1:cal.ntrc
-            trc(:,:,i)  =  trc0(i) + (trc1(i)-trc0(i)) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
-        end
-    case 'linear'
+    case 'plume'
+        pl_sigma = pl_width / (2 * sqrt(2 * log(2)));
+        
         Tp  =  T0 + (T1-T0) .* (ZZ/D) + dTr.*rp + dTg.*gp;  % potential temperature [C]
+        
         c = zeros(Nz,Nx,cal.ncmp);
         for i = 1:cal.ncmp
-            c(:,:,i)  =  c0(i) + (c1(i)-c0(i)) .* (ZZ/D) + dcr(i).*rp + dcg(i).*gp;  % major elements
+            c(:,:,i)  =  c0(i) + (c_crust(i)-c0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % major elements
         end
         trc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
-            trc(:,:,i)  =  trc0(i) + (trc1(i)-trc0(i)) .* (ZZ/D) + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
+            trc(:,:,i)  =  trc0(i) + (trc_crust(i)-trc0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
         end
-    case 'read_1D'
-        initname = [outdir,'/',runID,'/',runID,'_init.mat'];
-        load(initname,'m','Tp','c','trc');
-
-        hi  = D./(size(Tp,1));
-        Xci = +hi/2:hi:L-hi/2;
-        Zci = +hi/2:hi:D-hi/2;
-        m   = repmat(interp1(Zci,m,Zc).',1,Nx);
-        indmix = m>0.75;
-
-        Tp  = repmat(interp1(Zci,Tp-273.15,Zc).',1,Nx);
-        Tp(indmix) = mean(Tp(indmix));
-        Tp = Tp + dTr.*rp + dTg.*gp;
-
-        ci = zeros(Nz,Nx,cal.ncmp);
-        for i = 1:cal.ncmp
-            cii  = repmat(interp1(Zci,c(:,:,i),Zc).',1,Nx);
-            cii(indmix) = mean(cii(indmix));
-            ci(:,:,i)   = cii + dcr(i).*rp + dcg(i).*gp;
-        end
-        c = ci;
-
-        trci = zeros(Nz,Nx,cal.ntrc);
-        for i = 1:cal.ntrc
-            trcii   = repmat(interp1(Zci,trc(:,:,i),Zc).',1,Nx);
-            trcii(indmix) = mean(trcii(indmix));
-            trci(:,:,i)   = trcii + dr_trc(i).*rp + dg_trc(i).*gp;
-        end
-        trc = trci;
 
     case 'MOR'
         sprtime = XX./sprate + minage;
+        
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
 
         for i = 1:cal.ncmp
@@ -178,13 +147,14 @@ switch init_mode
             trc(:,:,i)  =  trc0(i) + (trc_crust(i)-trc0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
         end
 
-    
-        
 end 
 
 
 %Defining the top bounday spreading rate 's' shape function
 bnd_spr = (1-exp(-Xu./bnd_sprw)) .* sprate;
+
+%Defining the Gaussian inflow profile of the plume 
+bnd_pl  = pl_rate * exp(-((Xu - pl_center).^2) / pl_sigma^2);
 
 Tin = Tp;
 

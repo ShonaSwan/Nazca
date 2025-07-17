@@ -70,50 +70,17 @@ MapP = reshape(1:NP,Nz+2,Nx+2);
 MapW = reshape(1:NW,Nz+1,Nx+2);
 MapU = reshape(1:NU,Nz+2,Nx+1) + NW;
 
-% set up shape functions for initial boundary layers
-
-%sdsinit = zeros(size(XX)); %spare sides boundary variable (both left and right)
-topinit = zeros(size(ZZ));
-botinit = zeros(size(ZZ));
-
-if any(bnd_h)
-    switch bndmode
-        case 0  % none
-        case 1  % top only
-            topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
-        case 2  % bot only
-            botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-        case 3  % top/bot only
-            topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
-            botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-        case 4 % all walls
-            topinit = (1+erf( ( -ZZ+bnd_h(1))/bnd_w))/2;
-            botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-        case 5 % mid ocean ridge set up
-            topinit = 0.5 * (1 + tanh(XX / bnd_w));
-            botinit = (1+erf(-(D-ZZ-bnd_h(2))/bnd_w))/2;
-    end
-end
-
 % set up shape functions for transient boundary layers
 topshape = zeros(size(ZZ));
 botshape = zeros(size(ZZ));
 
 if ~any(bnd_h)
     switch bndmode
-        case 0  % none
-        case 1  % top only
-            topshape = exp( ( -ZZ)/bnd_w);
-        case 2  % bot only
-            botshape = exp(-(D-ZZ)/bnd_w);
-        case 3  % top/bot only
-            topshape = exp( ( -ZZ)/bnd_w);
-            botshape = exp(-(D-ZZ)/bnd_w);
-        case 4 % all walls
-            topshape = exp( ( -ZZ)/bnd_w);
-            botshape = exp(-(D-ZZ)/bnd_w);
-        case 5 % mid ocean ridge set up
+        case 0 % Mid Ocean Ridge set up
             topshape = exp( ( -ZZ+h/2)/bnd_w);
+        case 1 % Mantle Plume set up 
+            topshape = exp( ( -ZZ)/bnd_w);
+            botshape = exp(-(D-ZZ)/bnd_w);
     end
 end
 
@@ -121,14 +88,21 @@ bnd_S = zeros(Nz,Nx);
 bnd_C = zeros(Nz,Nx,cal.ncmp);
 bnd_V = zeros(Nz,Nx);
 
-% set specified boundaries to no slip, else to free slip
-if bndmode>=4;               sdleft = +1; sdright = +1;      % no slip sides for 'all sides(4)'
-else;                        sdleft = -1; sdright = -1; end  % free slip sides for other types
-if bndmode==1 || bndmode>=3; top = +1;      % no slip top for 'top only(1)', 'top/bot(3)', 'all sides(4)'
-else;                        top = -1; end  % free slip for other types
-if bndmode>=2;               bot = +1;      % no slip bot for 'bot only(2)', 'top/bot(3)', 'all sides(4)'
-else;                        bot = -1; end  % free slip for other types
-if bndmode==5;               sdleft = -1; sdright = -1; top = 1; bot = -1; end %Mid ocean ridge setting
+% Boundary condition options:
+% -1 = free slip, +1 = No slip, 0 = No gradient/Symetrical
+if bndmode==0; %Mid Ocean Ridge
+Wtop  =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
+Utop  = +1;  Ubot  = -1;  Uleft  =  0;  Uright  = -1;
+Pftop = -1;  Pfbot = +1;  Pfleft = -1;  Pfright = -1;
+Pcall    = -1;
+
+elseif bndmode == 1; % Mantle Plume
+ 
+
+else; %Error Message 
+ disp(['Invalid Bndmode']);
+end
+
 
 %Se ghosted index array
     icx = [1,1:Nx,Nx];
@@ -140,7 +114,7 @@ if bndmode==5;               sdleft = -1; sdright = -1; top = 1; bot = -1; end %
 
 % Calculating the crustal thickness 
 Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
-%Hc = Hcmin - 1e6;%max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));   
+%Hc = Hcmin - 1e6;   
 switch init_mode
     case 'layer'
         Tp  =  T0 + (T1-T0) .* (1+erf((ZZ/D-zlay+rp*h*dlay)/wlay_T))/2 + dTr.*rp + dTg.*gp;  % potential temperature [C]
@@ -212,22 +186,10 @@ end
 %Defining the top bounday spreading rate 's' shape function
 bnd_spr = (1-exp(-Xu./bnd_sprw)) .* sprate;
 
-% apply initial boundary layers
-if any(topinit(:)) && ~isnan(Twall(1)); Tp = Tp + (Twall(1)-Tp).*topinit; end
-if any(botinit(:)) && ~isnan(Twall(2)); Tp = Tp + (Twall(2)-Tp).*botinit; end
-
 Tin = Tp;
 
-for i = 1:cal.ncmp
-    if any(topinit(:)) && ~any(isnan(cwall(1,:))); c(:,:,i) = c(:,:,i) + (cwall(1,i)-c(:,:,i)).*topinit; end
-    if any(botinit(:)) && ~any(isnan(cwall(2,:))); c(:,:,i) = c(:,:,i) + (cwall(2,i)-c(:,:,i)).*botinit; end
-end
 cin = c;
 
-for i = 1:cal.ntrc
-    if any(topinit(:)) && ~isnan(trcwall(1,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(1,i)-trc(:,:,i)).*topinit; end
-    if any(botinit(:)) && ~isnan(trcwall(2,i)); trc(:,:,i) = trc(:,:,i) + (trcwall(2,i)-trc(:,:,i)).*botinit; end
-end
 tein = trc;
 
 U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U; qDx = 0.*U;

@@ -5,7 +5,7 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB_N100';      % run identifier
+runID     =  '2D_MORB_N1';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  10;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -46,7 +46,7 @@ trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
 
 % set thermo-chemical boundary parameters
 periodic  =  0;
-bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
+bndmode   =  0;                   % boundary assimilation mode (0 = Mid-Ocean Ridge setup, 1 = Plume setup)
 bnd_w     =  h;                   % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)

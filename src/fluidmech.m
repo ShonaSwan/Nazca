@@ -33,9 +33,10 @@ AAR = [];       % forcing entries for R
 % assemble coefficients of z-stress divergence
 
 % top boundary
-ii  = MapW(1,:); jj1 = ii;  
+ii  = MapW(1,:); jj1 = ii; jj2 = MapW(2,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wtop];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
@@ -43,7 +44,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wbot];
 aa  = zeros(size(ii)); 
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
@@ -51,14 +52,14 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapW((2:end-1),1); jj1 = ii; jj2 = MapW((2:end-1),2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wleft];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
 ii  = MapW((2:end-1),end); jj1 = ii; jj2 = MapW((2:end-1),end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];  AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)+Wright];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
@@ -101,20 +102,21 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
 aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Ubot];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
-ii  = MapU((2:end-1),1); jj = ii;
+ii  = MapU((2:end-1),1); jj = ii; jj2 = MapU((2:end-1),2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Uleft];
 aa  = zeros(size(ii));% + UBG((2:end-1),1);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
@@ -122,7 +124,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Uright];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
@@ -237,28 +239,28 @@ AAR = [];       % forcing entries for R
 ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pftop];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapP(end,:);  jj1 = ii; jj2 = MapP(end-1,:); 
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pfbot];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)]; 
 
 % left boundary  
 ii  = MapP((2:end-1),1);  jj1 = ii;  jj2 = MapP((2:end-1),2); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pfleft];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
 ii  = MapP((2:end-1),end); jj1 = ii;  jj2 = MapP((2:end-1),end-1); 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pfright];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % Internal Points
@@ -309,28 +311,28 @@ AAR = [];       % forcing entries for R
 ii  = MapP(1,:);  jj1 = ii; jj2 = MapP(2,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pcall];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapP(end,:);  jj1 = ii;  jj2 = MapP(end-1,:);
 aa = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pcall];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary  
 ii  = MapP((2:end-1),1);  jj1 = ii;  jj2 = MapP((2:end-1),2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pcall];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
 ii  = MapP((2:end-1),end); jj1 = ii;  jj2 = MapP((2:end-1),end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Pcall];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 
@@ -436,12 +438,13 @@ if ~bnchm
 
     % z-Darcy flux
     qDz(2:end-1,2:end-1) = - (KD(1:end-1,:).*KD(2:end,:)).^0.5.*(ddz(Pf(2:end-1,2:end-1),h)-((rhom(1:end-1,:)+rhom(2:end,:))/2-mean(rhow(2:end-1,:),2)).*g0); % melt segregation speed
-    qDz([1,end],:) = min(1,1-[top;bot]).*qDz([2,end-1],:);
+    qDz([1,end],:) = min(1,1-[1;-1]).*qDz([2,end-1],:);
     qDz(:,[1 end]) = qDz(:,[2 end-1]);
 
     % x-Darcy flux
     qDx(2:end-1,2:end-1) = - (KD(:,1:end-1).*KD(:,2:end)).^0.5 .*(ddx(Pf(2:end-1,2:end-1),h));
-    qDx(:,[1,end]) = qDx(:,[2,end-1]); % Simple extrapolation for left/right, adjust if needed
+    qDx(:,end) = qDx(:,end-1); 
+    qDx(:,1) = 0;
     qDx([1 end],:) = qDx([2 end-1],:); % Top/bottom copied from interior
 
     muz  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;

@@ -52,6 +52,9 @@ mu     = max(0,min(1, m.*rho./rhom ));
 chi_mem = reshape(reshape(cx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
 chi_mem = chi_mem./sum(chi_mem,3);
 
+muz  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;
+mux  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;
+
 % update thermal parameters
 aT = mu.*aTm + chi.*aTx;
 bP = mu.*bPm + chi.*bPx;
@@ -61,7 +64,11 @@ RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
 Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 %Extracted bounday conditions
-if iter==1; twophs = double(mu(icz,icx)>=mulim); end  % update two-phase masking once per time step
+if iter==1; 
+twophs  = double(mu(icz,icx)>=mulim); 
+twophsw = double(mu(icz,icx)>=mulim);
+twophsu = double(mu(icz,icx)>=mulim);
+end  % update two-phase masking once per time step
 
 % update lithostatic pressure
 if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else

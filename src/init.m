@@ -114,6 +114,7 @@ if ~any(bnd_h)
             botshape = exp(-(D-ZZ)/bnd_w);
         case 5 % mid ocean ridge set up
             topshape = exp( ( -ZZ+h/2)/bnd_w);
+            botshape = exp(-(D-ZZ+h/2)/bnd_w);
     end
 end
 
@@ -248,13 +249,13 @@ sref   = 0e3; % reference entropy
 c0_oxd = c0*cal.cmp_oxd;
 c0_oxd_all = zeros(size(c0,1),9);
 c0_oxd_all(:,cal.ioxd) = c0_oxd;
-rhom0   = mean(cal.rhox0-500).*ones(size(Tp));
-rhox0   = mean(cal.rhox0).*ones(size(Tp)); 
+rhom0  = mean(cal.rhox0-500).*ones(size(Tp));
+rhox0  = mean(cal.rhox0).*ones(size(Tp)); 
 Pchmb  = Pchmb0;  Pchmbo = Pchmb;  Pchmboo = Pchmbo;  dPchmbdt = Pchmb;  dPchmbdto = dPchmbdt; dPchmbdtoo = dPchmbdto;  upd_Pchmb = dPchmbdt;
-Pt     = Ptop + Pchmb + mean(rhom0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
+Pt     = Ptop + mean(rhox0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
 rhox   = rhox0.*(1+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1+bPm.*(Pt-Pref));
-rho    = rhom;
+rho    = rhox;
 rhow  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhou  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhow.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
@@ -363,6 +364,8 @@ Mo   = M;
 Co   = C;
 Xo   = X;
 rhoo = rho;
+
+sm   = cPm.*log(Tp./Tref) + Dsm;  sx = cPx.*log(Tp./Tref);  
 
 % get trace element phase compositions
 Ktrc = zeros(Nz,Nx,cal.ntrc);

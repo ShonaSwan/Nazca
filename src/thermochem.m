@@ -45,7 +45,7 @@ advn_C = - advect(M.*cm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  
          - advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
 % major component diffusion (regularisation)
-diff_C = diffus(cm,M.*kc,h,[1,2],BCD) + diffus(cx,X.*kc,h,[1,2],BCD);
+% diff_C = diffus(cm,M.*kc,h,[1,2],BCD) + diffus(cx,X.*kc,h,[1,2],BCD);
 
 % boundary layers
 bnd_C = zeros(size(C));
@@ -55,7 +55,7 @@ for i = 1:cal.ncmp
 end
 
 % total rate of change
-dCdt = advn_C + diff_C + bnd_C + Gemc + Gexc;                                            
+dCdt = advn_C + bnd_C + Gemc + Gexc;                                            
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -90,8 +90,8 @@ res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 % semi-implicit update of phase fraction densities
 upd_X = - alpha*res_X*dt/a1 + beta*upd_X;
 upd_M = - alpha*res_M*dt/a1 + beta*upd_M;
-X     = max(eps,min(rho-eps,X + upd_X));
-M     = max(eps,min(rho-eps,M + upd_M));
+X     = max(0,min(rho-0, X + upd_X ));
+M     = max(0,min(rho-0, M + upd_M ));
 
 %***  update phase fractions and component concentrations
 

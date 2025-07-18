@@ -28,9 +28,10 @@ Gmc = (cmq.*mq-cm.*m).*RHO/max(tau_r,10*dt);
 Gxc = (cxq.*xq-cx.*x).*RHO/max(tau_r,10*dt);
 
 % extract and erupt melt
-Gem = min(0,mthr-m).*RHO/max(tau_e,10*dt);
+Gem = min(0,mthr-m).*RHO/max(tau_e,30*dt);
+for i=1:2; Gem = Gem + diffus(Gem,1/8*ones(size(rp)),1,[1,2],BCD); end
 Gex = topshape.*(-sum(Gem,1))./sum(topshape,1);
-for i=1:4; Gex = Gex + diffus(Gex,1/8*ones(size(rp)),1,[1,2],BCD); end
+for i=1:2; Gex = Gex + diffus(Gex,1/8*ones(size(rp)),1,[1,2],BCD); end
 
 Gemc = cm.*Gem;
 Gexc = topshape.*(-sum(Gemc,1))./sum(topshape,1);

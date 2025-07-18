@@ -14,10 +14,10 @@ while time <= tend && step <= Nt
     resnorm  = 1;
     resnorm0 = resnorm;
     iter     = 1;
-    if frst; alpha = alpha/2; beta = beta/2; end
+    % if frst; alpha = alpha/2; beta = beta/2; end
 
     %%%%% Non-Linear Iteration Loop %%%%
-    while resnorm/resnorm0 >= rtol/(1 + frst*10) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst)
+    while resnorm/resnorm0 >= rtol/(1 + frst*100) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst)
         
         %%%% solve thermo-chemical equations
         thermochem;
@@ -55,7 +55,8 @@ while time <= tend && step <= Nt
     % increment time/step
     time = time+dt;
     step = step+1;
-    if frst; alpha = alpha*2; beta = beta*2; frst=0; end
+    frst = 0;
+    % if frst; alpha = alpha*2; beta = beta*2; frst=0; end
  
 %%%% The end of the Physical Time Stepping Loop %%%% 
 end

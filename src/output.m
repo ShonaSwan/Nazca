@@ -378,7 +378,7 @@ else % create 2D plots
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\nabla \cdot \mathbf{v}$ [1/s]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh3,'CurrentAxes',ax(33));
-    imagesc(Xsc,Zsc,Gm./rho*TimeScale*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,max(-max(Gm(:)),Gm)./rho*TimeScale*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_m/\bar{\rho}$ [wt\%/',TimeUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     set(fh3,'CurrentAxes',ax(34));
     imagesc(Xsc,Zsc,(Gem+Gex)./rho*TimeScale*100); axis ij equal tight; box on; cb = colorbar;

@@ -35,11 +35,11 @@ for i=1:2; Gex = Gex + diffus(Gex,1/8*ones(size(rp)),1,[1,2],BCD); end
 
 Gemc = cm.*Gem;
 Gexc = topshape.*(-sum(Gemc,1))./sum(topshape,1);
-for i=1:5; Gexc = Gexc + diffus(Gexc,1/8*ones(size(rp)),1,[1,2],BCD); end
+for i=1:2; Gexc = Gexc + diffus(Gexc,1/8*ones(size(rp)),1,[1,2],BCD); end
 
 Gemt = trcm.*Gem;
 Gext = topshape.*(-sum(Gemt,1))./sum(topshape,1);
-for i=1:4; Gext = Gext + diffus(Gext,1/8*ones(size(rp)),1,[1,2],BCD); end
+for i=1:2; Gext = Gext + diffus(Gext,1/8*ones(size(rp)),1,[1,2],BCD); end
 
 cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);

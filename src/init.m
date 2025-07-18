@@ -224,7 +224,7 @@ for i = 1:cal.ntrc
 end
 tein = trc;
 
-U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U; qDx = 0.*U;
+U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U;  um = 0.*U; qDx = 0.*U;
 W   =  zeros(Nz+1,Nx+2);  WBG = W; Wi = W; wx = 0.*W; wm = 0.*W; upd_W = 0*W;  qDz = 0.*W; 
 Pf  =  zeros(Nz+2,Nx+2);  Vel = 0.*Tp; upd_Pf= 0*Pf; %Div_rhoV = 0.*P;  DD = sparse(length(P(:)),length([W(:);U(:)]));
 Pc   =  zeros(Nz+2,Nx+2);
@@ -256,8 +256,9 @@ Pt     = Ptop + mean(rhox0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt
 rhox   = rhox0.*(1+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1+bPm.*(Pt-Pref));
 rho    = rhox;
-rhow  = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
-rhou  = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
+M      = 0*rhox;
+rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
+rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhow.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
 rhoUo  = rhou.*U(2:end-1,:); rhoUoo = rhoUo; advn_mx = 0.*rhoUo;
 mq = zeros(size(Tp));  xq = 1-mq;  
@@ -324,10 +325,6 @@ while res > tol
         eqtime = toc(eqtime);
         EQtime = EQtime + eqtime;
 
-        update;
-        Pf(2:end-1,2:end-1) = Pt;
-        Px = Pt;
-
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             m = m * (minit./max(m(:)))^0.25;
@@ -344,6 +341,10 @@ while res > tol
         M    = rho.*m;  RHO = X+M;
         C    = rho.*c;
         S    = rho.*s;
+
+        update;
+        Pf(2:end-1,2:end-1) = Pt;
+        Px = Pt;
 
         [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);

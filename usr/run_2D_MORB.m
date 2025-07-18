@@ -5,16 +5,16 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB_N100';      % run identifier
+runID     =  '2D_MORB_N120';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  1;                  % output frame plotted/saved every 'nop' time steps
+nop       =  10;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
-save_op   =  0;                   % switch on to save output to file
+save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  100;                 % number of grid points in z-direction
+N         =  160;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -24,7 +24,8 @@ bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' fun
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
-mulim     =  1e-5;                % Setting a limit for melt fraction
+mumin     =  1e-5;                % Setting lower limit for melt fraction in coeff. use
+mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff. use
 
 % set initial thermo-chemical state
 init_mode =  'MOR';
@@ -40,7 +41,7 @@ periodic  =  0;
 bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
 bnd_w     =  h/2;                   % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
-Twall     =  [T0,T1,nan,nan];     % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+Twall     =  [T0,nan,nan,nan];     % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);
 Ptop      =  4.0e7;               % top pressure [Pa]
 
@@ -65,13 +66,13 @@ etaymin   =  1e20;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
-ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
+ADVN      =  'centr';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
 CFL       =  0.75;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-4;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.50;                % iterative step size
-gamma     =  0.50;                % relaxing parameter for viscosity update
+alpha     =  0.75;                % iterative step size
+gamma     =  0.25;                % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling

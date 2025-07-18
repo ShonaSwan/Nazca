@@ -341,11 +341,11 @@ else % create 2D plots
     imagesc(Xsc,Zsc, (Pf+Pc)./1e6); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P$ [MPa]'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh1,'CurrentAxes',ax(14));
-    imagesc(Xsc,Zsc,-qDz./SpeedScale); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{D,z}$ [',SpeedUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    imagesc(Xsc,Zsc,-wm./SpeedScale); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Delta w$ [',SpeedUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh1,'CurrentAxes',ax(15));
-    imagesc(Xsc,Zsc,-qDx./SpeedScale); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{D,x}$ [',SpeedUnits,']'],TX{:},FS{:});  xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
+    imagesc(Xsc,Zsc, um./SpeedScale); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Delta u$ [',SpeedUnits,']'],TX{:},FS{:});  xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
     set(fh1,'CurrentAxes',ax(16));
     imagesc(Xsc,Zsc, max(-1e8,min(1e8,Pc))/1e6); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$P_c$ [MPa]'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
@@ -371,7 +371,7 @@ else % create 2D plots
     % plot phase fractions and reaction rates in Fig. 3
     set(0,'CurrentFigure',fh3)
     set(fh3,'CurrentAxes',ax(31));
-    imagesc(Xsc,Zsc,log10((m+mulim).*100)); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,log10((m+mumin).*100)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$m$ [log$_{10}$ wt\%]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh3,'CurrentAxes',ax(32));
     imagesc(Xsc,Zsc,Div_V); axis ij equal tight; box on; cb = colorbar;

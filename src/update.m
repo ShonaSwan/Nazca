@@ -44,6 +44,9 @@ rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2;
 rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 
+Mw     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;
+Mu     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;
+
 % update density contrasts
 Drhow  = rhow -mean(rhow,2);
 Drhomw = rhomw-mean(rhow,2);
@@ -57,6 +60,8 @@ rhop  = 1./(m./rhomp + x./rhoxp);
 % convert weight to volume fraction, update bulk density
 chi    = max(0,min(1, x.*rho./rhox ));
 mu     = max(0,min(1, m.*rho./rhom ));
+
+mucff  = (1./mu + 1./mumax).^-1 + mumin;
 
 % interpolate to staggered stencil nodes
 muw  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;
@@ -75,11 +80,11 @@ Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 % Extracted bounday conditions
 if iter==1 % update two-phase masking once per time step
-    twophs  = double(mu (icz,icx)>=mulim); 
-    twophsw  = (twophs (icz(1:end-1),icx)+twophs (icz(2:end),icx))./2;
-    twophsu  = (twophs (icz,icx(1:end-1))+twophs (icz,icx(2:end)))./2;
-    % twophsw = double(muw         >=mulim);
-    % twophsu = double(muu         >=mulim);
+    twophs  = double(mu (icz,icx)>=mumin); 
+    % twophsw  = (twophs (icz(1:end-1),icx)+twophs (icz(2:end),icx))./2;
+    % twophsu  = (twophs (icz,icx(1:end-1))+twophs (icz,icx(2:end)))./2;
+    twophsw = double(muw         >=mumin);
+    twophsu = double(muu         >=mumin);
 end  
 
 % update lithostatic pressure
@@ -100,7 +105,7 @@ kv = permute(cat(3,etax,etam),[3,1,2]);
 Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
 
 % get permission weights
-ff = permute(cat(3,chi,mu+mulim),[3,1,2]);
+ff = permute(cat(3,1-mucff,mucff),[3,1,2]);
 FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
 Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
 Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
@@ -118,21 +123,22 @@ etay   = tyield./(eII + eps^1.25) + etaymin;
 eta    = eta.^gamma .* ((1./etay + 1./eta0).^-1).^(1-gamma);
 
 % traditional two-phase coefficients
-KD     = (mu+mulim).^2./squeeze(Cv(2,:,:));  % melt segregation coeff
-KD     = (1./KD + 1./1e-10).^-1 + 1e-24;
+Cv     = squeeze(Cv(2,:,:));
+Ks     = mucff   ./Cv;  % melt segregation coeff
+KD     = mucff.^2./Cv;  % Darcy coeff
 
-zeta0  = eta./(mu+mulim);  % solid compaction coeff
+zeta0  = eta./mucff;  % solid compaction coeff
 
 % get yield viscosity
-zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./(mu+mulim);
+zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./mucff;
 zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % interpolate to staggered stencil nodes
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
 
-KDw    = (KD(icz(1:end-1),:) + KD(icz(2:end),:)).*0.5;
-KDu    = (KD(:,icx(1:end-1)) + KD(:,icx(2:end))).*0.5;
+Ksw    = (Ks(icz(1:end-1),:) + Ks(icz(2:end),:)).*0.5;
+Ksu    = (Ks(:,icx(1:end-1)) + Ks(:,icx(2:end))).*0.5;
 % KDw    = (KD(icz(1:end-1),:) .* KD(icz(2:end),:)).^0.5;
 % KDu    = (KD(:,icx(1:end-1)) .* KD(:,icx(2:end))).^0.5;
 
@@ -144,8 +150,8 @@ qD  = sqrt(((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))/2).^2 ...
          + ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))/2).^2);
 
 % update velocity divergences
-Div_V  = ddz(W  (:,2:end-1),h) + ddx(U  (2:end-1,:),h);                    % get velocity divergence
-Div_qD = ddz(qDz(:,2:end-1),h) + ddx(qDx(2:end-1,:),h);                    % get velocity divergence
+Div_V  = ddz(W (:,2:end-1),h) + ddx(U (2:end-1,:),h);                      % get velocity divergence
+Div_Vm = ddz(wm(:,2:end-1),h) + ddx(um(2:end-1,:),h);                      % get velocity divergence
 
 % update strain rates
 exx = diff(U(2:end-1,:),1,2)./h - Div_V./3;                                % x-normal strain rate
@@ -158,8 +164,8 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
 
 etamax = etacntr.*max(min(eta(:)),etamin);
 eta    = 1./(1./etamax + 1./eta) + etamin;
-zetamax = 1./(1./(eta./mulim) + 1./(etamax./(mu+mulim)));
-zetamin = etamin./(mu+mulim);
+zetamax = 1./(1./(eta./mucff) + 1./(etamax./mucff));
+zetamin = etamin./mucff;
 zeta   = 1./(1./zetamax + 1./zeta) + zetamin;
 
 % update dimensionless numbers

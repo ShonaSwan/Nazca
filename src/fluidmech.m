@@ -498,38 +498,57 @@ KP(ip0,ip0) = speye(length(ip0));
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 
-% % Sizes of blocks
-% [n1, m1] = size(KV);
-% [n2, m2] = size(KF);
-% [n3, m3] = size(KC);
-% 
-% % Total size
-% Ntot = n1 + n2 + n3;
-% 
-% % Preallocate LL as sparse
-% if ~exist('total_nnz','var'); total_nnz = nnz(KV) + 2*nnz(GG) + nnz(KF) + nnz(KC) + 2*nnz(DD);  end
-% LL = spalloc(Ntot, Ntot, total_nnz);
-% 
-% % Assign blocks
-% LL(1:n1,       1:m1      ) = KV;
-% LL(1:n1,    m1+1:m1+m2   ) = GG;
-% LL(1:n1, m1+m2+1:m1+m2+m3) = GG;
-% 
-% LL(n1+1:n1+n2,    1:m1    ) = DD;
-% LL(n1+1:n1+n2, m1+1:m1+m2 ) = KF;
-% 
-% LL(n1+n2+1:n1+n2+n3,       1:m1      ) = DD;
-% LL(n1+n2+1:n1+n2+n3, m1+m2+1:m1+m2+m3) = KC;
-
 OV = sparse(NW+NU,NW+NU);
 OP = sparse(NW+NU,NP);
 OC = sparse(NP,NP);
 
-% Assign blocks
-LL = [KV   OV   GG   GG; ...
-      OV.' KF   GG   OP; ...
-      DDs  DDm  KP   OC; ...
-      DD   OP.' OC.' KC];
+% % Sizes of blocks
+[n1, m1] = size(KV);
+[n2, m2] = size(KF);
+[n3, m3] = size(KP);
+[n4, m4] = size(KC);
+
+% Total size
+Ntot = n1 + n2 + n3 + n4;
+
+% Preallocate LL as sparse
+if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC)+ 2*nnz(GG) + 2*nnz(OP) + nnz(OV)+ nnz(DD) + nnz(DDs)+ nnz(DDm)+ nnz(OC);  end
+LL = spalloc(Ntot, Ntot, total_nnz);
+
+i1 = 1:n1;
+i2 = n1+1:n1+n2;
+i3 = n1+n2+1:n1+n2+n3;
+i4 = n1+n2+n3+1:Ntot;
+
+% Assign top row
+LL(i1, i1) = KV;
+LL(i1, i2) = OV;
+LL(i1, i3) = GG;
+LL(i1, i4) = GG;
+
+% Second row
+LL(i2, i1) = OV.'; 
+LL(i2, i2) = KF;
+LL(i2, i3) = GG;
+LL(i2, i4) = OP;
+
+% Third row
+LL(i3, i1) = DDs;
+LL(i3, i2) = DDm;
+LL(i3, i3) = KP;
+LL(i3, i4) = OC;
+
+% Fourth row
+LL(i4, i1) = DD;
+LL(i4, i2) = OP.';
+LL(i4, i3) = OC.';
+LL(i4, i4) = KC;
+
+% % Assign blocks
+% LL = [KV   OV   GG   GG; ...
+%       OV.' KF   GG   OP; ...
+%       DDs  DDm  KP   OC; ...
+%       DD   OP.' OC.' KC];
 
 RR  = [RV; RF; RP; RC];
 

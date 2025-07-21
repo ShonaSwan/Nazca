@@ -18,7 +18,7 @@ N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.0*D;               % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
-Hcmin     =  6e3;                 % Minimum crustal thickness 
+Hcmin     =  0e3;  %6e3               % Minimum crustal thickness 
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 

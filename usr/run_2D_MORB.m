@@ -26,7 +26,8 @@ bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' fun
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
-mulim     =  1e-4;                % Setting a limint for melt fraction
+mumin     =  1e-5;                % Setting lower limit for melt fraction in coeff. 
+mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
 % set initial thermo-chemical state
 init_mode =  'MOR';
@@ -69,17 +70,17 @@ kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
 tyield    =  1e8;                 % yield stress for shear failure [Pa]
-pyield    =  5e7;                 % yield pressure for tensile failure [Pa]
+pyield    =  1e8;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL       =  1.0;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
-rtol      =  1e-3;                % outer its relative tolerance
-atol      =  1e-7;                % outer its absolute tolerance
+CFL       =  0.75;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
+rtol      =  1e-4;                % outer its relative tolerance
+atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.50;                 % iterative step size
+alpha     =  0.75;                 % iterative step size
 gamma     =  0.25;                 % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity

@@ -30,7 +30,7 @@ mumin     =  1e-5;                % Setting lower limit for melt fraction in coe
 mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
 % set initial thermo-chemical state
-init_mode =  'MOR';
+init_mode =  'plume';               % 'plume' or 'MOR'
 minage    =  7e5*yr;
 T0        =  5;                   % temperature top  layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
@@ -41,13 +41,21 @@ c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (
 dcr       =  [1,-1,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 
+%Plume related Variables
+T_plume = 1700;
+trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];
+c_plume   = [0.85 0.14 0.01 0];
+pl_width  = 100e3;
+pl_local  = L/2;
+pl_center = L / 2;                
+
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
 
 % set thermo-chemical boundary parameters
 periodic  =  0;
-bndmode   =  5;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = Mid-Ocean Ridge setup)
+bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 bnd_w     =  h;                   % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)

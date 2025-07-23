@@ -38,14 +38,17 @@ rho0   = 1./(m./rhom0 + x./rhox0);
 rho    = 1./(m./rhom  + x./rhox );
 
 % interpolate to staggered stencil nodes
-rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;
-rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2;
+rhoxw  = (rhox(icz(1:end-1),:).*rhox(icz(2:end),:)).^0.5;
+rhomw  = (rhom(icz(1:end-1),:).*rhom(icz(2:end),:)).^0.5;
 
-rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
-rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
+rhow   = (rho(icz(1:end-1),:).*rho(icz(2:end),:)).^0.5;
+rhou   = (rho(:,icx(1:end-1)).*rho(:,icx(2:end))).^0.5;
 
-Mw     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;
-Mu     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;
+Mz     = (M(icz(1:end-1),:).*M(icz(2:end),:)).^0.5;
+Mx     = (M(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5;
+
+mz     = (m(icz(1:end-1),:).*m(icz(2:end),:)).^0.5;
+mx     = (m(:,icx(1:end-1)).*m(:,icx(2:end))).^0.5;
 
 % update density contrasts
 Drhow  = rhow -mean(rhow,2);
@@ -64,8 +67,8 @@ mu     = max(0,min(1, m.*rho./rhom ));
 mucff  = (1./mu + 1./mumax).^-1 + mumin;
 
 % interpolate to staggered stencil nodes
-muw  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;
-muu  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;
+muw  = (mu(icz(1:end-1),icx).*mu(icz(2:end),icx)).^0.5;
+muu  = (mu(icz,icx(1:end-1)).*mu(icz,icx(2:end))).^0.5;
 
 chi_mem = reshape(reshape(cx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
 chi_mem = chi_mem./sum(chi_mem,3);
@@ -88,12 +91,12 @@ if iter==1 % update two-phase masking once per time step
 end  
 
 % update lithostatic pressure
-if Nz==1; Pt    = max(1e7,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*(Pchmb + Pf(2:end-1,2:end-1)))); else
+if Nz==1; Pt    = max(Ptop,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*Pf(2:end-1,2:end-1))); else
     Pl(1,:)     = repmat(mean(rhow(1,:),2).*g0.*h/2,1,Nx) + Ptop;
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
-    Pt          = max(1e7,(1-alpha).*Pt + alpha.*(Pl + Pcouple*(Pchmb + Pf(2:end-1,2:end-1))));
+    Pt          = max(Ptop,(1-alpha).*Pt + alpha.*(Pl + Pcouple*Pf(2:end-1,2:end-1)));
 end
-Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mu);
+Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
@@ -113,34 +116,34 @@ Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
 % get momentum flux and transfer coefficients
 thtv = squeeze(prod(Mv.^Xf,2));
 Kv   = ff.*kv.*thtv;
-Cv   = Kv./dx0.^2;
+Cv   = (1-ff).*Kv./dx0.^2;
 
 % get effective viscosity
 eta0  = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
 % get yield viscosity
 etay   = tyield./(eII + eps^1.25) + etaymin;
-eta    = eta.^gamma .* ((1./etay + 1./eta0).^-1).^(1-gamma);
+eta    = (eta + ((1./etay + 1./eta0).^-1))/2;
 
 % traditional two-phase coefficients
 Cv     = squeeze(Cv(2,:,:));
 Ks     = mucff   ./Cv;  % melt segregation coeff
 KD     = mucff.^2./Cv;  % Darcy coeff
 
-zeta0  = eta./mucff;  % solid compaction coeff
+zeta   = eta./mucff;  % solid compaction coeff
 
 % get yield viscosity
-zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./mucff;
-zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
+% zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./mucff;
+% zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % interpolate to staggered stencil nodes
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
 
-Ksw    = (Ks(icz(1:end-1),:) + Ks(icz(2:end),:)).*0.5;
-Ksu    = (Ks(:,icx(1:end-1)) + Ks(:,icx(2:end))).*0.5;
-% KDw    = (KD(icz(1:end-1),:) .* KD(icz(2:end),:)).^0.5;
-% KDu    = (KD(:,icx(1:end-1)) .* KD(:,icx(2:end))).^0.5;
+% Ksw    = (Ks(icz(1:end-1),:) + Ks(icz(2:end),:)).*0.5;
+% Ksu    = (Ks(:,icx(1:end-1)) + Ks(:,icx(2:end))).*0.5;
+Ksw    = (Ks(icz(1:end-1),:) .* Ks(icz(2:end),:)).^0.5;
+Ksu    = (Ks(:,icx(1:end-1)) .* Ks(:,icx(2:end))).^0.5;
 
 % update velocity magnitudes
 Vel = sqrt(((W(1:end-1,2:end-1)+W(2:end,2:end-1))/2).^2 ...
@@ -150,8 +153,9 @@ qD  = sqrt(((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))/2).^2 ...
          + ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))/2).^2);
 
 % update velocity divergences
-Div_V  = ddz(W (:,2:end-1),h) + ddx(U (2:end-1,:),h);                      % get velocity divergence
-Div_Vm = ddz(wm(:,2:end-1),h) + ddx(um(2:end-1,:),h);                      % get velocity divergence
+Div_V    = ddz(W   (:,2:end-1),h) + ddx(U   (2:end-1,:),h);
+Div_DV   = ddz(wm  (:,2:end-1),h) + ddx(um  (2:end-1,:),h);
+Div_Vmix = ddz(Wmix(:,2:end-1),h) + ddx(Umix(2:end-1,:),h);
 
 % update strain rates
 exx = diff(U(2:end-1,:),1,2)./h - Div_V./3;                                % x-normal strain rate
@@ -188,12 +192,12 @@ if Nz==1 && Nx==1
     diss = 0.*T;  % no dissipation in 0-D mode (no diffusion, no shear deformation, no segregation)
 else
     [grdTx ,grdTz ] = gradient(T(icz,icx),h);
-    diss = kT./T.*(grdTz (2:end-1,2:end-1).^2 + grdTx (2:end-1,2:end-1).^2) ...
-         + exx.*txx + ezz.*tzz ...
-         + 2.*(exz(1:end-1,1:end-1)+exz(2:end,1:end-1)+exz(1:end-1,2:end)+exz(2:end,2:end))./4 ...
-            .*(txz(1:end-1,1:end-1)+txz(2:end,1:end-1)+txz(1:end-1,2:end)+txz(2:end,2:end))./4 ...
-         +  KD .* ((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))./2).^2 ...
-         +  KD .* ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))./2).^2;
+    exz_ce = (exz(1:end-1,1:end-1)+exz(2:end,1:end-1)+exz(1:end-1,2:end)+exz(2:end,2:end))./4;
+    diss = min(1e-3,diss ...
+         + kT./T.*(grdTz (2:end-1,2:end-1).^2 + grdTx (2:end-1,2:end-1).^2) ...
+         + eta.*exx.^2 + eta.*ezz.^2 + 2.*eta.*exz_ce.^2 ...
+         + Cv .* ((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))./2).^2 ...
+         + Cv .* ((um(2:end-1,1:end-1)+um(2:end-1,2:end))./2).^2)/2;
 end
 
 % update time step

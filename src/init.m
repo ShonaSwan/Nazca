@@ -66,6 +66,7 @@ gp = exp(-(XX-L/2).^2/(max(L,D)/8)^2 - (ZZ-D/2).^2/(max(L,D)/8)^2);
 NP = (Nz+2) * (Nx+2);
 NW = (Nz+1) * (Nx+2);
 NU = (Nz+2) * (Nx+1);
+NV = NW+NU;
 MapP = reshape(1:NP,Nz+2,Nx+2);
 MapW = reshape(1:NW,Nz+1,Nx+2);
 MapU = reshape(1:NU,Nz+2,Nx+1) + NW;
@@ -224,8 +225,8 @@ for i = 1:cal.ntrc
 end
 tein = trc;
 
-U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U;  um = 0.*U; qDx = 0.*U;
-W   =  zeros(Nz+1,Nx+2);  WBG = W; Wi = W; wx = 0.*W; wm = 0.*W; upd_W = 0*W;  qDz = 0.*W; 
+U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U;  um = 0.*U; qDx = 0.*U; Umix = 0.*U;
+W   =  zeros(Nz+1,Nx+2);  WBG = W; Wi = W; wx = 0.*W; wm = 0.*W; upd_W = 0*W;  qDz = 0.*W; Wmix = 0.*W;
 Pf  =  zeros(Nz+2,Nx+2);  Vel = 0.*Tp; upd_Pf= 0*Pf; %Div_rhoV = 0.*P;  DD = sparse(length(P(:)),length([W(:);U(:)]));
 Pc   =  zeros(Nz+2,Nx+2);
 SOL = [W(:);U(:);Pf(:);Pc(:)];
@@ -271,7 +272,7 @@ cP   = cPm; RhoCp = rho.*cP;
 Adbt = aT./RhoCp;
 Tp   = (Tp+273.15); %T = Tp;
 T    = Tp.*exp(Adbt.*(Pt-Pref));
-sm   = cPm.*log(Tp./Tref) + Dsm;  sx = cPx.*log(Tp./Tref);  
+diss = 0.*T;
 x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
 
@@ -327,7 +328,7 @@ while res > tol
 
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
-            m = m * (minit./max(m(:)))^0.25;
+            m = m * (minit./max(m(:)))^0.1;
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
@@ -393,7 +394,7 @@ Gemc = 0.*c; Gexc = 0.*c;
 Gemt = 0.*trc; Gext = 0.*trc;
 
 % initialise auxiliary variables
-dSdt   = 0.*T;  dSdto  = dSdt; diss_h = 0.*T;
+dSdt   = 0.*T;  dSdto  = dSdt; diss_h = 0.*T; 
 dTpdt  = 0.*T;  dTpdto = dTpdt;
 dTdt   = 0.*T;  dTdto  = dTdt;
 dCdt   = 0.*c;  dCdto  = dCdt;
@@ -419,7 +420,6 @@ upd_TRC = 0.*TRC;
 frst    = 1;
 step    = 0;
 time    = 0;
-iter    = 2;
 hist    = [];
 dsumSdto = 0;  dsumSdt = 0;
 dsumBdto = 0;  dsumBdt = 0;

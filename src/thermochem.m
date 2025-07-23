@@ -23,7 +23,7 @@ bnd_S = RHO.*cP.*bnd_T ./ T;
 
 
 % total rate of change
-dSdt  = advn_S + diff_S + diss_h + bnd_S +sm.*Gem + sx.*Gex;
+dSdt  = advn_S + diff_S + diss_h + bnd_S + sm.*Gem + sx.*Gex;
 
 % residual of entropy evolution
 res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
@@ -90,8 +90,8 @@ res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 % semi-implicit update of phase fraction densities
 upd_X = - alpha*res_X*dt/a1 + beta*upd_X;
 upd_M = - alpha*res_M*dt/a1 + beta*upd_M;
-X     = max(0,min(rho-0, X + upd_X ));
-M     = max(0,min(rho-0, M + upd_M ));
+X     = max(eps,min(rho-0, X + upd_X ));
+M     = max(0,min(rho-eps, M + upd_M ));
 
 %***  update phase fractions and component concentrations
 

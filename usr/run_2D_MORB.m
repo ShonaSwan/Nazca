@@ -5,16 +5,16 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MORB_N120';      % run identifier
+runID     =  '2D_MORB_N200';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  10;                  % output frame plotted/saved every 'nop' time steps
+nop       =  20;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  160;                 % number of grid points in z-direction
+N         =  200;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % chamber width (equal to h for 1-D mode) [m]
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -47,13 +47,13 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';           % phase diagram calibration
-tau_r     =  0;                   % phase change reaction time (set to 0 to tie to dt)
-tau_e     =  0;                   % extraction/eruption time (set to 0 to tie to dt)
+tau_r     =  1e3*yr;              % phase change reaction time (set to 0 to tie to dt)
+tau_e     =  1e4*yr;              % extraction/eruption time (set to 0 to tie to dt)
 mthr      =  0.20;                % threshold melt fraction for extraction/eruption
 minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
-dx0       =  5e-3;                % matrix grain size
+dx0       =  1e-2;                % matrix grain size
 aTm       =  5e-5;                % melt  thermal expansivity [1/K]
 aTx       =  1e-5;                % xtal  thermal expansivity [1/K]
 kTm       =  1;                   % melt  thermal conductivity [W/m/K]
@@ -61,18 +61,18 @@ kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
 tyield    =  1e8;                 % yield stress for shear failure [Pa]
-pyield    =  1e8;                 % yield pressure for tensile failure [Pa]
+pyield    =  1e9;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
-ADVN      =  'centr';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL       =  0.75;                % (physical) time stepping courant number (multiplies stable step) [0,1]
+ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
+CFL       =  0.50;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-4;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.75;                % iterative step size
-gamma     =  0.25;                % relaxing parameter for viscosity update
+alpha     =  0.40;                % iterative step size
+gamma     =  0.20;                % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling

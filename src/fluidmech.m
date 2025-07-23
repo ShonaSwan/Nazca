@@ -633,7 +633,7 @@ SS              =  0*RR;
 
 %% Scaling coefficient matrix
 
-etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta/e0;
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta./rho/(e0/Drho0);
 scl = ([zeros(NV,1); zeros(NV,1); 1./etagh(:); zeros(NP,1)]);
 scl(BC.ind) = [];
 scl = (abs(diag(LL)) + scl).^0.5;  

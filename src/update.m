@@ -130,11 +130,11 @@ Cv     = squeeze(Cv(2,:,:));
 Ks     = mucff   ./Cv;  % melt segregation coeff
 KD     = mucff.^2./Cv;  % Darcy coeff
 
-zeta   = eta./mucff;  % solid compaction coeff
+zeta0  = eta./mucff;  % solid compaction coeff
 
 % get yield viscosity
-% zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./mucff;
-% zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
+zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./mucff;
+zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % interpolate to staggered stencil nodes
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...

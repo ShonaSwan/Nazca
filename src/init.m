@@ -126,11 +126,12 @@ Hc = Hcmin - 1e6;%max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
 switch init_mode
     case 'plume'
         pl_sigma = pl_width / (2 * sqrt(2 * log(2)));
-        
-        %Defining the Gaussian inflow profile of the plume 
-        pl_profile = exp(-((XX - pl_local).^2) / pl_sigma^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+        Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * minage)));
 
-        Tp = T0 + (T1 - T0) .* (ZZ/D) .* (1 - pl_profile) + (T_plume - T0) .* pl_profile + dTr.*rp + dTg.*gp;
+        %Defining the Gaussian inflow profile of the plume 
+        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+
+        Tp = Tp + dT_plume .* pl_profile + dTr.*rp + dTg.*gp;
         
         for i = 1:cal.ncmp
             c(:,:,i) = c0(i) + (c1(i) - c0(i)) .* (ZZ/D) .* (1 - pl_profile) + (c_plume(i) - c0(i)) .* pl_profile + dcr(i).*rp + dcg(i).*gp;

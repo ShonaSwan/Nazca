@@ -17,10 +17,6 @@ D         =  200e3;               % chamber depth [m]
 N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.0*D;               % chamber width (equal to h for 1-D mode) [m]
-sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
-Hcmin     =  0e3;  %6e3               % Minimum crustal thickness 
-bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
-bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
@@ -29,37 +25,43 @@ dt        =  1e2*yr;              % initial time step [s]
 mumin     =  1e-5;                % Setting lower limit for melt fraction in coeff. 
 mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
-% set initial thermo-chemical state
-init_mode =  'plume';               % 'plume' or 'MOR'
-minage    =  7e5*yr;
-T0        =  5;                   % temperature top  layer [deg C]
-T1        =  1350;                % temperature base layer [deg C]
+% model set up switches (plume or MOR)
+init_mode =  'MOR';               % 'plume' or 'MOR'
+bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+
+% MOR Spreading parameters  
+sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
+bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
+
+% set initial thermo-chemical state of the Mantle 
+minage    =  7e5*yr;   %(20e6)    %
+T0        =  5;                   % temperature of the top  boundary [deg C]
+T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
 c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
-c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,-1,0,0]*0e-3;     % Random perturbation of the composition field
-dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
-
-%Plume related Variables
-T_plume = 1700;
-trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];
-c_plume   = [0.85 0.14 0.01 0];
-pl_width  = 100e3;
-pl_local  = L/2;
-pl_center = L / 2;                
-
-% set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
+dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
+
+% set initial thermo-chemical state of the Crust  
+Hcmin     =  0e3;  %6e3               % Minimum crustal thickness 
+c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
 
+% set initial thermo-chemical state of the Plume 
+dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
+pl_width  = 50e3;                               % Width of the plume [m]
+pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
+c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+
 % set thermo-chemical boundary parameters
-periodic  =  0;
-bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 bnd_w     =  h;                   % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
-cwall     =  nan(3,7,7);
+cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 Ptop      =  4.0e7;               % top pressure [Pa]
 
 % set thermo-chemical material parameters
@@ -70,6 +72,8 @@ mthr      =  0.20;                % threshold melt fraction for extraction/erupt
 minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
+bPx       =  1e-11;               % solid compressibility [1/Pa]
+bPm       =  3e-11;  %(1e-11)     % melt  compressibility [1/Pa]
 dx0       =  5e-3;                % matrix grain size
 aTm       =  5e-5;                % melt  thermal expansivity [1/K]
 aTx       =  1e-5;                % xtal  thermal expansivity [1/K]

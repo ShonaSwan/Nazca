@@ -40,7 +40,7 @@ AAR = [];       % forcing entries for R
 % assemble coefficients of z-stress divergence
 
 % top boundary
-ii  = MapW(1,:); jj1 = ii; jj2 = MapW(2,:);
+ii  = MapW(1,2:end-1); jj1 = ii; jj2 = MapW(2,2:end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wtop];
@@ -63,14 +63,14 @@ aa  = VolSrc(end,:)/(Drho0*u0/h0);
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
     
 % left boundary
-ii  = MapW((2:end-1),1); jj1 = ii; jj2 = MapW((2:end-1),2);
+ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wleft];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
-ii  = MapW((2:end-1),end); jj1 = ii; jj2 = MapW((2:end-1),end-1);
+ii  = MapW(:,end); jj1 = ii; jj2 = MapW(:,end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];  AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];  AAL = [AAL; aa(:)+Wright];
@@ -520,53 +520,53 @@ OV = sparse(NV,NV);
 OF = sparse(NV,NP);
 OP = sparse(NP,NP);
 
-% % Sizes of blocks
-[n1, m1] = size(KV);
-[n2, m2] = size(KF);
-[n3, m3] = size(KP);
-[n4, m4] = size(KC);
+% % % Sizes of blocks
+% [n1, m1] = size(KV);
+% [n2, m2] = size(KF);
+% [n3, m3] = size(KP);
+% [n4, m4] = size(KC);
+% 
+% % Total size
+% Ntot = n1 + n2 + n3 + n4;
+% 
+% % Preallocate LL as sparse
+% if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC)+ 3*nnz(GG) + 2*nnz(OF) + 2*nnz(OV)+ nnz(DD) + nnz(DDs)+ nnz(DDm)+ 2*nnz(OP);  end
+% LL = spalloc(Ntot, Ntot, total_nnz);
+% 
+% i1 = 1:n1;
+% i2 = n1+1:n1+n2;
+% i3 = n1+n2+1:n1+n2+n3;
+% i4 = n1+n2+n3+1:Ntot;
+% 
+% % Assign top row
+% LL(i1, i1) = KV;
+% LL(i1, i2) = OV;
+% LL(i1, i3) = GG;
+% LL(i1, i4) = GG;
+% 
+% % Second row
+% LL(i2, i1) = OV.'; 
+% LL(i2, i2) = KF;
+% LL(i2, i3) = GG;
+% LL(i2, i4) = OF;
+% 
+% % Third row
+% LL(i3, i1) = DDs;
+% LL(i3, i2) = DDm;
+% LL(i3, i3) = KP;
+% LL(i3, i4) = OP;
+% 
+% % Fourth row
+% LL(i4, i1) = DD;
+% LL(i4, i2) = OF.';
+% LL(i4, i3) = OP.';
+% LL(i4, i4) = KC;
 
-% Total size
-Ntot = n1 + n2 + n3 + n4;
-
-% Preallocate LL as sparse
-if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC)+ 3*nnz(GG) + 2*nnz(OF) + 2*nnz(OV)+ nnz(DD) + nnz(DDs)+ nnz(DDm)+ 2*nnz(OP);  end
-LL = spalloc(Ntot, Ntot, total_nnz);
-
-i1 = 1:n1;
-i2 = n1+1:n1+n2;
-i3 = n1+n2+1:n1+n2+n3;
-i4 = n1+n2+n3+1:Ntot;
-
-% Assign top row
-LL(i1, i1) = KV;
-LL(i1, i2) = OV;
-LL(i1, i3) = GG;
-LL(i1, i4) = GG;
-
-% Second row
-LL(i2, i1) = OV.'; 
-LL(i2, i2) = KF;
-LL(i2, i3) = GG;
-LL(i2, i4) = OF;
-
-% Third row
-LL(i3, i1) = DDs;
-LL(i3, i2) = DDm;
-LL(i3, i3) = KP;
-LL(i3, i4) = OP;
-
-% Fourth row
-LL(i4, i1) = DD;
-LL(i4, i2) = OF.';
-LL(i4, i3) = OP.';
-LL(i4, i4) = KC;
-
-% % Assign blocks
-% LL = [KV   OV   GG   GG; ...
-%       OV.' KF   GG   OF; ...
-%       DDs  DDm  KP   OP; ...
-%       DD   OF.' OP.' KC];
+% Assign blocks
+LL = [KV   OV   GG   GG; ...
+      OV.' KF   GG   OF; ...
+      DDs  DDm  KP   OP; ...
+      DD   OF.' OP.' KC];
 
 RR  = [RV; RF; RP; RC];
 

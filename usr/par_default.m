@@ -60,11 +60,11 @@ periodic =  0;                   % set side boundaries to periodic
 bndmode  =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
 bnd_w    =  h;                   % boundary layer width [m]
 bnd_h    =  [0,0,0];             % internal wall rock layer thickness [m]
-tau_T    =  12*hr; %0            % wall cooling/assimilation time [s]
-tau_a    =  24*hr; %0            % wall cooling/assimilation tie [s]
-Twall    =  [300,300,nan,nan];   % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
-cwall    =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
-trcwall  =  nan(3,6,6);          % [top,bot,left,right] wall rock trace elements [wt ppm] (nan = no assimilation)
+tau_T    =  12*hr;               % wall cooling/assimilation time [s]
+tau_a    =  24*hr;               % wall cooling/assimilation tie [s]
+Twall    =  [300,300,nan,nan];  % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+cwall    =  nan(3,7,7);            % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
+trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elements [wt ppm] (nan = no assimilation)
 
 % set thermo-chemical material parameters
 calID    =  'MORB';              % phase diagram calibration

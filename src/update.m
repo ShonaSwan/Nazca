@@ -38,26 +38,26 @@ rho0   = 1./(m./rhom0 + x./rhox0);
 rho    = 1./(m./rhom  + x./rhox );
 
 % interpolate to staggered stencil nodes
-rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;      % Arithmetic Mean 
-rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2;      % Arithmetic Mean 
-%rhoxw  = (rhox(icz(1:end-1),:).*rhox(icz(2:end),:)).^0.5; % Geometric Mean 
-%rhomw  = (rhom(icz(1:end-1),:).*rhom(icz(2:end),:)).^0.5; % Geometric Mean 
+rhoxw  = (rhox(icz(1:end-1),:).*rhox(icz(2:end),:)).^0.5; % Geometric Mean 
+rhomw  = (rhom(icz(1:end-1),:).*rhom(icz(2:end),:)).^0.5; % Geometric Mean 
+%rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;      % Arithmetic Mean 
+%rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2;      % Arithmetic Mean 
 
-rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;      % Arithmetic Mean 
-rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;      % Arithmetic Mean 
-%rhow   = (rho(icz(1:end-1),:).*rho(icz(2:end),:)).^0.5; % Geometric Mean 
-%rhou   = (rho(:,icx(1:end-1)).*rho(:,icx(2:end))).^0.5; % Geometric Mean 
+rhow   = (rho(icz(1:end-1),:).*rho(icz(2:end),:)).^0.5;   % Geometric Mean 
+rhou   = (rho(:,icx(1:end-1)).*rho(:,icx(2:end))).^0.5;   % Geometric Mean 
+%rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;      % Arithmetic Mean 
+%rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;      % Arithmetic Mean 
 
+Mz     = (M(icz(1:end-1),:).*M(icz(2:end),:)).^0.5;       % Geometric Mean 
+Mx     = (M(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5;       % Geometric Mean
+%Mz     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;           % Arithmetic Mean  
+%Mx     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;           % Arithmetic Mean 
 
-Mz     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;        % Arithmetic Mean  Mw
-Mx     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;        % Arithmetic Mean  Mu
-% Mz     = (M(icz(1:end-1),:).*M(icz(2:end),:)).^0.5;  % Geometric Mean
-% Mx     = (M(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5;  % Geometric Mean
+mz     = (m(icz(1:end-1),:).*m(icz(2:end),:)).^0.5;       % Geometric Mean 
+mx     = (m(:,icx(1:end-1)).*m(:,icx(2:end))).^0.5;       % Geometric Mean 
+%mz     = (m(icz(1:end-1),:)+m(icz(2:end),:))/2;      % Arithmetic Mean
+%mx     = (m(:,icx(1:end-1))+m(:,icx(2:end)))/2;      % Arithmetic Mean 
 
-mz     = (m(icz(1:end-1),:)+m(icz(2:end),:))/2;      % Arithmetic Mean
-mx     = (m(:,icx(1:end-1))+m(:,icx(2:end)))/2;      % Arithmetic Mean 
-%mz     = (m(icz(1:end-1),:).*M(icz(2:end),:)).^0.5; % Geometric Mean
-%mx     = (m(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5; % Geometric Mean
 
 % update density contrasts
 Drhow  = rhow -mean(rhow,2);
@@ -76,10 +76,11 @@ mu     = max(0,min(1, m.*rho./rhom ));
 mucff  = (1./mu + 1./mumax).^-1 + mumin;
 
 % interpolate to staggered stencil nodes
-muw  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;    % Arithmetic Mean 
-muu  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;    % Arithmetic Mean 
-%muw  = (mu (icz(1:end-1),icx).*mu (icz(2:end),icx)).^0.5; % Geometric Mean
-%muu  = (mu (icz,icx(1:end-1)).*mu (icz,icx(2:end))).^0.5; % Geometric Mean
+ 
+muw  = (mu (icz(1:end-1),icx).*mu (icz(2:end),icx)).^0.5; % Geometric Mean
+muu  = (mu (icz,icx(1:end-1)).*mu (icz,icx(2:end))).^0.5; % Geometric Mean
+%muw  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;    % Arithmetic Mean 
+%muu  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;    % Arithmetic Mean
 
 chi_mem = reshape(reshape(cx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
 chi_mem = chi_mem./sum(chi_mem,3);
@@ -153,10 +154,11 @@ zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
 
-Ksw    = (Ks(icz(1:end-1),:) + Ks(icz(2:end),:)).*0.5; % Arithmetic Mean
-Ksu    = (Ks(:,icx(1:end-1)) + Ks(:,icx(2:end))).*0.5; % Arithmetic Mean
-%Ksw    = (Ks(icz(1:end-1),:) .* Ks(icz(2:end),:)).^0.5;  % Geometric Mean
-%Ksu    = (Ks(:,icx(1:end-1)) .* Ks(:,icx(2:end))).^0.5;  % Geometric Mean
+
+Ksw    = (Ks(icz(1:end-1),:) .* Ks(icz(2:end),:)).^0.5;  % Geometric Mean
+Ksu    = (Ks(:,icx(1:end-1)) .* Ks(:,icx(2:end))).^0.5;  % Geometric Mean
+%Ksw    = (Ks(icz(1:end-1),:) + Ks(icz(2:end),:)).*0.5; % Arithmetic Mean
+%Ksu    = (Ks(:,icx(1:end-1)) + Ks(:,icx(2:end))).*0.5; % Arithmetic Mean
 
 
 % update velocity magnitudes

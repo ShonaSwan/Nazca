@@ -121,8 +121,8 @@ end
 % initialise solution fields
 
 % Calculating the crustal thickness 
-%Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
-Hc = Hcmin - 1e6;%max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));   
+Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
+%Hc = Hcmin - 1e6;%max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));   
 
 switch init_mode
     case 'plume'
@@ -215,7 +215,6 @@ Adbt = aT./RhoCp;
 Tp   = (Tp+273.15); %T = Tp;
 T    = Tp.*exp(Adbt.*(Pt-Pref));
 diss = 0.*T;
-%sm   = cPm.*log(Tp./Tref) + Dsm;  sx = cPx.*log(Tp./Tref);  
 x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
 

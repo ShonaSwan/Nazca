@@ -55,7 +55,6 @@ for i = 1:cal.ncmp
 end
 
 % total rate of change
-% dCdt = advn_C + diff_C + bnd_C + Gemc + Gexc; 
 dCdt = advn_C + bnd_C + Gemc + Gexc;                                      
   
 % residual of major component evolution

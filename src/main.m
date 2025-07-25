@@ -14,7 +14,7 @@ while time <= tend && step <= Nt
     resnorm  = 1;
     resnorm0 = resnorm;
     iter     = 1;
-    %if frst; alpha = alpha/2; beta = beta/2; end
+    % if frst; alpha = alpha/2; beta = beta/2; end
 
     %%%%% Non-Linear Iteration Loop %%%%
     while resnorm/resnorm0 >= rtol/(1 + frst*100) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst)
@@ -22,11 +22,11 @@ while time <= tend && step <= Nt
         %%%% solve thermo-chemical equations
         thermochem;
 
-        %%%% solve fluid-mechanics equations
-        fluidmech;
-
         %%%% update non-linear parameters and auxiliary variables
         update;
+
+        %%%% solve fluid-mechanics equations
+        fluidmech;
 
         %%%% update geochemical evolution
         geochem;

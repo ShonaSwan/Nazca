@@ -13,15 +13,17 @@ t0    = h0/u0;
 if ~bnchm && step>0 && ~restart
 
 % residual of mixture mass evolution
-% Div_rhoV = reshape(DDs*[W(:);U(:)] + DDm*[wm(:);um(:)] ,Nz+2,Nx+2) * Drho0/h0;
-% drhodt   = - Div_rhoV(2:end-1,2:end-1) + Gem + Gex;
+% VGradRho = - advect(rho,Umix(2:end-1,:),Wmix(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA);
+% drhodt   = - rho.*Div_Vmix - VGradRho + Gem + Gex;
+
 
 res_rho  = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
-% upd_rho  = - alpha*res_rho*dt/a1;
 
-% upd_rho = - alpha*res_rho./b1;
-% VolSrc  = VolSrc + upd_rho;
-VolSrc  = - (a1*rho-a2*rhoo-a3*rhooo)/dt + Gem + Gex;  % correct volume source term by scaled residual
+upd_rho  = - alpha*res_rho./b1;
+VolSrc   = VolSrc + upd_rho;
+
+% VGradRho = - advect(rho,Umix(2:end-1,:),Wmix(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA);
+% VolSrc   = (- (a1*rho-a2*rhoo-a3*rhooo)/dt + Gem + Gex);  % correct volume source term by scaled residual
 
 end
 
@@ -46,15 +48,20 @@ aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
-
-ii  = MapW(end,:); jj1 = ii; jj2 = MapW(end-1,:);
+ii  = MapW(end,2:end-1); jj1 = ii; jj2 = MapW(end-1,2:end-1); jj3 = MapU(end-1,2:end); jj4 = MapU(end-1,1:end-1);
 aa  = zeros(size(ii));
-IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Wbot];
-aa  = zeros(size(ii)); 
+rho1 = rhow(end  ,:      )/Drho0;
+rho2 = rhow(end-1,:      )/Drho0;
+rho3 = rhou(end  ,2:end  )/Drho0;
+rho4 = rhou(end  ,1:end-1)/Drho0;
+
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; +rho1(:)/(h/h0)];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; -rho2(:)/(h/h0)];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; +rho3(:)/(h/h0)];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -rho4(:)/(h/h0)];
+aa  = VolSrc(end,:)/(Drho0*u0/h0); 
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
     
-
 % left boundary
 ii  = MapW((2:end-1),1); jj1 = ii; jj2 = MapW((2:end-1),2);
 aa  = zeros(size(ii));
@@ -178,7 +185,7 @@ end
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 % assemble coefficient matrix & right-hand side vector
-KV  = sparse(IIL,JJL,AAL,NW+NU,NW+NU);
+KV  = sparse(IIL,JJL,AAL,NV,NV);
 RV  = sparse(IIR,ones(size(IIR)),AAR);
 
 
@@ -212,7 +219,7 @@ if ~exist('GG','var') || bnchm
     
     
     % Assemble coefficient matrix
-    GG  = sparse(IIL,JJL,AAL,NW+NU,NP);
+    GG  = sparse(IIL,JJL,AAL,NV,NP);
 end
 
 
@@ -237,10 +244,10 @@ if ~exist('DD','var') || bnchm
     IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; aa(:)+1/(h/h0)];  % W one below
 
     % Assemble coefficient matrix
-    DD  = sparse(IIL,JJL,AAL,NP,NW+NU);
+    DD  = sparse(IIL,JJL,AAL,NP,NV);
 end
 
-%% assemble coefficients for Darcy Flux KF and RF
+%% assemble coefficients for matrix Darcy flow diagonal and right hand side KF and RF
 
 % qDz  
 IIL = [];       % equation indeces into L
@@ -339,7 +346,7 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 
 % assemble block matrix and right hand side vector
-KF  = sparse(IIL,JJL,AAL,NW+NU,NW+NU);
+KF  = sparse(IIL,JJL,AAL,NV,NV);
 RF  = sparse(IIR,ones(size(IIR)),AAR);
 
 
@@ -395,6 +402,12 @@ AAR = [AAR; rr(:)];
 KP  = sparse(IIL,JJL,AAL,NP,NP);
 RP  = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
+%% set pressure fix line
+ipx = 2:Nx+1;
+ipz = Nz+1;
+ip0 = MapP(ipz,ipx);
+KP(ip0,:)   = 0;
+KP(ip0,ip0) = speye(length(ip0));
 
 
 %% assemble coefficients for compressibility diagonal and right-hand side (KC and RC)
@@ -443,7 +456,7 @@ aa  = zeros(size(ii)) + e0./zeta;
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
 % RHS
-rr = zeros(size(ii));
+rr  = zeros(size(ii));
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
 
@@ -467,14 +480,13 @@ rho2 = rhou(:,2:end  )/Drho0;
 rho3 = rhow(1:end-1,:)/Drho0;
 rho4 = rhow(2:end  ,:)/Drho0;
 
-aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; -rho1(:)/(h/h0)];  % U one to the left
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; +rho2(:)/(h/h0)];  % U one to the right
 IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; -rho3(:)/(h/h0)];  % W one above
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +rho4(:)/(h/h0)];  % W one below
 
 % Assemble coefficient matrix
-DDs  = sparse(IIL,JJL,AAL,NP,NW+NU);
+DDs  = sparse(IIL,JJL,AAL,NP,NV);
 
 %% assemble coefficients for divergence of relative melt mass flux (DD)
 
@@ -488,10 +500,10 @@ ii  = MapP(2:end-1,2:end-1);
 % coefficients multiplying velocities U, W
 %          left U          ||           right U       ||           top W           ||          bottom W
 jj1 = MapU(2:end-1,1:end-1); jj2 = MapU(2:end-1,2:end); jj3 = MapW(1:end-1,2:end-1); jj4 = MapW(2:end,2:end-1);
-M1  = Mu(:,1:end-1)/Drho0;
-M2  = Mu(:,2:end  )/Drho0;
-M3  = Mw(1:end-1,:)/Drho0;
-M4  = Mw(2:end  ,:)/Drho0;
+M1  = Mx(:,1:end-1)/Drho0;
+M2  = Mx(:,2:end  )/Drho0;
+M3  = Mz(1:end-1,:)/Drho0;
+M4  = Mz(2:end  ,:)/Drho0;
 
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; -M1(:)/(h/h0)];  % U one to the left
@@ -500,21 +512,13 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; -M3(:)/(h/h0)];  % W one 
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +M4(:)/(h/h0)];  % W one below
 
 % Assemble coefficient matrix
-DDm  = sparse(IIL,JJL,AAL,NP,NW+NU);
-
-
-%% set pressure fix line
-ipx = 2:Nx+1;
-ipz = Nz+1;
-ip0 = MapP(ipz,ipx);
-KP(ip0,:)   = 0;
-KP(ip0,ip0) = speye(length(ip0));
+DDm  = sparse(IIL,JJL,AAL,NP,NV);
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 
-OV = sparse(NW+NU,NW+NU);
-OP = sparse(NW+NU,NP);
-OC = sparse(NP,NP);
+OV = sparse(NV,NV);
+OF = sparse(NV,NP);
+OP = sparse(NP,NP);
 
 % % Sizes of blocks
 [n1, m1] = size(KV);
@@ -526,7 +530,7 @@ OC = sparse(NP,NP);
 Ntot = n1 + n2 + n3 + n4;
 
 % Preallocate LL as sparse
-if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC)+ 2*nnz(GG) + 2*nnz(OP) + nnz(OV)+ nnz(DD) + nnz(DDs)+ nnz(DDm)+ nnz(OC);  end
+if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC)+ 3*nnz(GG) + 2*nnz(OF) + 2*nnz(OV)+ nnz(DD) + nnz(DDs)+ nnz(DDm)+ 2*nnz(OP);  end
 LL = spalloc(Ntot, Ntot, total_nnz);
 
 i1 = 1:n1;
@@ -544,36 +548,35 @@ LL(i1, i4) = GG;
 LL(i2, i1) = OV.'; 
 LL(i2, i2) = KF;
 LL(i2, i3) = GG;
-LL(i2, i4) = OP;
+LL(i2, i4) = OF;
 
 % Third row
 LL(i3, i1) = DDs;
 LL(i3, i2) = DDm;
 LL(i3, i3) = KP;
-LL(i3, i4) = OC;
+LL(i3, i4) = OP;
 
 % Fourth row
 LL(i4, i1) = DD;
-LL(i4, i2) = OP.';
-LL(i4, i3) = OC.';
+LL(i4, i2) = OF.';
+LL(i4, i3) = OP.';
 LL(i4, i4) = KC;
 
 % % Assign blocks
 % LL = [KV   OV   GG   GG; ...
-%       OV.' KF   GG   OP; ...
-%       DDs  DDm  KP   OC; ...
-%       DD   OP.' OC.' KC];
+%       OV.' KF   GG   OF; ...
+%       DDs  DDm  KP   OP; ...
+%       DD   OF.' OP.' KC];
 
 RR  = [RV; RF; RP; RC];
-
 
 
 %% Setting Pc to zero where there is no melt 
 
 bc_ind = [];
-bc_ind = [bc_ind;find(twophsw(:)<=0.0) +   NW+NU     ];
-bc_ind = [bc_ind;find(twophsu(:)<=0.0) + 2*NW+NU     ];
-bc_ind = [bc_ind;find(twophs (:)<=0.0) + 2*NW+2*NU+NP];
+bc_ind = [bc_ind;find(twophsw(:)<=0.0) + NV      ];
+bc_ind = [bc_ind;find(twophsu(:)<=0.0) + NV+NW   ];
+bc_ind = [bc_ind;find(twophs (:)<=0.0) + NV+NV+NP];
 
 bc_val = zeros(size(bc_ind));
 
@@ -588,15 +591,15 @@ TMP             =  LL(:,BC.ind);
 RR              =  RR - TMP*BC.val;
 LL              =  LL(BC.free,BC.free);
 RR              =  RR(BC.free);
-
+SS              =  0*RR;
 
 %% Scaling coefficient matrix
 
-etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta/e0;
-scl = ([zeros(NU+NW,1); zeros(NU+NW,1); 1./etagh(:); zeros(NP,1)]);
+etagh = ones(Nz+2,Nx+2);  etagh(2:end-1,2:end-1) = eta./rho/(e0/Drho0);
+scl = ([zeros(NV,1); zeros(NV,1); 1./etagh(:); zeros(NP,1)]);
 scl(BC.ind) = [];
-SCL = (abs(diag(LL)) + scl).^0.5;  
-SCL = spdiags(1./SCL, 0, length(SCL), length(SCL));
+scl = (abs(diag(LL)) + scl).^0.5;  
+SCL = spdiags(1./scl, 0, length(scl), length(scl));
 
 LL = SCL * LL * SCL;
 RR = SCL * RR;
@@ -604,38 +607,42 @@ RR = SCL * RR;
 
 %% Solve linear system of equations for W, U, Pf, Pc
 
-if iter==2; pcol = colamd(LL); end               % update column permutation for sparsity pattern once per time step
+if iter==1; pcol = colamd(LL); end               % update column permutation for sparsity pattern once per time step
 dLL          = decomposition(LL(:,pcol), 'lu');  % get LU-decomposition for consistent performance of LL \ RR
 SS(pcol,1)   = dLL \ RR;                         % solve permuted decomposed system
 
 SOL(BC.free) = SCL * SS;  % update solution
 SOL(BC.ind ) = BC.val;    % fill in boundary conditions  
-clear SS;                 % clear temporary solution vector
 
 % map solution vector to 2D arrays
-W    = full(reshape(SOL(MapW(:))               ,Nz+1,Nx+2));  % matrix z-velocity
-U    = full(reshape(SOL(MapU(:))               ,Nz+2,Nx+1));  % matrix x-velocity
-wm   = full(reshape(SOL(MapW(:)+(  NW+  NU   )),Nz+1,Nx+2));  % segregation z-velocity
-um   = full(reshape(SOL(MapU(:)+(  NW+  NU   )),Nz+2,Nx+1));  % segregation x-velocity
-Pf   = full(reshape(SOL(MapP(:)+(2*NW+2*NU   )),Nz+2,Nx+2));  % matrix dynamic pressure
-Pc   = full(reshape(SOL(MapP(:)+(2*NW+2*NU+NP)),Nz+2,Nx+2));  % matrix compaction pressure
+W    = full(reshape(SOL(MapW(:)           ),Nz+1,Nx+2));  % matrix z-velocity
+U    = full(reshape(SOL(MapU(:)           ),Nz+2,Nx+1));  % matrix x-velocity
+wm   = full(reshape(SOL(MapW(:)+(NV      )),Nz+1,Nx+2));  % segregation z-velocity
+um   = full(reshape(SOL(MapU(:)+(NV      )),Nz+2,Nx+1));  % segregation x-velocity
+Pf   = full(reshape(SOL(MapP(:)+(NV+NV   )),Nz+2,Nx+2));  % matrix dynamic pressure
+Pc   = full(reshape(SOL(MapP(:)+(NV+NV+NP)),Nz+2,Nx+2));  % matrix compaction pressure
 
 % redimensionalise solution and parameters
-W      = W   *u0;
-U      = U   *u0;
-wm     = wm *u0;
-um     = um *u0;
-Pf     = Pf  *p0;
-Pc     = Pc  *p0;
+W      = W   * u0;
+U      = U   * u0;
+wm     = wm  * u0;
+um     = um  * u0;
+Pf     = Pf  * p0;
+Pc     = Pc  * p0;
+
+
 
 if ~bnchm
 
-     % update phase velocities
+    % update phase velocities
     Wx  = W + 0.;  % xtl z-velocity
     Ux  = U + 0.;  % xtl x-velocity
     Wm  = W + wm;  % mlt z-velocity
     Um  = U + um;  % mlt x-velocity
 
+    % update mixture velocity
+    Umix = U + mx(icz,:).*um;
+    Wmix = W + mz(:,icx).*wm;
 
 end
 

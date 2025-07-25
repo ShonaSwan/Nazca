@@ -18,7 +18,7 @@ for i = 1:cal.ntrc
                      - advect(X.*trcx(:,:,i),Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
     % get trace element diffusion (regularisation)
-    %dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);
+    % dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);
 
     % get trace element assimilation
     if ~isnan(trcwall(1,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(1,i)-TRC(:,:,i)).*mu./tau_a .* topshape; end
@@ -27,7 +27,6 @@ for i = 1:cal.ntrc
 end
 
 % get total rate of change
-%dTRCdt = adv_TRC + dff_TRC + bnd_TRC + Gemt + Gext;
 dTRCdt = adv_TRC + bnd_TRC + Gemt + Gext;
 
 % residual of trace element evolution

@@ -58,7 +58,7 @@ c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp,
 trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
-bnd_w     =  h;                   % boundary layer width [m]
+bnd_w     =  h;  %h/2                 % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
@@ -66,8 +66,8 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';           % phase diagram calibration
-tau_r     =  0;                   % phase change reaction time (set to 0 to tie to dt)
-tau_e     =  0;                   % extraction/eruption time (set to 0 to tie to dt)
+tau_r     =  0; %1e3*yr           % phase change reaction time (set to 0 to tie to dt)
+tau_e     =  0; %1e4*yr           % extraction/eruption time (set to 0 to tie to dt)
 mthr      =  0.20;                % threshold melt fraction for extraction/eruption
 minit     =  0.01;                % maximum initial melt fraction
 
@@ -82,18 +82,18 @@ kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
 tyield    =  1e8;                 % yield stress for shear failure [Pa]
-pyield    =  1e8;                 % yield pressure for tensile failure [Pa]
+pyield    =  1e8;   %1e9              % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL       =  0.75;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
+CFL       =  0.75;  %0.50         % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-4;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.75;                 % iterative step size
-gamma     =  0.25;                 % relaxing parameter for viscosity update
+alpha     =  0.75;                % iterative step size
+gamma     =  0.25;                % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling

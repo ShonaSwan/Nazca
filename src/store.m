@@ -7,8 +7,6 @@
 [Too    , To    ] = deal(To    , T    );
 [Tpoo   , Tpo   ] = deal(Tpo   , Tp   );
 [Pchmboo, Pchmbo] = deal(Pchmbo, Pchmb);
-[rhoWoo , rhoWo ] = deal(rhoWo , rhoW );
-[rhoUoo , rhoUo ] = deal(rhoUo , rhoU );
 
 [dSdtoo    , dSdto    ] = deal(dSdto    , dSdt    );
 [dCdtoo    , dCdto    ] = deal(dCdto    , dCdt    );

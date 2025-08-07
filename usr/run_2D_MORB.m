@@ -28,6 +28,7 @@ mumax     =  0.2;                 % Setting upper limit for melt fraction in coe
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 % MOR Spreading parameters  
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)

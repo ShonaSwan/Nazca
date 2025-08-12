@@ -40,37 +40,37 @@ rho    = 1./(m./rhom  + x./rhox );
 
 % interpolate to staggered stencil nodes
 
-if bndmode == 0; % Geometric
+if bndmode == 0 % Geometric
    rhoxw  = (rhox(icz(1:end-1),:).*rhox(icz(2:end),:)).^0.5; 
    rhomw  = (rhom(icz(1:end-1),:).*rhom(icz(2:end),:)).^0.5; 
-elseif bndmode == 1; % Arithmetic
+elseif bndmode == 1 % Arithmetic
    rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;      
    rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2;      
 end
 
 
-if bndmode == 0; % Geometric
+if bndmode == 0 % Geometric
    rhow   = (rho(icz(1:end-1),:).*rho(icz(2:end),:)).^0.5;    
    rhou   = (rho(:,icx(1:end-1)).*rho(:,icx(2:end))).^0.5;   
-elseif bndmode == 1; % Arithmetic
+elseif bndmode == 1 % Arithmetic
    rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;      
    rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;          
 end
 
 
-if bndmode == 0; % Geometric
+if bndmode == 0 % Geometric
    Mz     = (M(icz(1:end-1),:).*M(icz(2:end),:)).^0.5;       
    Mx     = (M(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5;       
-elseif bndmode == 1; % Arithmetic
+elseif bndmode == 1 % Arithmetic
    Mz     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;             
    Mx     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;              
 end
  
 
-if bndmode == 0; % Geometric
+if bndmode == 0 % Geometric
    mz     = (m(icz(1:end-1),:).*m(icz(2:end),:)).^0.5;        
    mx     = (m(:,icx(1:end-1)).*m(:,icx(2:end))).^0.5;       
-elseif bndmode == 1; % Arithmetic
+elseif bndmode == 1 % Arithmetic
    mz     = (m(icz(1:end-1),:)+m(icz(2:end),:))/2;      
    mx     = (m(:,icx(1:end-1))+m(:,icx(2:end)))/2;                  
 end
@@ -94,10 +94,10 @@ mucff  = (1./mu + 1./mumax).^-1 + mumin;
 
 % interpolate to staggered stencil nodes
  
-if bndmode == 0; % Geometric
+if bndmode == 0 % Geometric
    muw  = (mu (icz(1:end-1),icx).*mu (icz(2:end),icx)).^0.5; 
    muu  = (mu (icz,icx(1:end-1)).*mu (icz,icx(2:end))).^0.5;       
-elseif bndmode == 1; % Arithmetic
+elseif bndmode == 1 % Arithmetic
    muw  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;    
    muu  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;                  
 end
@@ -174,10 +174,10 @@ zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
        .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
 
-if bndmode == 0; % Geometric
+if bndmode == 0 % Geometric
    Ksw    = (Ks(icz(1:end-1),:) .* Ks(icz(2:end),:)).^0.5;  
    Ksu    = (Ks(:,icx(1:end-1)) .* Ks(:,icx(2:end))).^0.5;        
-elseif bndmode == 1; % Arithmetic
+elseif bndmode == 1 % Arithmetic
    Ksw    = (Ks(icz(1:end-1),:) + Ks(icz(2:end),:)).*0.5; 
    Ksu    = (Ks(:,icx(1:end-1)) + Ks(:,icx(2:end))).*0.5;                   
 end

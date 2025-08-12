@@ -94,12 +94,12 @@ bnd_V = zeros(Nz,Nx);
 
 % Boundary condition options:
 % -1 = free slip, +1 = No slip, 0 = No gradient/Symetrical
-if bndmode == 0; %Mid Ocean Ridge
+if bndmode == 0 %Mid Ocean Ridge
 Wtop   =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
 Utop   = +1;  Ubot  = -1;  Uleft  =  0;  Uright  = -1;
 qDxtop = -1; 
 Pall = -1;  
-elseif bndmode == 1; % Mantle Plume
+elseif bndmode == 1 % Mantle Plume
 Wtop  =  0;   Wbot  = -1;  Wleft  = -1;  Wright  = -1;
 Utop  =  -1;  Ubot  = -1;  Uleft  =  0;  Uright  =  0;
 qDxtop = -1;
@@ -107,8 +107,8 @@ Pall = -1;
 % Pftop = -1;  Pfbot = +1;  Pfleft = -1;  Pfright = -1;
 % Pcall = -1;
 
-else; %Error Message 
- disp(['Invalid Bndmode']);
+else %Error Message 
+ disp('Invalid Bndmode');
 end
 
 %Se ghosted index array
@@ -218,7 +218,7 @@ x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
 
 % get volume fractions and bulk density
-step    = 0;
+%step    = 0;
 EQtime  = 0;
 FMtime  = 0;
 TCtime  = 0;

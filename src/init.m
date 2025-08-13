@@ -121,7 +121,7 @@ end
 
 % Calculating the crustal thickness 
 Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
-%Hc = Hcmin - 1e6;%max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));   
+%Hc = Hcmin - 1e6;   
 
 switch init_mode
     case 'plume'

@@ -28,18 +28,49 @@ Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+3*dt);
 Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 
 % extract and erupt melt
-Gem = min(0,mthr-m).*RHO/(tau_e+3*dt);
-% for i=1:2; Gem = Gem + diffus(Gem,1/8*ones(size(rp)),1,[1,2],BCD); end
-Gex = topshape.*(-sum(Gem,1))./sum(topshape,1);
-for i=1:4; Gex = Gex + diff(Gex(:,icx),2,2)./8; end
 
-Gemc = cm.*Gem;
-Gexc = topshape.*(-sum(Gemc,1))./sum(topshape,1);
-for i=1:4; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./8; end
+findmoho
 
-Gemt = trcm.*Gem;
-Gext = topshape.*(-sum(Gemt,1))./sum(topshape,1);
-for i=1:4; Gext = Gext + diff(Gext(:,icx,:),2,2)./8; end
+switch emplacement_mode
+    case 'erupt'
+        Gem = min(0,mthr-m).*RHO/(tau_e+3*dt);
+      % for i=1:2; Gem = Gem + diffus(Gem,1/8*ones(size(rp)),1,[1,2],BCD); end
+        Gex = topshape.*(-sum(Gem,1))./sum(topshape,1);
+        for i=1:4; Gex = Gex + diff(Gex(:,icx),2,2)./8; end
+
+        Gemc = cm.*Gem;
+        Gexc = topshape.*(-sum(Gemc,1))./sum(topshape,1);
+        for i=1:4; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./8; end
+
+        Gemt = trcm.*Gem;
+        Gext = topshape.*(-sum(Gemt,1))./sum(topshape,1);
+        for i=1:4; Gext = Gext + diff(Gext(:,icx,:),2,2)./8; end
+
+    case 'emplacement'
+
+        Gem = min(0,mthr-m).*RHO/(tau_e+3*dt);
+      % for i=1:2; Gem = Gem + diffus(Gem,1/8*ones(size(rp)),1,[1,2],BCD); end
+        mohoshape = exp( -abs(ZZ - moho_depth) / bnd_w );
+        Gex = mohoshape.*(-sum(Gem,1))./sum(mohoshape,1);
+        for i=1:4; Gex = Gex + diff(Gex(:,icx),2,2)./8; end
+
+        Gemc = cm.*Gem;
+        Gexc = mohoshape.*(-sum(Gemc,1))./sum(mohoshape,1);
+        for i=1:4; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./8; end
+
+        Gemt = trcm.*Gem;
+        Gext = mohoshape.*(-sum(Gemt,1))./sum(mohoshape,1);
+        for i=1:4; Gext = Gext + diff(Gext(:,icx,:),2,2)./8; end
+
+    otherwise
+        error('Unknown emplacement_mode: %s', emplacement_mode);
+end
+
+
+
+
+
+
 
 cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);

@@ -29,6 +29,7 @@ mumax     =  0.2;                 % Setting upper limit for melt fraction in coe
 init_mode =  'MOR';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
+emplacement_mode = 'erupt'; % 'erupt' or 'emplacement'
 
 % MOR Spreading parameters  
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -47,7 +48,7 @@ dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
-Hcmin     =  0e3;  %6e3               % Minimum crustal thickness 
+Hcmin     =  6e3;  %6e3               % Minimum crustal thickness 
 c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
 
@@ -74,7 +75,7 @@ minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]
-bPm       =  3e-11;  %(1e-11)     % melt  compressibility [1/Pa]
+bPm       =  1e-11;  %(1e-11)     % melt  compressibility [1/Pa]
 dx0       =  1e-2;   %(5e-3)      % matrix grain size
 aTm       =  5e-5;                % melt  thermal expansivity [1/K]
 aTx       =  1e-5;                % xtal  thermal expansivity [1/K]

@@ -1,4 +1,4 @@
-
+set(0, 'DefaultFigureWindowStyle', 'normal');
 % prepare for plotting
 TX = {'Interpreter','Latex'}; FS = {'FontSize',12};
 TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',10};
@@ -499,7 +499,11 @@ else % create 2D plots
     set(fh8,'CurrentAxes',ax(86));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh8,'CurrentAxes',ax(87));
+    imagesc(Xsc,Zsc,(m+mumin).*100); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$m$ [log$_{10}$ wt\%]',TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh8,'CurrentAxes',ax(88));
+    imagesc(Xsc,Zsc,rho); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Delta \bar{\rho}_h$ [kg/m$^3$]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(gca,'YTickLabel',[]); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     set(fh8,'CurrentAxes',ax(89));
     set(gca,'YTickLabel',[]);
@@ -637,6 +641,48 @@ if plot_cv
     xlabel(['Time [',TimeUnits,']'],TX{:},FS{:});
 end
 
+    % plot major oxide Harker Plots in Fig. 15 (13)
+
+    if ~exist('fh15','var'); fh15 = figure(VIS{:});
+      else; set(0, 'CurrentFigure', fh15); clf;
+    end 
+    colormap(ocean);
+
+     % set axis and border dimensions
+    axh = 6.00*sqrt(D/L); axw = 6.00*sqrt(L/D)+1.50;
+    ahs = 0.80 * 2.5; avs = 0.80 * 2;
+    axb = 1.20; axt = 1.50;
+    axl = 1.50; axr = 0.50;
+
+    fh = axb + 3*axh + 2*avs + axt;
+    fw = axl + 3*axw + 2*ahs + axr;
+   
+    set(fh15,UN{:},'Position',[11 11 fw fh]);
+    set(fh15,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
+    set(fh15,'Color','w','InvertHardcopy','off','Resize','off') 
+   
+    ax(91) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+2*axh+2*avs axw axh]);
+    ax(92) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+2*axh+2*avs axw axh]);
+    ax(93) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+2*axh+2*avs axw axh]);
+    ax(94) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+1*axh+1*avs axw axh]);
+    ax(95) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+1*axh+1*avs axw axh]);
+    ax(96) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+1*axh+1*avs axw axh]);
+    ax(97) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+0*axh+0*avs axw axh]);
+
+    set(0,'CurrentFigure',fh15)
+    sumanh = sum(c_oxd(:,:,1:end-1),3);
+    SiO2_vals = c_oxd(:,:,1); 
+    for i = 2:cal.noxd-1
+        oxide_vals = c_oxd(:,:,i);
+        set(fh15,'CurrentAxes',ax(90+i-1));
+        scatter(SiO2_vals(:), oxide_vals(:)./sumanh(:).*100, 30, T(:)-273.15, 'filled'), grid on; colorbar; box on; axis xy normal;
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); xlabel([cal.oxdStr{1}, '[wt \%]'], TX{:}, FS{:});ylabel([cal.oxdStr{i}, '[wt \%]'], TX{:}, FS{:});
+    end
+
+    set(fh15,'CurrentAxes',ax(92));
+    set(gca,'XTickLabel',[],'YTickLabel',[]);
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+
 drawnow
 
 % save output to file
@@ -684,6 +730,8 @@ if save_op && ~restart
         print(fh11,name,'-dpng','-r300','-image');
         name = [outdir,'/',runID,'/',runID,'_AFM',num2str(floor(step/nop))];
         print(fh12,name,'-dpng','-r300','-image');
+        name = [outdir,'/',runID,'/',runID,'_Har',num2str(floor(step/nop))];
+        print(fh15,name,'-dpng','-r300','-image');
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];

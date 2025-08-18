@@ -683,6 +683,76 @@ end
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
 
+%Basalt plot 
+
+if ~exist('fh16','var'); fh16 = figure(VIS{:});
+    colormap(ocean);
+    fh = 18;
+    fw = 22;
+    set(fh16,UN{:},'Position',[15 15 fw fh]);
+    set(fh16,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
+    set(fh16,'Color','w','InvertHardcopy','off','Resize','off');
+else; set(0, 'CurrentFigure', fh16);
+end
+
+if Nz>1 || step==0 || frst; clf;
+LBL1 = cal.msyStr(cal.imsy(1)); 
+LBL2 = cal.msyStr(cal.imsy(2)); 
+LBL3 = cal.msyStr(cal.imsy(3));  
+LBL4 = cal.msyStr(cal.imsy(4));
+BTH;
+end
+
+% middle ternary (plg olv cpx)
+sumABC = sum(cx_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords(cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(2))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC);
+scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+sumABC = sum(cm_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords(cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(2))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC);
+scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+sumABC = sum( c_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords( c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(2))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC);
+scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean);
+
+% upper ternary (plg cpx qtz)
+sumABC = sum(cx_msy(:,:,cal.imsy([1,4,3])),3);
+[A,B] = terncoords(cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(4))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC);
+scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+sumABC = sum(cm_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords(cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(4))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC);
+scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+sumABC = sum( c_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords( c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(4))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC);
+scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean);
+
+% left ternary (olv cpx qtz)
+sumABC = sum(cx_msy(:,:,cal.imsy([2,3,4])),3);
+[A,B] = terncoords(cx_msy(:,:,cal.imsy(2))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC,cx_msy(:,:,cal.imsy(4))./sumABC);
+scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+sumABC = sum(cm_msy(:,:,cal.imsy([2,3,4])),3);
+[A,B] = terncoords(cm_msy(:,:,cal.imsy(2))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC,cm_msy(:,:,cal.imsy(4))./sumABC);
+scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+sumABC = sum( c_msy(:,:,cal.imsy([2,3,4])),3);
+[A,B] = terncoords( c_msy(:,:,cal.imsy(2))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC, c_msy(:,:,cal.imsy(4))./sumABC);
+scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean);
+
+% right ternary (qtz plg olv)
+sumABC = sum(cx_msy(:,:,cal.imsy([4,1,2])),3);
+[A,B] = terncoords(cx_msy(:,:,cal.imsy(4))./sumABC,cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(2))./sumABC);
+scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+sumABC = sum(cm_msy(:,:,cal.imsy([4,1,2])),3);
+[A,B] = terncoords(cm_msy(:,:,cal.imsy(4))./sumABC,cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(2))./sumABC);
+scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+sumABC = sum( c_msy(:,:,cal.imsy([4,1,2])),3);
+[A,B] = terncoords( c_msy(:,:,cal.imsy(4))./sumABC, c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(2))./sumABC);
+scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean); 
+
+if Nz>1 || step==0 || frst
+    cb = colorbar;
+    set(cb,'Position',[0.85,0.45,0.03,0.5],TL{:},'FontSize',12); 
+    text(1.48,0.65,'T [$^\circ$C]','FontSize',16,TX{:},'HorizontalAlignment','center','VerticalAlignment','bottom');
+end
+
 drawnow
 
 % save output to file
@@ -730,8 +800,11 @@ if save_op && ~restart
         print(fh11,name,'-dpng','-r300','-image');
         name = [outdir,'/',runID,'/',runID,'_AFM',num2str(floor(step/nop))];
         print(fh12,name,'-dpng','-r300','-image');
-        name = [outdir,'/',runID,'/',runID,'_Har',num2str(floor(step/nop))];
+        name = [outdir,'/',runID,'/',runID,'_HAR',num2str(floor(step/nop))];
         print(fh15,name,'-dpng','-r300','-image');
+        name = [outdir,'/',runID,'/',runID,'_BTH',num2str(floor(step/nop))];
+        print(fh16,name,'-dpng','-r300','-image');
+
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];

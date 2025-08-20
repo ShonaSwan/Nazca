@@ -29,7 +29,7 @@ mumax     =  0.2;                 % Setting upper limit for melt fraction in coe
 init_mode =  'MOR';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
-emplacement_mode = 'erupt'; % 'erupt' or 'emplacement'
+erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
 % MOR Spreading parameters  
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -37,7 +37,7 @@ bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) 
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
-minage    =  1e5*yr;   %(20e6)    %
+minage    =  7e5*yr;   %(20e6)    %
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
@@ -70,7 +70,7 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 calID     =  'MORB_lo';           % phase diagram calibration
 tau_r     =  1e3*yr; %0           % phase change reaction time (set to 0 to tie to dt)
 tau_e     =  1e4*yr; %0          % extraction/eruption time (set to 0 to tie to dt)
-mthr      =  0.20;                % threshold melt fraction for extraction/eruption
+mthr      =  0.10;                % threshold melt fraction for extraction/eruption
 minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters

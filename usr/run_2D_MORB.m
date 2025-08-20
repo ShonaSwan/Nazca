@@ -29,6 +29,7 @@ mumax     =  0.2;                 % Setting upper limit for melt fraction in coe
 init_mode =  'MOR';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
+erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
 % MOR Spreading parameters  
 sprate    =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -70,12 +71,12 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 calID     =  'MORB_lo';           % phase diagram calibration
 tau_r     =  1e3*yr; %0           % phase change reaction time (set to 0 to tie to dt)
 tau_e     =  1e4*yr; %0          % extraction/eruption time (set to 0 to tie to dt)
-mthr      =  0.20;                % threshold melt fraction for extraction/eruption
+mthr      =  0.10;                % threshold melt fraction for extraction/eruption
 minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]
-bPm       =  3e-11;  %(1e-11)     % melt  compressibility [1/Pa]
+bPm       =  1e-11;  %(1e-11)     % melt  compressibility [1/Pa]
 dx0       =  1e-2;   %(5e-3)      % matrix grain size
 aTm       =  5e-5;                % melt  thermal expansivity [1/K]
 aTx       =  1e-5;                % xtal  thermal expansivity [1/K]

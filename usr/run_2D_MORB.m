@@ -48,9 +48,10 @@ dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
-Hcmin     =  6e3;  %6e3               % Minimum crustal thickness 
-c_crust   =  [0.01 0.90 0.09 0];  % components (maj comp, H2O) Crustal layer
-trc_crust =  [0.1,0.1,0.5,10,10,2];       % trace elements crust layer [wt ppm]
+crust_sw  =  1;                      % 0 = no crust, 1 = crust 
+Hcmin     =  6e3;  %6e3             % Minimum crustal thickness 
+c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
+trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 150;                                % Temperature difference between the plume and the mantle 

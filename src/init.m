@@ -120,8 +120,13 @@ end
 % initialise solution fields
 
 % Calculating the crustal thickness 
-Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
-%Hc = Hcmin - 1e6;   
+if crust_sw == 0
+   Hc = Hcmin - 1e6;
+elseif crust_sw == 1
+   Hc = Hcmin - max(0,7e3 - Hcmin) * (1 - exp(-200 * (sprate * yr)));
+else
+   disp('Invalid crust setting'); 
+end 
 
 switch init_mode
     case 'plume'

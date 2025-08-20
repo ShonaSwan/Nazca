@@ -13,6 +13,8 @@ cm_mem = reshape(reshape(cm,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
 cx_mem = reshape(reshape(cx,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
 
 % update mineral systems composition for solid assemblage
+c_msy  = reshape(reshape( c_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
+cm_msy = reshape(reshape(cm_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
 cx_msy = reshape(reshape(cx_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
 
 % update mineral systems oxide compositions for solid assemblage
@@ -130,11 +132,17 @@ if Nz==1; Pt    = max(Ptop,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcoupl
 end
 Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
 
-
+ %Diffusion Creep viscosity 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
 etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
 etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
+
+%Dislocation creep Viscosity 
+etax0_diss = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
+etax_diss  = etax0_diss .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
+n = 3;
+eta_diss = etax_diss .* (max(eII, 1e-18) .^((1/n)-1));
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);
@@ -157,7 +165,7 @@ eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
 % get yield viscosity
 etay   = tyield./(eII + eps^1.25) + etaymin;
-eta    = (eta + ((1./etay + 1./eta0).^-1))/2;
+eta    = (eta + (1./etay + 1./eta0 + 1./eta_diss).^-1)/2;
 
 
 % traditional two-phase coefficients

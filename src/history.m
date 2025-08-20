@@ -154,6 +154,12 @@ for i=1:cal.noxd
     hist.cm_oxd(stp,3,i) = max(max(cm_oxd(:,:,i)));
 end
 
+for i=1:cal.nmsy
+    hist.cm_msy(stp,1,i) = min(min(cm_msy(:,:,i)));
+    hist.cm_msy(stp,2,i) = sum(sum(cm_msy(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.cm_msy(stp,3,i) = max(max(cm_msy(:,:,i)));
+end
+
 hist.rhom(stp,1) = min(min(rhom));
 hist.rhom(stp,2) = sum(sum(rhom.*m))./sum(sum(m));
 hist.rhom(stp,3) = max(max(rhom));

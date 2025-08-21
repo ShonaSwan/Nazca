@@ -139,15 +139,16 @@ switch init_mode
         Tp = Tp + dT_plume .* pl_profile + dTr.*rp + dTg.*gp;
         
         for i = 1:cal.ncmp
-            c(:,:,i) = c0(i) + (c1(i) - c0(i)) .* (ZZ/D) .* (1 - pl_profile) + (c_plume(i) - c0(i)) .* pl_profile + dcr(i).*rp + dcg(i).*gp;
+          c(:,:,i) = c0(i) + (c_plume(i) - c0(i)) .* pl_profile + (c_crust(i) - c0(i)) .* (1 - erf((ZZ/D - Hc/D + rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;
         end
+            
         for i = 1:cal.ntrc
-            trc(:,:,i) = trc0(i) + (trc1(i) - trc0(i)) .* (ZZ/D) .* (1 - pl_profile) + (trc_plume(i) - trc0(i)) .* pl_profile + dr_trc(i).*rp + dg_trc(i).*gp;
+         trc(:,:,i) = trc0(i) + (trc_plume(i) - trc0(i)) .* pl_profile + (trc_crust(i) - trc0(i)) .* (1 - erf((ZZ/D - Hc/D + rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;
         end
+                
 
     case 'MOR'
         sprtime = XX./sprate + minage;
-        
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
 
         for i = 1:cal.ncmp

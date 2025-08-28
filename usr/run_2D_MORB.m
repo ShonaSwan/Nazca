@@ -5,7 +5,7 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_plume_N200';     % run identifier
+runID     =  '2D_MOR_N200';     % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  5;                   % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -26,8 +26,8 @@ mumin     =  1e-5;                % Setting lower limit for melt fraction in coe
 mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
 % model set up switches (plume or MOR)
-init_mode =  'plume';               % 'plume' or 'MOR'
-bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+init_mode =  'MOR';               % 'plume' or 'MOR'
+bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
 erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
@@ -37,7 +37,7 @@ bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) 
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
-minage    =  20e6*yr;             %(20e6 / 7e5) 
+minage    =  7e5*yr;             %(20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)

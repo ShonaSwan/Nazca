@@ -1,6 +1,6 @@
 % create manufactured solution
-load ocean.mat
-clear x z
+load ./colmap/lapaz.mat
+clear x z SOL W U P
 TINY = 1e-16;
 syms U_mms(x,z) W_mms(x,z) P_mms(x,z) eta_mms(x,z) rho_mms(x,z) src_mms(x,z)
 
@@ -14,7 +14,7 @@ P_mms(x,z) =-3e+3.*(cos(4*(x)*pi/L).*cos(4*(z)*pi/L));
 % compose manufactured material coefficients and volume source
 eta_mms(x,z) = 1e+3-9e+2.*(cos(4*(x)*pi/L).*sin(4*(z)*pi/L));
 rho_mms(x,z) = 3e+3-5e+1.*(cos(4*(x)*pi/L).*sin(4*(z)*pi/L)); rhoref = 3e+3;
-src_mms(x,z) =     -1e-3.*(cos(4*(x)*pi/L).*sin(4*(z)*pi/L));
+src_mms(x,z) =     -1e+3.*(cos(4*(x)*pi/L).*sin(4*(z)*pi/L));
 
 fprintf(1,'       W   = %s \n',char(W_mms));
 fprintf(1,'       U   = %s \n',char(U_mms));
@@ -25,9 +25,10 @@ fprintf(1,'       src = %s \n',char(src_mms));
 fprintf(1,'       . ');
 
 % update strain rates
-DivV_mms(x,z)= (diff(W_mms,z) + diff(U_mms,x));
-exx_mms(x,z) = diff(U_mms,x) - DivV_mms./2;         % x-normal strain rate
-ezz_mms(x,z) = diff(W_mms,z) - DivV_mms./2;         % z-normal strain rate
+DivV_mms(x,z)    = (diff(W_mms,z) + diff(U_mms,x));
+DivrhoV_mms(x,z) = (diff(rho_mms*W_mms,z) + diff(rho_mms*U_mms,x));
+exx_mms(x,z) = diff(U_mms,x) - DivV_mms./3;         % x-normal strain rate
+ezz_mms(x,z) = diff(W_mms,z) - DivV_mms./3;         % z-normal strain rate
 exz_mms(x,z) = 1/2.*(diff(U_mms,z)+diff(W_mms,x));  % xz-shear strain rate
 fprintf(1,' . ');
 
@@ -40,12 +41,12 @@ fprintf(1,' . ');
 % manufactured solution residuals
 res_W_mms = -(diff(tzz_mms,z) + diff(txz_mms,x)) + diff(P_mms,z) - (rho_mms(x,z)-rhoref)*g0;
 res_U_mms = -(diff(txx_mms,x) + diff(txz_mms,z)) + diff(P_mms,x);
-res_P_mms =  DivV_mms - src_mms(x,z);
+res_P_mms =  DivrhoV_mms - src_mms(x,z);
 fprintf(1,' . ');
 
 % plot manufactured solution
 figure(15);
-colormap(ocean);
+colormap(lapaz);
 subplot(2,3,1); fcontour( -W_mms*hr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $W$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,2); fcontour(  U_mms*hr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $U$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,3); fcontour(  P_mms/1e3 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $P$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
@@ -75,7 +76,7 @@ src_P_mms = double(subs(res_P_mms)); fprintf(1,' . ');
 
 % plot manufactured residuals and evaluated source terms
 figure(16);
-colormap(ocean);
+colormap(lapaz);
 subplot(2,3,1); fcontour(-res_W_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $W$-res','Interpreter','latex');
 subplot(2,3,2); fcontour(-res_U_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $U$-res','Interpreter','latex');
 subplot(2,3,3); fcontour(-res_P_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $P$-res','Interpreter','latex');
@@ -87,30 +88,31 @@ drawnow;
 % evaluate analytical solution on appropriate coordinate grids
 [x,z]  = meshgrid(x_mms,zw_mms);
 W_mms  = double(subs(W_mms)); fprintf(1,' . ');
-rhow  = double(subs(rho_mms)); fprintf(1,' . ');
-rhow  = rhow(:,2:end-1);
+rhow   = double(subs(rho_mms)); fprintf(1,' . ');
+rhow   = rhow(:,2:end-1);
 [x,z]  = meshgrid(xu_mms,z_mms);
 U_mms  = double(subs(U_mms)); fprintf(1,' . ');
-rhou  = double(subs(rho_mms)); fprintf(1,' . ');
-rhou  = rhou(2:end-1,:);
+rhou   = double(subs(rho_mms)); fprintf(1,' . ');
+rhou   = rhou(2:end-1,:);
 [x,z]  = meshgrid(x_mms,z_mms);
 P_mms  = double(subs(P_mms)); fprintf(1,' . ');
 eta    = double(subs(eta_mms)); fprintf(1,' . ');
 eta    = eta(2:end-1,2:end-1);
-VolSrc = double(subs(src_mms)); fprintf(1,' . ');
-VolSrc = VolSrc(2:end-1,2:end-1);
+rho    = double(subs(rho_mms)); fprintf(1,' . ');
+rho    = rho(2:end-1,2:end-1);
+MFS    = double(subs(src_mms)); fprintf(1,' . ');
+MFS    = MFS(2:end-1,2:end-1);
 [x,z]  = meshgrid(xu_mms,zw_mms);
 etaco  = double(subs(eta_mms)); fprintf(1,' . ');
 
-Drho   = rhow-mean(rhow,2)
+Drho   = rhow-mean(rhow,2);
 rhoWo  = zeros(size(rhow));
 rhoWoo = zeros(size(rhow));
 rhoUo  = zeros(size(rhou));
 rhoUoo = zeros(size(rhou));
-
-WBG    = 0.*W_mms;  W = WBG;
-UBG    = 0.*U_mms;  U = UBG;
-SOL    = [W_mms(:);U_mms(:);P_mms(:)];
+MFBG   = 0.*W_mms;
+SOL    = 0.*[W_mms(:);U_mms(:);P_mms(:)];
+U      = 0*U_mms;  W = 0*W_mms;  P = 0*P_mms;
 dt     = 1e32;
 
 % get mapping arrays
@@ -130,22 +132,15 @@ b1 = 1; b2 = 0; b3 = 0;
 
 % set boundary conditions to free slip
 sds = -1;
-top = -1;
-bot = -1;
+top_cnv = -1;
+bot_cnv = -1;
 BCA = {'',''};
 
 % set ghosted index arrays
-if periodic
-    icx = [Nx,1:Nx,1];
-    icz = [Nz,1:Nz,1];
-    ifx = [Nx,1:Nx+1,2];
-    ifz = [Nz,1:Nz+1,2];
-else
-    icx = [1,1:Nx,Nx];
-    icz = [1,1:Nz,Nz];
-    ifx = [1,1:Nx+1,Nx+1];
-    ifz = [1,1:Nz+1,Nz+1];
-end
+icx = [Nx,1:Nx,1];
+icz = [Nz,1:Nz,1];
+ifx = [Nx,1:Nx+1,2];
+ifz = [Nz,1:Nz+1,2];
 
 fprintf(1,' . \n');
    

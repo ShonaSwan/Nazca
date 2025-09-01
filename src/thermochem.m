@@ -103,8 +103,6 @@ m = M./RHO;
 hasx = x >= eps^0.5;
 hasm = m >= eps^0.5;
 
-if reactive
-
 % update major component phase composition
 Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);
 subsol  = m<=eps^0.5 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
@@ -119,8 +117,8 @@ while rnorm>tol && it<mxit
 
     Kx = cx./(cm+eps);
 
-    cmK = c    ./(m + x.*Kx + eps); 
-    cxK = c.*Kx./(m + x.*Kx + eps); 
+    cm  = c    ./(m + x.*Kx + eps); 
+    cx  = c.*Kx./(m + x.*Kx + eps); 
 
     cm  = cm./sum(cm,3);
     cx  = cx./sum(cx,3);
@@ -140,8 +138,6 @@ end
 % fix subsolidus and superliquidus conditions
 cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); m(subsol) = 0;
 cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); x(supliq) = 0;
-
-end
 
 % record timing
 TCtime = TCtime + toc - eqtime.*Rcouple;

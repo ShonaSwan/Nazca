@@ -20,6 +20,9 @@ xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);
 mq = mq./(mq+xq);
 xq = xq./(mq+xq);
 
+cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
+cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+
 % phase mass transfer rates 
 Gm  = (mq-m).*RHO/(tau_r+3*dt);
 Gx  = (xq-x).*RHO/(tau_r+3*dt); 

@@ -135,14 +135,18 @@ Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
  %Diffusion Creep viscosity 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
+%Get reference viscosity
 etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
+%diffusion creep 
 etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
 
 %Dislocation creep Viscosity 
 etax0_diss = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
 etax_diss  = etax0_diss .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
 n = 3;
-eta_diss = etax_diss .* (max(eII, 1e-18) .^((1/n)-1));
+eps_ref = 1e-15;  
+eta_diss = etax_diss .* (max(eII, 1e-18) / eps_ref).^((1/n)-1);
+
 
 % get coefficient contrasts
 kv = permute(cat(3,etax,etam),[3,1,2]);

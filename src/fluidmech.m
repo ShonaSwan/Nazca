@@ -105,7 +105,8 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 % z-RHS vector
 rr  = + (Drhow(2:end-1,:).*g0)/(Drho0*g0);
-if bnchm; rr = rr + src_W_mms(2:end-1,:); end
+
+if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
@@ -297,8 +298,11 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 % set right hand side in z-direction
 rr  = Drhomw(2:end-1,:).*g0./(Drho0*g0);
 rr(end,end) = 0;  % avoid conflict with boundary conditions at lower right corner (Div.v = 0)
-IIR = [IIR; ii(:)];
-AAR = [AAR; rr(:)];
+
+if bnchm; rr = rr + src_wm_mms(2:end-1,2:end-1); end
+
+IIR = [IIR; ii(:)]; AAR = [AAR; rr(:)];
+
 
 % qDx
 
@@ -342,6 +346,9 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 
 % set right hand side in x-direction
 rr  = zeros(size(ii));
+
+if bnchm; rr = rr + src_um_mms(2:end-1,2:end-1); end
+
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 
@@ -396,6 +403,8 @@ aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
 rr  = VolSrc/(Drho0*u0/h0);
+if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1); end
+
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
 
@@ -403,11 +412,24 @@ KP  = sparse(IIL,JJL,AAL,NP,NP);
 RP  = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
 %% set pressure fix line
+
+if bnchm
+    ipx = round((Nx+2)/2);
+    ipz = round((Nz+2)/2);
+    ip0 = MapP(ipz,ipx);
+    KP(ip0, :)   = 0;
+    KP(ip0, ip0) = speye(length(ip0));
+    DD(ip0, :)   = 0;               
+    RP(ip0)      = Pf_mms(ipz, ipx); 
+else
+
 ipx = 2:Nx+1;
 ipz = Nz+1;
 ip0 = MapP(ipz,ipx);
 KP(ip0,:)   = 0;
 KP(ip0,ip0) = speye(length(ip0));
+
+end
 
 
 %% assemble coefficients for compressibility diagonal and right-hand side (KC and RC)
@@ -457,8 +479,10 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 
 % RHS
 rr  = zeros(size(ii));
-IIR = [IIR; ii(:)];
-AAR = [AAR; rr(:)];
+
+if bnchm; rr = rr + src_Pc_mms(2:end-1,2:end-1); end
+
+IIR = [IIR; ii(:)];AAR = [AAR; rr(:)];
 
 KC = sparse(IIL,JJL,AAL,NP,NP);
 RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);

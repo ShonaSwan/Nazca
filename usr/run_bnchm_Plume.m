@@ -14,6 +14,8 @@ for nn = NN
     bnchm    =  1;                   % set flag for mms benchmark in fluidmech
 
     % set model domain parameters
+    D        =  100e3;
+    L        =  D;
     N        =  nn;                  % number of grid points in z-direction (incl. 2 ghosts)
     h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 
@@ -29,38 +31,38 @@ for nn = NN
     % run code
     run('../src/mms')
 
-    figure(17); clf;
-    colormap(ocean);
-    subplot(2,3,1); imagesc(x_mms,zw_mms,-W*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $W$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,2); imagesc(xu_mms,z_mms, U*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $U$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,3); imagesc(x_mms,zw_mms,-wm*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $wm$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,4); imagesc(x_mms,zw_mms,-(W-W_mms)*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $W$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,5); imagesc(xu_mms,z_mms, (U-U_mms)*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $U$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,6); imagesc(x_mms,zw_mms,-(wm-wm_mms)*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $wm$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    drawnow;
-
     figure(18); clf;
     colormap(ocean);
-    subplot(2,3,1); imagesc(xu_mms,z_mms, um*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $um$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,1); imagesc(x_mms,zw_mms,-W(:,2:end-1)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $W$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,2); imagesc(xu_mms,z_mms, U(2:end-1,:)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $U$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,3); imagesc(x_mms,zw_mms,-wm(:,2:end-1)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $wm$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,4); imagesc(x_mms,zw_mms,-(W(:,2:end-1)-W_mms(:,2:end-1))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $W$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,5); imagesc(xu_mms,z_mms, (U(2:end-1,:)-U_mms(2:end-1,:))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $U$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,6); imagesc(x_mms,zw_mms,-(wm(:,2:end-1)-wm_mms(:,2:end-1))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $wm$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    drawnow;
+
+    figure(19); clf;
+    colormap(ocean);
+    subplot(2,3,1); imagesc(xu_mms,z_mms, um(2:end-1,:)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $um$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
     subplot(2,3,2); imagesc(x_mms ,z_mms, Pf/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $Pf$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
     subplot(2,3,3); imagesc(x_mms ,z_mms, Pc/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $Pc$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,4); imagesc(xu_mms,z_mms, (um-um_mms)*hr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $um$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,5); imagesc(x_mms ,z_mms, (Pf-Pf_mms)/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pf$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,6); imagesc(x_mms ,z_mms, (Pc-Pc_mms)/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pc$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,4); imagesc(xu_mms,z_mms, (um(2:end-1,:)-um_mms(2:end-1,:))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $um$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,5); imagesc(x_mms ,z_mms, (Pf(2:end-1,2:end-1)-Pf_mms(2:end-1,2:end-1))/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pf$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,6); imagesc(x_mms ,z_mms, (Pc(2:end-1,2:end-1)-Pc_mms(2:end-1,2:end-1))/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pc$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
     drawnow;
 
     % get solution error
-    EW = norm(W-W_mms)./norm(W_mms);
-    EU = norm(U-U_mms)./norm(U_mms);
-    Ewm = norm(wm-wm_mms)./norm(wm_mms);
-    Eum = norm(um-um_mms)./norm(um_mms);
-    EPf = norm(Pf-Pf_mms)./norm(Pf_mms);
-    EPc = norm(Pc-Pc_mms)./norm(Pc_mms);
+    EW = norm(W(:,2:end-1)-W_mms(:,2:end-1))./norm(W_mms(:,2:end-1));
+    EU = norm(U(2:end-1,:)-U_mms(2:end-1,:))./norm(U_mms(2:end-1,:));
+    Ewm = norm(wm(:,2:end-1)-wm_mms(:,2:end-1))./norm(wm_mms(:,2:end-1));
+    Eum = norm(um(2:end-1,:)-um_mms(2:end-1,:))./norm(um_mms(2:end-1,:));
+    EPf = norm(Pf(2:end-1,2:end-1)-Pf_mms(2:end-1,2:end-1))./norm(Pf_mms(2:end-1,2:end-1));
+    EPc = norm(Pc(2:end-1,2:end-1)-Pc_mms(2:end-1,2:end-1))./norm(Pc_mms(2:end-1,2:end-1));
 
     clist = [colororder;[0 0 0]];
 
     % plot error convergence
-    fh19 = figure(19);
+    fh20 = figure(20);
     p1 = loglog(h,EW, 's','Color',clist(1,:),'MarkerSize',10,'LineWidth',2); axis xy tight; hold on; box on;
     p2 = loglog(h,EU, 'o','Color',clist(2,:),'MarkerSize',10,'LineWidth',2); axis xy tight; hold on; box on;
     p3 = loglog(h,Ewm,'v','Color',clist(3,:),'MarkerSize',10,'LineWidth',2); axis xy tight; hold on; box on;
@@ -80,7 +82,7 @@ for nn = NN
     end
 
     % plot error convergence
-    fh20 = figure(20);
+    fh21 = figure(21);
     DOFS = (NN+2).*(NN+2) + 2.*(NN+1).*(NN+2);
     dofs = (nn+2).*(nn+2) + 2.*(nn+1).*(nn+2);
     p8 = loglog(dofs,FMtime,'h','Color',clist(2,:),'MarkerSize',10,'LineWidth',2); axis xy tight; hold on; box on;
@@ -100,7 +102,7 @@ for nn = NN
 end
 
 name = [outdir,'/',runID,'/',runID,'_bnchm'];
-print(fh19,name,'-dpng','-r300','-vector');
+print(fh20,name,'-dpng','-r300','-vector');
 
 name = [outdir,'/',runID,'/',runID,'_sclng'];
-print(fh20,name,'-dpng','-r300','-vector');
+print(fh21,name,'-dpng','-r300','-vector');

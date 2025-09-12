@@ -49,7 +49,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapW(end,2:end-1); jj1 = ii; jj2 = MapW(end-1,2:end-1); jj3 = MapU(end-1,2:end); jj4 = MapU(end-1,1:end-1);
-aa  = zeros(size(ii));
+if ~bnchm
 rho1 = rhow(end  ,:      )/Drho0;
 rho2 = rhow(end-1,:      )/Drho0;
 rho3 = rhou(end  ,2:end  )/Drho0;
@@ -59,9 +59,19 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; +rho1(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; -rho2(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; +rho3(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -rho4(:)/(h/h0)];
+
 aa  = VolSrc(end,:)/(Drho0*u0/h0); 
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-    
+
+else
+
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+aa  = W_mms(end,2:end-1)/u0;
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+
+end
+
 % left boundary
 ii  = MapW(:,1); jj1 = ii; jj2 = MapW(:,2);
 aa  = zeros(size(ii));
@@ -106,7 +116,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 % z-RHS vector
 rr  = + (Drhow(2:end-1,:).*g0)/(Drho0*g0);
 
-if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1); end
+if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1)/(p0/h0); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
@@ -180,7 +190,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 % x-RHS vector
 rr = zeros(size(ii));
 if bnchm
-    rr = rr + src_U_mms(2:end-1,2:end-1);
+    rr = rr + src_U_mms(2:end-1,2:end-1)/(p0/h0);
 end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -299,7 +309,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 rr  = Drhomw(2:end-1,:).*g0./(Drho0*g0);
 rr(end,end) = 0;  % avoid conflict with boundary conditions at lower right corner (Div.v = 0)
 
-if bnchm; rr = rr + src_wm_mms(2:end-1,2:end-1); end
+% if bnchm; rr = rr + src_wm_mms(2:end-1,2:end-1); end
 
 IIR = [IIR; ii(:)]; AAR = [AAR; rr(:)];
 
@@ -347,7 +357,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 % set right hand side in x-direction
 rr  = zeros(size(ii));
 
-if bnchm; rr = rr + src_um_mms(2:end-1,2:end-1); end
+% if bnchm; rr = rr + src_um_mms(2:end-1,2:end-1); end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
@@ -403,33 +413,13 @@ aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
 rr  = VolSrc/(Drho0*u0/h0);
-if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1); end
+if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1)/(Drho0*u0/h0); end
 
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
 
 KP  = sparse(IIL,JJL,AAL,NP,NP);
 RP  = sparse(IIR,ones(size(IIR)),AAR,NP,1);
-
-%% set pressure fix line
-
-if bnchm
-    ipx = round((Nx+2)/2);
-    ipz = round((Nz+2)/2);
-    ip0 = MapP(ipz,ipx);
-    KP(ip0, :)   = 0;
-    KP(ip0, ip0) = speye(length(ip0));
-    DD(ip0, :)   = 0;               
-    RP(ip0)      = Pf_mms(ipz, ipx); 
-else
-
-ipx = 2:Nx+1;
-ipz = Nz+1;
-ip0 = MapP(ipz,ipx);
-KP(ip0,:)   = 0;
-KP(ip0,ip0) = speye(length(ip0));
-
-end
 
 
 %% assemble coefficients for compressibility diagonal and right-hand side (KC and RC)
@@ -480,7 +470,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 % RHS
 rr  = zeros(size(ii));
 
-if bnchm; rr = rr + src_Pc_mms(2:end-1,2:end-1); end
+% if bnchm; rr = rr + src_Pc_mms(2:end-1,2:end-1); end
 
 IIR = [IIR; ii(:)];AAR = [AAR; rr(:)];
 
@@ -537,6 +527,36 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +M4(:)/(h/h0)];  % W one 
 
 % Assemble coefficient matrix
 DDm  = sparse(IIL,JJL,AAL,NP,NV);
+
+
+%% set pressure fix line
+
+if bnchm
+
+    ipz = round(Nz/2);%Nx+1;
+    ipx = round(Nx/2);%2:Nx+1;
+    ip0 = MapP(ipz,ipx);
+    KP(ip0,:  ) = 0;
+    KP(ip0,ip0) = speye(length(ip0));
+    DDs(ip0,: ) = 0;
+    DDm(ip0,: ) = 0;
+    RP(ip0    ) = Pf_mms(ipz,ipx)/p0;
+
+    KC(ip0,:  ) = 0;
+    KC(ip0,ip0) = speye(length(ip0));
+    DD(ip0,:  ) = 0;
+    RC(ip0    ) = Pc_mms(ipz,ipx)/p0;
+
+else
+
+    ipx = 2:Nx+1;
+    ipz = Nz+1;
+    ip0 = MapP(ipz,ipx);
+    KP(ip0,:)   = 0;
+    KP(ip0,ip0) = speye(length(ip0));
+
+end
+
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 

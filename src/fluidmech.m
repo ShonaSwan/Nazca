@@ -533,9 +533,10 @@ DDm  = sparse(IIL,JJL,AAL,NP,NV);
 
 if bnchm
 
-    ipz = round(Nz/2);%Nx+1;
-    ipx = round(Nx/2);%2:Nx+1;
+    ipz = round(Nz/3);
+    ipx = round(Nx/2);
     ip0 = MapP(ipz,ipx);
+    
     KP(ip0,:  ) = 0;
     KP(ip0,ip0) = speye(length(ip0));
     DDs(ip0,: ) = 0;

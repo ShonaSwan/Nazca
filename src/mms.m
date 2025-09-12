@@ -15,20 +15,20 @@ width = max(L,D) / 6; % 1/6 width of domain
 
 
 % compose manufactured material coefficients and volume source
-mms_gp(x,z) = exp(-((x - x0)^2 + (z - z0)^2) / width^2);
-mu_mms(x,z) = 0.02 * mms_gp(x,z);
+gp_mms(x,z) = exp(-((x - x0)^2 + (z - z0)^2) / width^2);
+mu_mms(x,z) = 0.05 * gp_mms(x,z);
 
 eta_mms(x,z)  = 1e+19 + 1e+18*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)) * exp(-3e+1 * mu_mms(x,z));
-rho_mms(x,z)  = 3e+3-5e+1*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)); rhoref = 3000;%int(rho_mms(x,z),x ,0,L)/L;
-rhom_mms(x,z) = 28e+2-5e+1*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)) - mu_mms(x,z) * 3e+2; 
-src_mms(x,z)  = -4e-14*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)) * mms_gp(x,z);
+rho_mms(x,z)  = 3e+3+5e+1*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)); rhoref = 3000; %int(rho_mms(x,z),x ,0,L)/L;
+rhom_mms(x,z) = 28e+2-5e+1*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)); 
+src_mms(x,z)  = -4e-14*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L)) * gp_mms(x,z);
 zeta_mms(x,z) = eta_mms(x,z)/(mu_mms(x,z) + 1e-3); 
 Ks_mms(x,z)   = mu_mms(x,z)^2 * 1e-9;
 M_mms(x,z)    = mu_mms(x,z) .* rhom_mms(x,z);
 
 % compose manufactured solution variables
-W_mms(x,z)  = 6e-9.*(cos(4*(x)*pi/L).*sin(4.5*(z)*pi/L)) - mms_gp(x,z)*2e-9;
-U_mms(x,z)  = 5e-9.*(sin(4*(x)*pi/L).*cos(  4*(z)*pi/L));
+W_mms(x,z)  = 6e-9.*(cos(4*(x)*pi/L).*sin(4.5*(z)*pi/L)) * (1 + 3*gp_mms(x,z))/4;
+U_mms(x,z)  = 5e-9.*(sin(4*(x)*pi/L).*cos(  4*(z)*pi/L)) * (1 + 3*gp_mms(x,z))/4;
 DivV_mms(x,z) = (diff(W_mms,z) + diff(U_mms,x));
 Pf_mms(x,z) = -1e6 .*(cos(4*(x)*pi/L).*sin(4*(z)*pi/L)) + zeta_mms(x,z) * DivV_mms(x,z);
 wm_mms(x,z) = - Ks_mms(x,z) * (diff(Pf_mms, z) - ( rhom_mms(x,z) - rhoref ) * g0); %3e-10.*(sin(4*(x)*pi/L).*cos(  4*(z)*pi/L)); 

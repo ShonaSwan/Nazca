@@ -414,8 +414,8 @@ RP  = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 %% set pressure fix line
 
 if bnchm
-    ipx = round((Nx+2)/2);
-    ipz = round((Nz+2)/2);
+    ipx = 2:Nx+1;
+    ipz = Nz+1;
     ip0 = MapP(ipz,ipx);
     KP(ip0, :)   = 0;
     KP(ip0, ip0) = speye(length(ip0));

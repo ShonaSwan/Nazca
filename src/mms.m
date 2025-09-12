@@ -2,7 +2,7 @@
 load ocean;  
 clear x z SOL W U wm um Pf Pc
 TINY = 1e-16;
-mumin = 1e-5;
+mumin = 1e-3;
 syms U_mms(x,z) W_mms(x,z) wm_mms(x,z) um_mms(x,z) Pf_mms(x,z) Pc_mms(x,z) eta_mms(x,z)  zeta_mms(x,z) rho_mms(x,z) rhom_mms(x,z) src_mms(x,z) Ks_mms(x,z) mu_mms(x,z)
 
 fprintf(1,'\n\n  ***  compose manufactured solution\n\n');
@@ -24,15 +24,15 @@ rhom_mms(x,z) = 28e+2-5e+1*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L))- mu_mms(x,z) * 3e+2
 src_mms(x,z)  = -4e-14*(cos(4*(x)*pi/L)*sin(4*(z)*pi/L));
 zeta_mms(x,z) = eta_mms(x,z)/(mu_mms(x,z)+1e-3); 
 Ks_mms(x,z)   = mu_mms(x,z)^2 * 1e-9;
-M_mms(x,z)    = mu_mms(x,z) .* rhom_mms(x,z);
+M_mms(x,z)    = mu_mms(x,z) * rhom_mms(x,z);
 
 % compose manufactured solution variables
-W_mms(x,z)  = 6e-9.*(cos(4*(x)*pi/L).*sin(4.5*(z)*pi/L));
-U_mms(x,z)  = 5e-9.*(sin(4*(x)*pi/L).*cos(  4*(z)*pi/L));
-wm_mms(x,z) = 1e-9.*(cos(4*(x)*pi/L).*sin(4.5*(z)*pi/L)); 
-um_mms(x,z) = 3e-10.*(sin(4*(x)*pi/L).*cos(  4*(z)*pi/L)); 
-Pc_mms(x,z) =  1e8 .*(sin(  4*(z)*pi/L))* mu_mms(x,z);
-Pf_mms(x,z) = -1e7 .*(cos(4*(x)*pi/L).*sin(4.5*(z-0.5*L/4.5)*pi/L))-Pc_mms(x,z);
+W_mms(x,z)  = 6e-9 *(cos(4*(x)*pi/L)*sin(4.5*(z)*pi/L));
+U_mms(x,z)  = 5e-9 *(sin(4*(x)*pi/L)*cos(  4*(z)*pi/L));
+wm_mms(x,z) = 1e-9 *(cos(4*(x)*pi/L)*sin(4.5*(z)*pi/L)); 
+um_mms(x,z) = 3e-10*(sin(4*(x)*pi/L)*cos(  4*(z)*pi/L)); 
+Pc_mms(x,z) =  1e8 *(sin(  4*(z)*pi/L))* mu_mms(x,z);
+Pf_mms(x,z) = -1e7 *(cos(4*(x)*pi/L)*sin(4.5*(z-0.5*L/4.5)*pi/L))-Pc_mms(x,z);
 
 fprintf(1,'       W    = %s \n',char(W_mms));
 fprintf(1,'       U    = %s \n',char(U_mms));
@@ -81,7 +81,6 @@ subplot(2,3,3); fcontour( -wm_mms*hr  ,[0,L],'LineWidth',1.5); axis ij equal tig
 subplot(2,3,4); fcontour(  um_mms*hr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $um$ [m/hr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,5); fcontour(  Pf_mms/1e3 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $Pf$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,6); fcontour(  Pc_mms/1e3 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $Pc$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-
 drawnow;
 fprintf(1,' . ');
 
@@ -95,6 +94,7 @@ subplot(2,3,5); fcontour(       (Ks_mms),[0,L],'LineWidth',1.5); axis ij equal t
 subplot(2,3,6); fcontour(       (mu_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $mu$ []','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
 drawnow;
 fprintf(1,' . \n');
+
 
 % evaluate mms source terms on appropriate coordinate grids
 fprintf(1,'\n  ***  evaluate manufactured solution\n\n');
@@ -133,7 +133,7 @@ drawnow;
 
 figure(18);
 colormap(ocean);
-subplot(2,3,1);fcontour(-res_um_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $um$-res','Interpreter','latex');
+subplot(2,3,1); fcontour(-res_um_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $um$-res','Interpreter','latex');
 subplot(2,3,2); fcontour(-res_Pf_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $Pf$-res','Interpreter','latex');
 subplot(2,3,3); fcontour(-res_Pc_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $Pc$-res','Interpreter','latex');
 subplot(2,3,4); imagesc(xu_mms,z_mms,-src_um_mms); axis ij equal tight; colorbar; box on; title('evaluated $um$-res','Interpreter','latex');

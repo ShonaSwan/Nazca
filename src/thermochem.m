@@ -23,7 +23,7 @@ bnd_S = RHO.*cP.*bnd_T ./ T;
 
 
 % total rate of change
-dSdt  = advn_S + diff_S + diss_h + bnd_S + sm.*Gem + sx.*Gex;
+dSdt  = advn_S + diff_S + diss_h + bnd_S + Gems + Gexs + Gins;
 
 % residual of entropy evolution
 res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
@@ -55,7 +55,7 @@ for i = 1:cal.ncmp
 end
 
 % total rate of change
-dCdt = advn_C + bnd_C + Gemc + Gexc;                                      
+dCdt = advn_C + bnd_C + Gemc + Gexc + Ginc;                                      
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -80,8 +80,8 @@ advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
 % total rates of change
 dXdt   = advn_X + Gx + Gex;
-dMdt   = advn_M + Gm + Gem;
-drhodt = advn_X + advn_M + Gem + Gex;
+dMdt   = advn_M + Gm + Gem + Gin;
+drhodt = advn_X + advn_M + Gem + Gex + Gin;
 
 % residual of phase density evolution
 res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);

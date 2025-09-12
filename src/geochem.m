@@ -27,7 +27,7 @@ for i = 1:cal.ntrc
 end
 
 % get total rate of change
-dTRCdt = adv_TRC + bnd_TRC + Gemt + Gext;
+dTRCdt = adv_TRC + bnd_TRC + Gemt + Gext + Gint;
 
 % residual of trace element evolution
 res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo)/dt - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo);

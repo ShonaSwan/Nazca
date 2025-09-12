@@ -381,7 +381,7 @@ else % create 2D plots
     imagesc(Xsc,Zsc,max(-max(Gm(:)),Gm)./rho*TimeScale*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_m/\bar{\rho}$ [wt\%/',TimeUnits,']'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     set(fh3,'CurrentAxes',ax(34));
-    imagesc(Xsc,Zsc,(Gem+Gex)./rho*TimeScale*100); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,(Gem+Gex+Gin)./rho*TimeScale*100); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_e/\bar{\rho}$ [wt\%/',TimeUnits,']'],TX{:},FS{:}); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
 
     % plot density, rheology, and segregation speeds in Fig. 4

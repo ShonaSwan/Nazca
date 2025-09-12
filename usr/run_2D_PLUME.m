@@ -5,9 +5,9 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MOR_N100';     % run identifier
-restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  5;                   % output frame plotted/saved every 'nop' time steps
+runID     =  '2D_PLUME_N100';     % run identifier
+restart   = -1;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
+nop       =  20;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
@@ -16,7 +16,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 D         =  200e3;               % chamber depth [m]
 N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  1.5*D;               % chamber width (equal to h for 1-D mode) [m]
+L         =  D;                   % chamber width (equal to h for 1-D mode) [m]
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
@@ -26,19 +26,19 @@ mumin     =  1e-5;                % Setting lower limit for melt fraction in coe
 mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
 % model set up switches (plume or MOR)
-init_mode =  'MOR';               % 'plume' or 'MOR'
-bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+init_mode =  'plume';             % 'plume' or 'MOR'
+bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.05;
 
 % MOR Spreading parameters  
-sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+sprate    =  0.0/yr;              % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
-minage    =  7e5*yr;             %(20e6 / 7e5) 
+minage    =  20e6*yr;              % (20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
@@ -50,16 +50,16 @@ trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  0;                     % 0 = no crust, 1 = crust 
-Hcmin     =  6e3;                   % Minimum crustal thickness 
+Hcmin     =  5e3;                  % Minimum crustal thickness 
 c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
-trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
+trc_crust =  [0.1,0.3,1.0,3,10,2.0]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
-dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
+dT_plume  = 250;                                % Temperature difference between the plume and the mantle 
 pl_width  = 50e3;                               % Width of the plume [m]
-pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
+pl_local  = L;                                  % Location of the mantle plume along the bottom boundary [m]
 c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
-trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+trc_plume = [10.0, 3.0, 2.0, 0.3, 0.1, 1.0];    % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/2;                 % boundary layer width [m]

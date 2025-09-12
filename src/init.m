@@ -343,7 +343,7 @@ TRCo = TRC;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
-Gem = 0.*m; Gex = 0.*x; 
+Gem = 0.*m; Gex = 0.*x; Gin = 0.*x;
 Gemc = 0.*c; Gexc = 0.*c;
 Gemt = 0.*trc; Gext = 0.*trc;
 
@@ -415,6 +415,7 @@ if restart
         store;
         fluidmech;
         update;
+        phseql;
         history;
         output;
     end
@@ -423,6 +424,7 @@ else
     store;
     fluidmech;
     update;
+    phseql;
     history;
     output;
     step = step+1;

@@ -477,7 +477,7 @@ IIR = [IIR; ii(:)];AAR = [AAR; rr(:)];
 KC = sparse(IIL,JJL,AAL,NP,NP);
 RC = sparse(IIR,ones(size(IIR)),AAR,NP,1);
 
-%% assemble coefficients for divergence of matrix mass flux (DD)
+%% assemble coefficients for divergence of matrix mass flux (DDs)
 
 IIL = [];       % equation indeces into A
 JJL = [];       % variable indeces into A
@@ -502,7 +502,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +rho4(:)/(h/h0)];  % W on
 % Assemble coefficient matrix
 DDs  = sparse(IIL,JJL,AAL,NP,NV);
 
-%% assemble coefficients for divergence of relative melt mass flux (DD)
+%% assemble coefficients for divergence of relative melt mass flux (DDm)
 
 IIL = [];       % equation indeces into A
 JJL = [];       % variable indeces into A

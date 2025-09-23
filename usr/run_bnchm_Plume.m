@@ -33,22 +33,22 @@ for nn = NN
 
     figure(18); clf;
     colormap(ocean);
-    subplot(2,3,1); imagesc(x_mms,zw_mms,-W(:,2:end-1)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $W$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,2); imagesc(xu_mms,z_mms, U(2:end-1,:)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $U$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,3); imagesc(x_mms,zw_mms,-wm(:,2:end-1)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $wm$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,4); imagesc(x_mms,zw_mms,-(W(:,2:end-1)-W_mms(:,2:end-1))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $W$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,5); imagesc(xu_mms,z_mms, (U(2:end-1,:)-U_mms(2:end-1,:))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $U$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,6); imagesc(x_mms,zw_mms,-(wm(:,2:end-1)-wm_mms(:,2:end-1))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $wm$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,1); imagesc(x_mms,zw_mms,-W(:,2:end-1)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $W$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,2); imagesc(xu_mms,z_mms, U(2:end-1,:)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $U$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,3); imagesc(x_mms,zw_mms,-wm(:,2:end-1)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $wm$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,4); imagesc(x_mms,zw_mms,-(W(:,2:end-1)-W_mms(:,2:end-1))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $W$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,5); imagesc(xu_mms,z_mms, (U(2:end-1,:)-U_mms(2:end-1,:))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $U$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,6); imagesc(x_mms,zw_mms,-(wm(:,2:end-1)-wm_mms(:,2:end-1))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $wm$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
     drawnow;
 
     figure(19); clf;
     colormap(ocean);
-    subplot(2,3,1); imagesc(xu_mms,z_mms, um(2:end-1,:)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $um$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,2); imagesc(x_mms ,z_mms, Pf/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $Pf$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,3); imagesc(x_mms ,z_mms, Pc/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $Pc$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,1); imagesc(xu_mms,z_mms, um(2:end-1,:)*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $um$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,2); imagesc(x_mms ,z_mms, Pf/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $Pf$ [kPa]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,3); imagesc(x_mms ,z_mms, Pc/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. sol. $Pc$ [kPa]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
     subplot(2,3,4); imagesc(xu_mms,z_mms, (um(2:end-1,:)-um_mms(2:end-1,:))*yr); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $um$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,5); imagesc(x_mms ,z_mms, (Pf(2:end-1,2:end-1)-Pf_mms(2:end-1,2:end-1))/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pf$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-    subplot(2,3,6); imagesc(x_mms ,z_mms, (Pc(2:end-1,2:end-1)-Pc_mms(2:end-1,2:end-1))/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pc$ [kPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,5); imagesc(x_mms ,z_mms, (Pf(2:end-1,2:end-1)-Pf_mms(2:end-1,2:end-1))/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pf$ [kPa]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+    subplot(2,3,6); imagesc(x_mms ,z_mms, (Pc(2:end-1,2:end-1)-Pc_mms(2:end-1,2:end-1))/1e3); axis ij equal tight; box on; colorbar('TicklabelInterpreter','latex'); title('num. err. $Pc$ [kPa]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
     drawnow;
 
     % get solution error

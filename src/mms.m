@@ -77,25 +77,25 @@ fprintf(1,' . ');
 % plot manufactured solution
 figure(15);
 colormap(ocean);
-subplot(2,3,1); fcontour( -W_mms*yr   ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $W$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,2); fcontour(  U_mms*yr   ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $U$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,3); fcontour( -wm_mms*yr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $wm$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,4); fcontour(  um_mms*yr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $um$ [m/yr]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,5); fcontour(  Pf_mms/1e6 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $Pf$ [MPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,6); fcontour(  Pc_mms/1e6 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $Pc$ [MPa]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-
+subplot(2,3,1); fcontour( -W_mms*yr   ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $W$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,2); fcontour(  U_mms*yr   ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $U$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,3); fcontour( -wm_mms*yr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $wm$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,4); fcontour(  um_mms*yr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $um$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,5); fcontour(  Pf_mms/1e6 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $Pf$ [MPa]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,6); fcontour(  Pc_mms/1e6 ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $Pc$ [MPa]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
 drawnow;
 fprintf(1,' . ');
 
 figure(16);
 colormap(ocean);
-subplot(2,3,1); fcontour(       rho_mms ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\rho$ [kg/m$^3$]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,2); fcontour(log10(eta_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\eta$ [log$_{10}$ Pas]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,3); fcontour(       src_mms ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\dot{Volsrc} [1/s]$','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,4); fcontour(log10(zeta_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\zeta$ [log$_{10}$ Pas]','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,5); fcontour(       (Ks_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $K_s$ []','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
-subplot(2,3,6); fcontour(       (mu_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\mu$ []','Interpreter','latex'); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,1); fcontour(       rho_mms ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\rho$ [kg/m$^3$]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,2); fcontour(log10(eta_mms) ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\eta$ [log$_{10}$ Pas]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,3); fcontour(       src_mms ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\dot{Volsrc} [1/s]$','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,4); fcontour(log10(zeta_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\zeta$ [log$_{10}$ Pas]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,5); fcontour(       (Ks_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $K_s$ []','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
+subplot(2,3,6); fcontour(       (mu_mms),[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\mu$ []','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
 drawnow;
+
 fprintf(1,' . \n');
 
 
@@ -126,12 +126,12 @@ src_Pf_mms = double(subs(res_Pf_mms)); fprintf(1,' . ');
 % plot manufactured residuals and evaluated source terms
 figure(17);
 colormap(ocean);
-subplot(2,3,1); fcontour(-res_W_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $W$-res','Interpreter','latex');
-subplot(2,3,2); fcontour(-res_U_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $U$-res','Interpreter','latex');
-subplot(2,3,3); fcontour(-res_Pf_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $P_f$-res','Interpreter','latex');
-subplot(2,3,4); imagesc(x_mms,zw_mms,-src_W_mms); axis ij equal tight; colorbar; box on; title('evaluated $W$-res','Interpreter','latex');
-subplot(2,3,5); imagesc(xu_mms,z_mms,-src_U_mms); axis ij equal tight; colorbar; box on; title('evaluated $U$-res','Interpreter','latex');
-subplot(2,3,6); imagesc(x_mms,z_mms,src_Pf_mms); axis ij equal tight; colorbar; box on; title('evaluated $P_f$-res','Interpreter','latex');
+subplot(2,3,1); fcontour(-res_W_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $W$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
+subplot(2,3,2); fcontour(-res_U_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $U$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
+subplot(2,3,3); fcontour(-res_Pf_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $P_f$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
+subplot(2,3,4); imagesc(x_mms,zw_mms,-src_W_mms); axis ij equal tight; colorbar; box on; title('evaluated $W$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
+subplot(2,3,5); imagesc(xu_mms,z_mms,-src_U_mms); axis ij equal tight; colorbar; box on; title('evaluated $U$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
+subplot(2,3,6); imagesc(x_mms,z_mms,src_Pf_mms); axis ij equal tight; colorbar; box on; title('evaluated $P_f$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
 drawnow;
 
 % figure(18);

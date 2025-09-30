@@ -28,7 +28,7 @@ mumax     =  0.2;                 % Setting upper limit for melt fraction in coe
 % model set up switches (plume or MOR)
 init_mode =  'plume';               % 'plume' or 'MOR'
 bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
-meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
+meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
 % MOR Spreading parameters  

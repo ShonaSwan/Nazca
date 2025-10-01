@@ -11,29 +11,22 @@ for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    nop      =  4;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  10;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
     plot_cv  =  0;                   % switch on to live plot iterative convergence
     save_op  =  0;
 
-    % % set model domain parameters
-    % D        =  10;                  % chamber depth [m]
-    % L        =  10;                  % chamber width [m]
-    % N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
-    % h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-    % 
     % set model timing parameters
     Nt       =  nop;                 % number of time steps to take
-    dt       =  1;                   % set initial time step
-
+    
     % model set up switches (plume or MOR)
-    init_mode =  'MOR';               % 'plume' or 'MOR'
-    bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
-    meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
+    init_mode   =  'plume';               % 'plume' or 'MOR'
+    bndmode     =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+    meansw      =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
     erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
     % set initial thermo-chemical state of the Plume 
-    dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
+    dT_plume  = 300;                                % Temperature difference between the plume and the mantle 
     pl_width  = 50e3;                               % Width of the plume [m]
     pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
     c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
@@ -79,8 +72,8 @@ for atol = ATOL
     p2 = loglog(atol,EB,'s','Color',clist(2,:),'MarkerSize',10,'LineWidth',2);
     p3 = loglog(atol,EM,'o','Color',clist(3,:),'MarkerSize',10,'LineWidth',2);
     p4 = loglog(atol,EX,'d','Color',clist(4,:),'MarkerSize',10,'LineWidth',2);
-    p5 = loglog(atol,EC,'^','Color',clist(6,:),'MarkerSize',10,'LineWidth',2);
-    p6 = loglog(atol,ET,'v','Color',clist(7,:),'MarkerSize',10,'LineWidth',2);
+    p5 = loglog(atol,EC,'^','Color',clist(5,:),'MarkerSize',10,'LineWidth',2);
+    p6 = loglog(atol,ET,'v','Color',clist(6,:),'MarkerSize',10,'LineWidth',2);
     set(gca,'TicklabelInterpreter','latex','FontSize',12)
     xlabel('abs. residual tolerance [1]','Interpreter','latex','FontSize',16)
     ylabel('rel. conservation error rate [1/s]','Interpreter','latex','FontSize',16)
@@ -88,7 +81,6 @@ for atol = ATOL
 
     if atol == ATOL(end)
         p7 = loglog(ATOL,eps.*ones(size(ATOL)),'k-' ,'LineWidth',2);  % plot trend for comparison
-        % legend([p1,p2,p3,p4,p5,p6,p7],{'error $S$','error $\bar{\rho}$','error $C_j$','error $\Theta_k$','machine prec.'},'Interpreter','latex','box','on','location','southeast')
         legend([p1,p2,p3,p4,p5,p6,p7],{'error $S$','error $\bar{\rho}$','error $M$','error $X$','error $C_j$','error $\Theta_k$','machine prec.'},'Interpreter','latex','box','on','location','southeast')
     end
     drawnow;

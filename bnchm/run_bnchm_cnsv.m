@@ -5,45 +5,39 @@ clear; close all;
 run('../usr/par_default')
 
 % test decreasing time step
-ATOL = [1e-3,1e-6,1e-9];
+ATOL = [1e-6,1e-9,1e-12];
 
 for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    restart  =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-    nop      =  10;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  4;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
-    plot_cv  =  1;                   % switch on to live plot iterative convergence
+    plot_cv  =  0;                   % switch on to live plot iterative convergence
+    save_op  =  0;
 
-    % set model domain parameters
-    D         =  1e1;                 % chamber depth [m]
-    N         =  100;                  % number of grid points in z-direction
-    h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-    L         =  D;                   % chamber width (equal to h for 1-D mode) [m]
-
+    % % set model domain parameters
+    % D        =  10;                  % chamber depth [m]
+    % L        =  10;                  % chamber width [m]
+    % N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
+    % h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
+    % 
     % set model timing parameters
-    Nt        =  5*nop;               % stop when dimensionless time is reached
+    Nt       =  nop;                 % number of time steps to take
+    dt       =  1;                   % set initial time step
 
-    % set crystallinity initial condition
-    xeq       =  0.01;                % equilibrium crystallinity of boundary layer [wt]
-    x0        =  xeq/10;              % initial background crystallinity [wt]
-    dxr       =  x0/10;                   % initial random perturbation [wt]
-    dxg       =  0;                % initial gaussian perturbation [wt]
+    % model set up switches (plume or MOR)
+    init_mode =  'MOR';               % 'plume' or 'MOR'
+    bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+    meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
+    erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
-    % set physical control parameters
-    d0        =  1e-2;                % xtal size constant [m]
-    etam0     =  1e+1;                % melt viscosity constant [kg/m3]
-    L0        =  h/2;                 % correlation length for eddy diffusivity (multiple of h, 0.5-1)
-    l0        =  d0*10;               % correlation length for phase fluctuation diffusivity (multiple of d0, 10-20)
-    R         =  1.0;                 % relative amplitude of crystallisation rate [s]
-    Xi        =  1.0;                 % relative amplitude of random noise flux
-    open_sgr  =  1;
-    open_cnv  =  0;
-
-    % set numerical model parameters
-    CFL       =  0.50;                % (physical) time stepping courant number (multiplies stable step) [0,1]
-    rtol      =  atol/1e6;            % outer its relative tolerance
+    % set initial thermo-chemical state of the Plume 
+    dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
+    pl_width  = 50e3;                               % Width of the plume [m]
+    pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
+    c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+    trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
 
     % create output directory
     if ~isfolder([outdir,'/',runID])
@@ -54,30 +48,52 @@ for atol = ATOL
     run('../src/main')
 
     % plot convergence
-    EB = rms(diff(HST.EB(Nt/2:Nt))./diff(HST.time(Nt/2:Nt)));
-    EM = rms(diff(HST.EM(Nt/2:Nt))./diff(HST.time(Nt/2:Nt)));
-    EX = rms(diff(HST.EX(Nt/2:Nt))./diff(HST.time(Nt/2:Nt)));
+    ES = norm(diff(hist.ES(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.ES(Nt/2:Nt))         ));
+    EB = norm(diff(hist.EB(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.EB(Nt/2:Nt))         ));
+    EM = norm(diff(hist.EM(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.EM(Nt/2:Nt))         ));
+    EX = norm(diff(hist.EX(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.EX(Nt/2:Nt))         ));
+    EC = norm(diff(hist.EC(Nt/2:Nt,:))./repmat(diff(hist.time(Nt/2:Nt)),cal.ncmp,1).','fro')./sqrt(length(diff(hist.EC(Nt/2:Nt))*cal.ncmp));
+    ET = norm(diff(hist.ET(Nt/2:Nt,:))./repmat(diff(hist.time(Nt/2:Nt)),cal.ntrc,1).','fro')./sqrt(length(diff(hist.ET(Nt/2:Nt))*cal.ntrc));
 
     clist = [colororder;[0 0 0]];
 
-    fh24 = figure(24);
-    loglog(atol,EB,'s','Color',clist(2,:),'MarkerSize',10,'LineWidth',2); hold on; box on;
-    loglog(atol,EM,'o','Color',clist(3,:),'MarkerSize',10,'LineWidth',2);
-    loglog(atol,EX,'d','Color',clist(4,:),'MarkerSize',10,'LineWidth',2);
-    set(gca,'LineWidth',1.5,'TickLabelInterpreter','latex','FontSize',12)
-    xlabel('Abs. residual tolerance [1]','Interpreter','latex','FontSize',15)
-    ylabel('Rel. conservation error rate [1/s]','Interpreter','latex','FontSize',15)
-    title('Global conservation with nonlinear convergence','Interpreter','latex','FontSize',18)
+    fh20 = figure(20);
+    subplot(4,1,1);
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.ES(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on;
+    ylabel('$\Delta E_S$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
+    subplot(4,1,2);
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EB(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on; hold on
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EM(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on;
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EX(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on;
+    ylabel('$\Delta E_{\bar{\rho}}, \Delta E_{F^i}$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
+    subplot(4,1,3);
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EC(Nt/2:Nt,:)))./repmat(diff(hist.time(Nt/2:Nt)),cal.ncmp,1).','-',LW{:}); hold on; axis tight; box on;
+    ylabel('$\Delta E_{C_j}$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
+    subplot(4,1,4);
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.ET(Nt/2:Nt,:)))./repmat(diff(hist.time(Nt/2:Nt)),cal.ntrc,1).','-',LW{:}); hold on; axis tight; box on;
+    ylabel('$\Delta E_{\Theta_k}$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
+    xlabel('Time [s]',TX{:},FS{:});
 
-    if atol == ATOL(1)
-        loglog(ATOL,eps.*ones(size(ATOL)),'k:' ,'LineWidth',2);  % plot trend for comparison
-    end
+    fh21 = figure(21);
+    p1 = loglog(atol,ES,'+','Color',clist(1,:),'MarkerSize',10,'LineWidth',2); hold on; box on;
+    p2 = loglog(atol,EB,'s','Color',clist(2,:),'MarkerSize',10,'LineWidth',2);
+    p3 = loglog(atol,EM,'o','Color',clist(3,:),'MarkerSize',10,'LineWidth',2);
+    p4 = loglog(atol,EX,'d','Color',clist(4,:),'MarkerSize',10,'LineWidth',2);
+    p5 = loglog(atol,EC,'^','Color',clist(6,:),'MarkerSize',10,'LineWidth',2);
+    p6 = loglog(atol,ET,'v','Color',clist(7,:),'MarkerSize',10,'LineWidth',2);
+    set(gca,'TicklabelInterpreter','latex','FontSize',12)
+    xlabel('abs. residual tolerance [1]','Interpreter','latex','FontSize',16)
+    ylabel('rel. conservation error rate [1/s]','Interpreter','latex','FontSize',16)
+    title('Global conservation with nonlinear convergence','Interpreter','latex','FontSize',20)
+
     if atol == ATOL(end)
-        legend('error $\bar{\rho}$','error $M$','error $X$','machine prec.','Interpreter','latex','box','on','location','southeast')
+        p7 = loglog(ATOL,eps.*ones(size(ATOL)),'k-' ,'LineWidth',2);  % plot trend for comparison
+        % legend([p1,p2,p3,p4,p5,p6,p7],{'error $S$','error $\bar{\rho}$','error $C_j$','error $\Theta_k$','machine prec.'},'Interpreter','latex','box','on','location','southeast')
+        legend([p1,p2,p3,p4,p5,p6,p7],{'error $S$','error $\bar{\rho}$','error $M$','error $X$','error $C_j$','error $\Theta_k$','machine prec.'},'Interpreter','latex','box','on','location','southeast')
     end
     drawnow;
 
 end
 
 name = [outdir,'/',runID,'/',runID,'_',TINT,'_',ADVN];
-print(fh24,name,'-dpng','-r300','-vector');
+print(fh21,name,'-dpng','-r300','-vector');

@@ -9,40 +9,47 @@ save_op  =  1;                   % switch on to save output to file
 plot_cv  =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  10;                  % chamber depth [m]
-L         =  10;                  % chamber width [m]
+D         =  200e3;               % System depth [m]
+L         =  1*D;                 % System width [m]
 N         =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-bnd_sprc  =  5e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
-bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
-
 
 % set model timing parameters
-Nt       =  3e5;                 % number of time steps to take
+Nt       =  5e5;                 % number of time steps to take
 hr       =  3600;                % conversion seconds to hours
 yr       =  24*365.25*hr;        % conversion seconds to years
-tend     =  1*yr;                % end time for simulation [s]
-dt       =  10;                  % initial time step [s]
+tend     =  1e9*yr;              % end time for simulation [s]
+dt       =  1e2*yr;              % initial time step [s]
 dtmax    =  1e6*yr;              % maximum time step [s]
+minage   =  20e6*yr;             % age of system before simuation 
+
+% set up melt fraction variabels 
+minit     =  0.01;                % maximum initial melt fraction (Initial reduction of melt)
+mumin     =  1e-5;                % Setting lower limit for melt fraction in 
+mumax     =  0.2;                 % Setting upper limit for melt fraction in 
+
+% set up mid ocean ridge spreading 
+bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
+bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 sprate   =  0.04/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 
-% set initial thermo-chemical state
-init_mode = 'layer';              % T initial condition mode ('layer' or 'linear')
+% set initial thermo-chemical state (Mantle)
+init_mode = 'plume';              % 'plume' or 'MOR'
+bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume)
 seed      =  24;                  % random perturbation seed
 smth      =  10;                  % regularisation of initial random perturbation
 zlay      =  2.0;                 % layer thickness (relative to domain depth D)
 dlay      =  0.0;                 % random perturbation to layer thickness (relative to grid spacing h)
 wlay_T    =  0*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-wlay_c    =  0*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-T0        =  1175;                % temperature top layer [deg C]
-T1        =  1175;                % temperature base layer [deg C]
+wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
+T0        =  5;                   % temperature top layer [deg C]
+T1        =  1350;                % temperature base layer [deg C]
 dTr       =  0;                   % amplitude of random noise [deg C]
 dTg       =  0;                   % amplitude of centred gaussian [deg C]
-c0        =  [0.04,0.12,0.44,0.24,0.14,0.02,0.005];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
-c1        =  [0.04,0.12,0.44,0.24,0.14,0.02,0.005];  % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
-dcr       =  [0,0,0,0,0,0,0];     % amplitude of random noise [wt SiO2]
+c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c1        =  c0;                  % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
+dcr       =  [1,-1,0,0]*0e-3;     % amplitude of random noise [wt SiO2]
 dcg       =  [0,0,0,0,0,0,0];     % amplitude of centred gaussian [wt SiO2]
-reactive  =  0;                   % 1 for reactive flow, 0 for non-reactive flow (melt model on off switch)    
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
 trc0     =  [1,1,1,1,1,1];       % trace elements top layer [wt ppm]
@@ -50,37 +57,60 @@ trc1     =  [1,1,1,1,1,1];       % trace elements base layer [wt ppm]
 dr_trc   =  [0,0,0,0,0,0];       % trace elements random noise [wt ppm]
 dg_trc   =  [0,0,0,0,0,0];       % trace elements centred gaussian [wt ppm]
 
+% set initial thermo-chemical state (Crust)
+crust_sw  =  1;                     % 0 = no crust, 1 = crust 
+Hcmin     =  6e3;                   % Minimum crustal thickness 
+c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
+trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
+
+% set initial thermo-chemical state (Plume)
+dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
+pl_width  = 50e3;                               % Width of the plume [m]
+pl_local  = L/2;                                % Location of the mantle plume along the bottom boundary [m]
+c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+
+% Plastic Deformation 
+tyield    =  1e8;                 % yield stress for shear failure [Pa]
+pyield    =  1e9;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e20;                % minimum yield viscosity
+
+% Melt Extraction Algorythm 
+erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all 
+tau_e     =  1e4*yr;              % extraction/eruption time (set to 0 to tie to dt)
+mthr      =  0.10;                % threshold melt fraction for extraction/eruption
+
 % set thermo-chemical boundary parameters
-fractxtl =  0;                   % fractional crystallisation mode for 0-D (Nz=Nx=1)
-fractmlt =  0;                   % fractional melting mode for 0-D (Nz=Nx=1)
-fractres =  0.25;                % residual fraction for fractionation mode
-dPdT     =  0e5;                 % decompression rate for 0D models
-Ptop     =  125e6;               % top pressure [Pa]
-periodic =  0;                   % set side boundaries to periodic
-bndmode  =  6;                   % boundary assimilation mode (0 = none; 1 = top only; 2 = bot only; 3 = top/bot only; 4 = all walls; 5 = only sides)
-bnd_w    =  h;                   % boundary layer width [m]
-bnd_h    =  [0,0,0];             % internal wall rock layer thickness [m]
-tau_T    =  12*hr;               % wall cooling/assimilation time [s]
-tau_a    =  24*hr;               % wall cooling/assimilation tie [s]
-Twall    =  [300,300,nan,nan];  % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
+% fractxtl =  0;                   % fractional crystallisation mode for 0-D (Nz=Nx=1)
+% fractmlt =  0;                   % fractional melting mode for 0-D (Nz=Nx=1)
+% fractres =  0.25;                % residual fraction for fractionation mode
+% dPdT     =  0e5;                 % decompression rate for 0D models
+
+Ptop     =  4.0e7;                 % top pressure [Pa]
+
+bnd_w    =  h/2;                   % boundary layer width [m]
+bnd_h    =  [0,0,0];               % internal wall rock layer thickness [m]
+tau_T    =  1e4*yr;                % wall cooling/assimilation time [s]
+tau_a    =  24*hr;                 % wall cooling/assimilation tie [s]
+Twall    =  [T0,nan,nan,nan];      % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall    =  nan(3,7,7);            % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elements [wt ppm] (nan = no assimilation)
 
 % set thermo-chemical material parameters
-calID    =  'MORB';              % phase diagram calibration
+calID    =  'MORB_lo';           % phase diagram calibration
 aTm      =  5e-5;                % melt  thermal expansivity [1/K]
 aTx      =  1e-5;                % xtal  thermal expansivity [1/K]
-kTm      =  2;                   % melt  thermal conductivity [W/m/K]
+kTm      =  1;                   % melt  thermal conductivity [W/m/K]
 kTx      =  5;                   % xtal  thermal conductivity [W/m/K]
-cPm      =  1200;                % melt  heat capacity [J/kg/K]
+cPm      =  1300;                % melt  heat capacity [J/kg/K]
 cPx      =  1000;                % xtal  heat capacity [J/kg/K]
-tau_r    =  0;                   % reaction time scale (set to zero for quasi-equilibrium mode)
+tau_r    =  1e3*yr;              % reaction time scale (set to zero for quasi-equilibrium mode)
 
 % set model buoyancy and pressure parameters
 bPx      =  1e-11;               % solid compressibility [1/Pa]
-bPm      =  3e-11;               % melt  compressibility [1/Pa]
+bPm      =  1e-11;               % melt  compressibility [1/Pa]
 dm0      =  1e-3;                % melt film size [m]
-dx0      =  1e-3;                % crystal size [m]
+dx0      =  1e-2;                % crystal size [m]
 g0       =  10.;                 % gravity [m/s2]
 
 % set chamber pressure parameters
@@ -89,27 +119,29 @@ eta_wall =  1e15;                % wall rock viscosity [Pas]
 mod_wall =  1e10;                % wall rock elastic modulus [Pa]
 
 % set numerical model parameters
+meansw   =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 TINT     =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN     =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL      =  1.00;                % (physical) time stepping courant number (multiplies stable step) [0,1]
+CFL      =  0.50;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 maxcmp   =  0.01;                % maximum change in phase fraction due to compaction
 rtol     =  1e-4;                % outer its relative tolerance
 atol     =  1e-8;                % outer its absolute tolerance
-maxit    =  20;                  % maximum outer its
-alpha    =  0.75;                % iterative step size parameter
+maxit    =  15;                  % maximum outer its
+alpha    =  0.40;                % iterative step size parameter
 beta     =  0.00;                % iterative damping parameter
-gamma    =  0.25;                % iterative lagging of viscosities
+gamma    =  0.20;                % iterative lagging of viscosities
 lambda1  =  0e-7;                % pressure regularisation parameter
 lambda2  =  0e-7;                % pressure regularisation parameter
-etacntr  =  1e+8;                % maximum viscosity contrast
+etacntr  =  1e5;                 % maximum viscosity contrast
 Delta_cnv=  h/2;                 % correlation length for eddy diffusivity (multiple of h, 0.5-1)
 Delta_sgr=  dx0*10;              % correlation length for phase fluctuation diffusivity (multiple of dx0, df0, 10-20)
 Prt      =  3;                   % turbulent Prandtl number (ratio of momentum to heat diffusivity)
 Sct      =  3;                   % turbulent Schmidt number (ratio of momentum to mass diffusivity)
-etamin   =  0.01;                % minimum viscosity
+etamin   =  1e18;                % minimum viscosity
 kmin     =  1e-9;                % minimum diffusivity
 kmax     =  1e+9;                % maximum diffusivity
 Pcouple  =  0;                   % coupling phase equilibria and material properties to dynamic pressure
+Rcouple  =  0;                   % switch on for full reactive coupling
 
 % set various options
 calibrt  =  0;                   % not in calibrate mode

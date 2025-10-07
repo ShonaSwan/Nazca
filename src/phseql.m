@@ -66,9 +66,13 @@ findmoho
 
 %Combining the Eruption and Emplacement sections based on the ratio
 
-Gex  = erupt_ratio * Gex_erupt  + (1-erupt_ratio) * Gex_intr;
-Gexc = erupt_ratio * Gexc_erupt + (1-erupt_ratio) * Gexc_intr;
-Gext = erupt_ratio * Gext_erupt + (1-erupt_ratio) * Gext_intr;
+Gex  = erupt_ratio * Gex_erupt;
+Gexc = erupt_ratio * Gexc_erupt;
+Gext = erupt_ratio * Gext_erupt;
+
+Gem  = (1-erupt_ratio) * Gex_intr;
+Gemc = (1-erupt_ratio) * Gexc_intr;
+Gemt = (1-erupt_ratio) * Gext_intr;
 
 cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);

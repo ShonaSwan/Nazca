@@ -62,13 +62,13 @@ hist.EX(stp  ) = (hist.sumX(stp  ) - hist.DX(stp  ))./hist.sumX(1  ) - 1;  % [kg
 hist.EC(stp,:) = (hist.sumC(stp,:) - hist.DC(stp,:))./hist.sumC(1,:) - 1;  % [kg/kg]
 hist.ET(stp,:) = (hist.sumT(stp,:) - hist.DT(stp,:))./hist.sumT(1,:) - 1;  % [kg/kg]
 
-% record conservation error of mass M, heat S, components C
-hist.EM(stp  ) = (hist.sumM(stp  ) - hist.DM(stp  ))./hist.sumM(1  ) - 1;  % [kg/kg]
-hist.ES(stp  ) = (hist.sumS(stp  ) - hist.DS(stp  ))./hist.sumS(1  ) - 1;  % [JK/JK]
-hist.EC(stp,:) = (hist.sumC(stp,:) - hist.DC(stp,:))./hist.sumC(1,:) - 1;  % [kg/kg]
-hist.ET(stp,:) = (hist.sumT(stp,:) - hist.DT(stp,:))./hist.sumT(1,:) - 1;  % [kg/kg]
-hist.EB(stp,:) = (hist.sumB(stp  ) - hist.DB(stp  ))./hist.sumB(1  ) - 1;  % [kg/kg]
-hist.EX(stp,:) = (hist.sumX(stp  ) - hist.DX(stp  ))./hist.sumX(1  ) - 1;  % [kg/kg]
+% % record conservation error of mass M, heat S, components C
+% hist.EM(stp  ) = (hist.sumM(stp  ) - hist.DM(stp  ))./hist.sumM(1  ) - 1;  % [kg/kg]
+% hist.ES(stp  ) = (hist.sumS(stp  ) - hist.DS(stp  ))./hist.sumS(1  ) - 1;  % [JK/JK]
+% hist.EC(stp,:) = (hist.sumC(stp,:) - hist.DC(stp,:))./hist.sumC(1,:) - 1;  % [kg/kg]
+% hist.ET(stp,:) = (hist.sumT(stp,:) - hist.DT(stp,:))./hist.sumT(1,:) - 1;  % [kg/kg]
+% hist.EB(stp,:) = (hist.sumB(stp  ) - hist.DB(stp  ))./hist.sumB(1  ) - 1;  % [kg/kg]
+% hist.EX(stp,:) = (hist.sumX(stp  ) - hist.DX(stp  ))./hist.sumX(1  ) - 1;  % [kg/kg]
 
 % if step==2; hist.sumM(1) = hist.sumM(2); end
 

@@ -5,7 +5,7 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
-runID     =  '2D_MOR_N100';     % run identifier
+runID     =  '2D_MOR_N200';     % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  10;                   % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results

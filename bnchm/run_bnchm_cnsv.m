@@ -11,14 +11,22 @@ for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    nop      =  10;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  200;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
     plot_cv  =  0;                   % switch on to live plot iterative convergence
     save_op  =  0;
 
+     % set model domain parameters
+    D        =  200e3;                  % chamber depth [m]
+    L        =  1*D;                  % chamber width [m]
+    N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
+    h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
+
     % set model timing parameters
     Nt       =  nop;                 % number of time steps to take
+    dt       =  1e2*yr;                   % set initial time step
     
+
     % model set up switches (plume or MOR)
     init_mode   =  'plume';               % 'plume' or 'MOR'
     bndmode     =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 

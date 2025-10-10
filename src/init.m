@@ -134,7 +134,7 @@ switch init_mode
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * minage)));
 
         %Defining the Gaussian inflow profile of the plume 
-        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D*0.75).^2) / pl_width^2); % Peaks at z=D, x=pl_local
 
         Tp = Tp + dT_plume .* pl_profile + dTr.*rp + dTg.*gp;
         
@@ -274,7 +274,7 @@ while res > tol
         eqtime = toc(eqtime);
         EQtime = EQtime + eqtime;
 
-      if bndmode == 0 % Mid ocean Ridge set up 
+      % if bndmode == 0 % Mid ocean Ridge set up 
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             m = m * (minit./max(m(:)))^0.1;
@@ -287,9 +287,9 @@ while res > tol
             s = x.*sx + m.*sm;
         end
 
-      else
-          s = x.*sx + m.*sm;
-      end
+      % else
+      %     s = x.*sx + m.*sm;
+      % end
 
         X    = rho.*x;
         M    = rho.*m;  RHO = X+M;

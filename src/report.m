@@ -1,7 +1,8 @@
 % get residual of thermochemical equations
 resnorm    = norm(upd_S  (:))./(norm(S  (:))+eps) ...
            + norm(upd_C  (:))./(norm(C  (:))+eps) ...
-           + norm(upd_X  (:)+upd_M  (:))./(norm(rho(:))+eps);
+           + norm(upd_X  (:)+upd_M  (:))./(norm(rho(:))+eps);%...
+           %+ norm(upd_rho(:))./(norm(VolSrc (:))+eps);
 
 if iter==1 || resnorm>resnorm0; resnorm0 = resnorm + 1e-32; end  % reset reference residual
 

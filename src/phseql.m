@@ -63,12 +63,16 @@ findmoho
  Gext_intr = mohoshape.*(-sum(Gemt,1))./sum(mohoshape,1);
  for i=1:4; Gext_intr = Gext_intr + diff(Gext_intr(:,icx,:),2,2)./8; end
 
+ % Gems = sm.*Gem;
+ % Gexs_intr = mohoshape.*(-sum(Gemt,1))./sum(mohoshape,1);
+ % for 
 
 %Combining the Eruption and Emplacement sections based on the ratio
 
 Gex  = erupt_ratio * Gex_erupt;
 Gexc = erupt_ratio * Gexc_erupt;
 Gext = erupt_ratio * Gext_erupt;
+
 
 Gem  = (1-erupt_ratio) * Gex_intr;
 Gemc = (1-erupt_ratio) * Gexc_intr;

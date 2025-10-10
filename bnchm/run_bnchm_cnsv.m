@@ -5,13 +5,13 @@ clear; close all;
 run('../usr/par_default')
 
 % test decreasing time step
-ATOL = [1e-6,1e-9,1e-12];
+ATOL = [1e-4,1e-7,1e-10];
 
 for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    nop      =  200;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  20;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
     plot_cv  =  0;                   % switch on to live plot iterative convergence
     save_op  =  0;
@@ -21,11 +21,14 @@ for atol = ATOL
     L        =  1*D;                  % chamber width [m]
     N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
     h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
+    alpha    =  0.4;                % iterative step size parameter
 
     % set model timing parameters
     Nt       =  nop;                 % number of time steps to take
-    dt       =  1e2*yr;                   % set initial time step
-    
+    dt       =  10*yr;                   % set initial time step
+    maxit    =  100;                  % maximum outer its
+    minit    =  0.05;                % maximum initial melt fraction (Initial reduction of melt)
+    mumax    =  0.20;                 % Setting upper limit for melt fraction in 
 
     % model set up switches (plume or MOR)
     init_mode   =  'plume';               % 'plume' or 'MOR'
@@ -34,7 +37,7 @@ for atol = ATOL
     erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 
     % set initial thermo-chemical state of the Plume 
-    dT_plume  = 300;                                % Temperature difference between the plume and the mantle 
+    dT_plume  = 200;                                % Temperature difference between the plume and the mantle 
     pl_width  = 50e3;                               % Width of the plume [m]
     pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
     c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)

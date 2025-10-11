@@ -7,6 +7,7 @@ nop      =  100;                 % output frame plotted/saved every 'nop' time s
 plot_op  =  1;                   % switch on to live plot results
 save_op  =  1;                   % switch on to save output to file
 plot_cv  =  0;                   % switch on to live plot iterative convergence
+colourmap = 'ocean';             % choose colourmap ('ocean','acton','devon','lajolla','lipari','lapaz','glasgow')
 
 % set model domain parameters
 D         =  200e3;               % System depth [m]

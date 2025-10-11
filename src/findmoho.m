@@ -17,7 +17,7 @@ dSiO2dz(iz+1:end,:) = repmat(dSiO2dz(iz,:),Nz-iz,1);
 moho_depth = Zc(imax);
 
 figure(200);
-imagesc(Xc,Zc,-dSiO2dz); axis equal tight; colorbar; colormap(ocean); hold on
+imagesc(Xc,Zc,-dSiO2dz); axis equal tight; colorbar;colormap(colmap); hold on
 plot(Xc,moho_depth,'w','LineWidth',1.5)
 
 

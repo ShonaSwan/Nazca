@@ -204,7 +204,7 @@ else % create 2D plots
     if ~exist('fh1','var'); fh1 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh1); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 2*axh + 1*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
     set(fh1,UN{:},'Position',[1 1 fw fh]);
@@ -220,7 +220,7 @@ else % create 2D plots
     if ~exist('fh2','var'); fh2 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh2); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 1*axh + 0*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
     set(fh2,UN{:},'Position',[3 3 fw fh]);
@@ -233,7 +233,7 @@ else % create 2D plots
     if ~exist('fh3','var'); fh3 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh3); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 2*axh + 1*avs + axt;
     fw = axl + 2*axw + 1*ahs + axr;
     set(fh3,UN{:},'Position',[5 5 fw fh]);
@@ -247,7 +247,7 @@ else % create 2D plots
     if ~exist('fh4','var'); fh4 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh4); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 2*axh + 1*avs + axt;
     fw = axl + 2*axw + 1*ahs + axr;
     set(fh4,UN{:},'Position',[7 7 fw fh]);
@@ -261,7 +261,7 @@ else % create 2D plots
     if ~exist('fh5','var'); fh5 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh5); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 2*axh + 1*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
     set(fh5,UN{:},'Position',[9 9 fw fh]);
@@ -277,7 +277,7 @@ else % create 2D plots
     if ~exist('fh6','var'); fh6 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh6); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 3*axh + 2*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
     set(fh6,UN{:},'Position',[11 11 fw fh]);
@@ -296,7 +296,7 @@ else % create 2D plots
     if ~exist('fh7','var'); fh7 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh7); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 2*axh + 1*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
     set(fh7,UN{:},'Position',[13 13 fw fh]);
@@ -312,7 +312,7 @@ else % create 2D plots
     if ~exist('fh8','var'); fh8 = figure(VIS{:});
     else; set(0, 'CurrentFigure', fh8); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
     fh = axb + 3*axh + 2*avs + axt;
     fw = axl + 3*axw + 2*ahs + axr;
     set(fh8,UN{:},'Position',[15 15 fw fh]);
@@ -580,7 +580,7 @@ cmSi = cm_oxd_all(:,:,1)./sum(cm_oxd_all(:,:,1:end-1),3).*100;
 cxNK = sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,1:end-1),3).*100;
 cmNK = sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,1:end-1),3).*100;
  cNK = sum( c_oxd_all(:,:,[7,8]),3)./sum( c_oxd_all(:,:,1:end-1),3).*100;
-scatter(cxSi(:),cxNK(:),50,T(:)-273.15,'filled','^'); colormap(ocean); cb = colorbar;
+scatter(cxSi(:),cxNK(:),50,T(:)-273.15,'filled','^'); colormap(colmap); cb = colorbar;
 scatter(cmSi(:),cmNK(:),50,T(:)-273.15,'filled','o');
 scatter( cSi(:), cNK(:),80,T(:)-273.15,'filled','s');
 set(cb,TL{:},'FontSize',12); set(gca,TL{:},'FontSize',15); xlabel('SiO$_2$ [wt \%]',TX{:},'FontSize',15); ylabel('Na$_2$O + K$_2$O [wt \%]',TX{:},'FontSize',15);
@@ -595,15 +595,15 @@ end
 [A,B] = terncoords(cx_oxd_all(:,:, 5      )./sum(cx_oxd_all(:,:,[5,4,7,8]),3), ...
                    cx_oxd_all(:,:, 4      )./sum(cx_oxd_all(:,:,[5,4,7,8]),3), ...
                sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,[5,4,7,8]),3));
-scatter(A(:),B(:),50,T(:)-273.15,'filled','^'); colormap(ocean); cb = colorbar;
+scatter(A(:),B(:),50,T(:)-273.15,'filled','^'); colormap(colmap); cb = colorbar;
 [A,B] = terncoords(cm_oxd_all(:,:, 5      )./sum(cm_oxd_all(:,:,[5,4,7,8]),3), ...
                    cm_oxd_all(:,:, 4      )./sum(cm_oxd_all(:,:,[5,4,7,8]),3), ...
                sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,[5,4,7,8]),3));
-scatter(A(:),B(:),50,T(:)-273.15,'filled','o'); colormap(ocean);
+scatter(A(:),B(:),50,T(:)-273.15,'filled','o'); colormap(colmap);
 [A,B] = terncoords(c_oxd_all(:,:, 5      )./(sum(c_oxd_all(:,:,[5,4,7,8]),3)), ...
                    c_oxd_all(:,:, 4      )./(sum(c_oxd_all(:,:,[5,4,7,8]),3)), ...
                sum(c_oxd_all(:,:,[7,8]),3)./(sum(c_oxd_all(:,:,[5,4,7,8]),3)));
-scatter(A(:),B(:),80,T(:)-273.15,'filled','s'); colormap(ocean);
+scatter(A(:),B(:),80,T(:)-273.15,'filled','s'); colormap(colmap);
 set(cb,TL{:},'FontSize',12); set(gca,TL{:},'FontSize',15); xlabel('SiO$_2$ [wt \%]',TX{:},'FontSize',15); ylabel('Na$_2$O + K$_2$O [wt \%]',TX{:},'FontSize',15);
 
 % plot model history
@@ -646,7 +646,7 @@ end
     if ~exist('fh15','var'); fh15 = figure(VIS{:});
       else; set(0, 'CurrentFigure', fh15); clf;
     end 
-    colormap(ocean);
+    colormap(colmap);
 
      % set axis and border dimensions
     axh = 6.00*sqrt(D/L); axw = 6.00*sqrt(L/D)+1.50;
@@ -686,7 +686,7 @@ end
 %Basalt plot 
 
 if ~exist('fh16','var'); fh16 = figure(VIS{:});
-    colormap(ocean);
+    colormap(colmap);
     fh = 18;
     fw = 22;
     set(fh16,UN{:},'Position',[15 15 fw fh]);
@@ -706,46 +706,46 @@ end
 % middle ternary (plg olv cpx)
 sumABC = sum(cx_msy(:,:,cal.imsy([1,2,3])),3);
 [A,B] = terncoords(cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(2))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC);
-scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
 sumABC = sum(cm_msy(:,:,cal.imsy([1,2,3])),3);
 [A,B] = terncoords(cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(2))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC);
-scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
 sumABC = sum( c_msy(:,:,cal.imsy([1,2,3])),3);
 [A,B] = terncoords( c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(2))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC);
-scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean);
+scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap);
 
 % upper ternary (plg cpx qtz)
 sumABC = sum(cx_msy(:,:,cal.imsy([1,4,3])),3);
 [A,B] = terncoords(cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(4))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC);
-scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
 sumABC = sum(cm_msy(:,:,cal.imsy([1,2,3])),3);
 [A,B] = terncoords(cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(4))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC);
-scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
 sumABC = sum( c_msy(:,:,cal.imsy([1,2,3])),3);
 [A,B] = terncoords( c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(4))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC);
-scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean);
+scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap);
 
 % left ternary (olv cpx qtz)
 sumABC = sum(cx_msy(:,:,cal.imsy([2,3,4])),3);
 [A,B] = terncoords(cx_msy(:,:,cal.imsy(2))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC,cx_msy(:,:,cal.imsy(4))./sumABC);
-scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
 sumABC = sum(cm_msy(:,:,cal.imsy([2,3,4])),3);
 [A,B] = terncoords(cm_msy(:,:,cal.imsy(2))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC,cm_msy(:,:,cal.imsy(4))./sumABC);
-scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
 sumABC = sum( c_msy(:,:,cal.imsy([2,3,4])),3);
 [A,B] = terncoords( c_msy(:,:,cal.imsy(2))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC, c_msy(:,:,cal.imsy(4))./sumABC);
-scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean);
+scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap);
 
 % right ternary (qtz plg olv)
 sumABC = sum(cx_msy(:,:,cal.imsy([4,1,2])),3);
 [A,B] = terncoords(cx_msy(:,:,cal.imsy(4))./sumABC,cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(2))./sumABC);
-scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(ocean);
+scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
 sumABC = sum(cm_msy(:,:,cal.imsy([4,1,2])),3);
 [A,B] = terncoords(cm_msy(:,:,cal.imsy(4))./sumABC,cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(2))./sumABC);
-scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(ocean);
+scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
 sumABC = sum( c_msy(:,:,cal.imsy([4,1,2])),3);
 [A,B] = terncoords( c_msy(:,:,cal.imsy(4))./sumABC, c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(2))./sumABC);
-scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(ocean); 
+scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap); 
 
 if Nz>1 || step==0 || frst
     cb = colorbar;

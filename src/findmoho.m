@@ -1,57 +1,83 @@
+%get vertical gradient of bulk SiO2
+[~,dSiO2dz] = gradient(c_oxd(:,:,1));
+dSiO2dz(dSiO2dz > 0) = 0;
+iz = floor(Nz/4);
+dSiO2dz(iz+1:end,:) = repmat(dSiO2dz(iz,:),Nz-iz,1);
 
-moho_depth = NaN(1, Nx);
-%Defining composition ratio for moho
-%high in crust low in mantle 
-c_moho = c_oxd(:,:,1) ./ c_oxd(:,:,5);
+% maxgrad = max(-dSiO2dz(:));
+% minProm = 0.1 * maxgrad;    
+% 
+% % find local max along vertical columns 
+% bound_zc = islocalmax(-dSiO2dz,1,'MinProminence',minProm,'MaxNumExtrema',1);
+% bound_zc(1,~any(bound_zc,1)) = 1;
+
+[ival,imax] = max(-dSiO2dz,[],1);
+
+% retrieve moho location
+moho_depth = Zc(imax);
+
+figure(200);
+imagesc(Xc,Zc,-dSiO2dz); axis equal tight; colorbar; colormap(ocean); hold on
+plot(Xc,moho_depth,'w','LineWidth',1.5)
 
 
-for ix = 1:Nx
-
-    % Get the composition values for each column 
-    compcol = c_moho(:, ix);
-    % Smooth out the values over the columns 
-    %smthmean = smoothdata(compcol, 'gaussian', 5);
-    % Get the vertical gradient 
-
-    gradcomp = abs(gradient(compcol, h));
-    %gradcomp = gradient(smthmean, h);   
-
-    % Remove any negative values 
-    gradcomp(gradcomp < 0) = 0;   
-   
-    % Find the max peak
-   
-    maxgrad = max(gradcomp);
-    minHeight = 0.1 * maxgrad;    %0.5
-    minProm   = 0.05 * maxgrad;    %0.2
-
-    %find peaks 
-    %[bound_val, bound_zc] = islocalmax(gradcomp, Zc, ...
-    [bound_val, bound_zc] = findpeaks(gradcomp, Zc, ...
-    'MinPeakHeight', minHeight, ...
-    'MinPeakProminence', minProm);
-
-    % Uses shallowestet gradient peak
-    if ~isempty(bound_zc)
-    moho_depth(ix) = min(bound_zc);
-    else
-    moho_depth(ix) = NaN;
-    end
-
-end 
-
-% %--- plot ---
-
-figure(15); clf;
-subplot(1,2,1);
-imagesc(1:Nx, Zc, c_moho); axis ij; hold on
-plot(1:Nx, moho_depth, 'k-', 'LineWidth', 2);
-xlabel('Horizontal index'); ylabel('Depth');
-title('SiO₂/MgO field with Moho line');
-colorbar;
-subplot(1,2,2);
-plot(moho_depth, 'k-');
-xlabel('Horizontal index'); ylabel('Moho depth');
-title('Moho depth vs horizontal position');
-
-drawnow;
+% moho_depth = NaN(1, Nx);
+% 
+% %Define compositional ratio of Moho detection
+% %high in crust low in mantle 
+% c_moho = c_oxd(:,:,1) ./ c_oxd(:,:,5);
+% 
+% 
+% % Get the vertical gradient 
+% 
+% gradcomp = abs(gradient(c_moho, h, 1));
+% 
+% 
+% % Remove any negative values 
+% gradcomp(~isfinite(gradcomp)) = 0;   
+% 
+% ismax = islocalmax(gradcomp, 1);
+% 
+% maxgrad_col = max(gradcomp, [], 1, 'omitnan');
+% minHeight_col = 0.1 * maxgrad_col;
+% minProm_col   = 0.05 * maxgrad_col;
+% 
+% % --- Apply thresholds ---
+% for ix = 1:Nx
+%     col = gradcomp(:, ix);
+%     peaks = ismax(:, ix) & (col >= minHeight_col(ix));
+% 
+%     % Find depths corresponding to valid peaks
+%     if any(peaks)
+%         moho_depth(ix) = Zc(find(peaks, 1, 'first'));  % shallowest significant peak
+%     else
+%         moho_depth(ix) = NaN;
+%     end
+% end
+% 
+% % --- Smooth the detected Moho depth ---
+% moho_depth_smooth = smoothdata(moho_depth, 'gaussian', 10, 'omitnan');
+% 
+% % --- Plot ---
+% figure(15); clf;
+% 
+% % 1️⃣ Field plot with smoothed Moho line
+% subplot(1,2,1);
+% imagesc(1:Nx, Zc, c_moho); axis ij; hold on
+% plot(1:Nx, moho_depth_smooth, 'k-', 'LineWidth', 2);
+% xlabel('Horizontal index'); ylabel('Depth');
+% title('SiO₂/MgO field with smoothed Moho line');
+% colorbar;
+% 
+% % (optional) show raw line for comparison (in gray dashed)
+% plot(1:Nx, moho_depth, 'Color', [0.5 0.5 0.5 0.5], 'LineWidth', 1, 'LineStyle', '--');
+% 
+% % 2️⃣ Moho depth vs horizontal position
+% subplot(1,2,2);
+% plot(moho_depth, 'Color', [0.6 0.6 0.6], 'LineStyle', '--'); hold on
+% plot(moho_depth_smooth, 'k-', 'LineWidth', 2);
+% xlabel('Horizontal index'); ylabel('Moho depth');
+% legend('Raw', 'Smoothed');
+% title('Moho depth vs horizontal position');
+% 
+% drawnow;

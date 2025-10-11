@@ -13,7 +13,7 @@ for atol = ATOL
     runID    =  'bnchm_cnsv';        % run identifier
     nop      =  20;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
-    plot_cv  =  0;                   % switch on to live plot iterative convergence
+    plot_cv  =  1;                   % switch on to live plot iterative convergence
     save_op  =  0;
 
      % set model domain parameters
@@ -25,23 +25,35 @@ for atol = ATOL
 
     % set model timing parameters
     Nt       =  nop;                 % number of time steps to take
-    dt       =  10*yr;                   % set initial time step
-    maxit    =  100;                  % maximum outer its
-    minit    =  0.05;                % maximum initial melt fraction (Initial reduction of melt)
-    mumax    =  0.20;                 % Setting upper limit for melt fraction in 
+    dt       =  1e2*yr;                   % set initial time step
 
     % model set up switches (plume or MOR)
     init_mode   =  'plume';               % 'plume' or 'MOR'
     bndmode     =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
     meansw      =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
     erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
-
+    minage    =  20e6*yr;
+    minit       = 0.05;                % maximum initial melt fraction (Initial reduction of melt)
+    mthr      =  0.10;                % threshold melt fraction for extraction/eruption
+    
     % set initial thermo-chemical state of the Plume 
     dT_plume  = 200;                                % Temperature difference between the plume and the mantle 
     pl_width  = 50e3;                               % Width of the plume [m]
     pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
     c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
     trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+
+
+    % set numerical model parameters
+    TINT     =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
+    ADVN     =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
+    CFL      =  0.50;                   % (physical) time stepping courant number (multiplies stable step) [0,1]
+    rtol     =  atol/1e6;            % outer its absolute tolerance
+    alpha    =  0.40;                % iterative step size parameter
+    beta     =  0.00;                % iterative damping parameter
+    gamma    =  0.20;                % iterative lagging of viscosities
+    maxit    =  100;                  % maximum outer its
+   
 
     % create output directory
     if ~isfolder([outdir,'/',runID])

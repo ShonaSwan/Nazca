@@ -5,12 +5,13 @@ clear; close all;
 run('./par_default')
 
 % set run parameters
+runID     =  '2D_Plume_N100';     % run identifier
 runID     =  '2D_MOR_N200';     % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  10;                   % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
-plot_cv   =  0;                   % switch on to live plot iterative convergence
+plot_cv   =  1;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
@@ -26,8 +27,8 @@ mumin     =  1e-5;                % Setting lower limit for melt fraction in coe
 mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
 % model set up switches (plume or MOR)
-init_mode =  'MOR';               % 'plume' or 'MOR'
-bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+init_mode =  'plume';               % 'plume' or 'MOR'
+bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
@@ -41,7 +42,7 @@ bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) 
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
-minage    =  7e5*yr;             %(20e6 / 7e5) 
+minage    =  20e6*yr;             %(20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
@@ -58,7 +59,7 @@ c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
-dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
+dT_plume  = 200;                                % Temperature difference between the plume and the mantle 
 pl_width  = 50e3;                               % Width of the plume [m]
 pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
 c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
@@ -95,9 +96,9 @@ etaymin   =  1e20;                % minimum yield viscosity
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
 CFL       =  0.50;                % (physical) time stepping courant number (multiplies stable step) [0,1]
-rtol      =  1e-4;                % outer its relative tolerance
-atol      =  1e-8;                % outer its absolute tolerance
-maxit     =  15;                  % maximum outer its
+rtol      =  1e-16;                % outer its relative tolerance
+atol      =  1e-16;                % outer its absolute tolerance
+maxit     =  100;                  % maximum outer its
 alpha     =  0.40;                % iterative step size
 gamma     =  0.20;                % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast

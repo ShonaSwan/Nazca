@@ -17,7 +17,7 @@ while time <= tend && step <= Nt
     % if frst; alpha = alpha/2; beta = beta/2; end
 
     %%%%% Non-Linear Iteration Loop %%%%
-    while resnorm/resnorm0 >= rtol/(1 + frst*100) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst)
+    while resnorm/resnorm0 >= rtol/(1 + frst*100) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst) || iter <=3
         
         %%%% solve thermo-chemical equations
         thermochem;

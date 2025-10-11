@@ -20,8 +20,35 @@ fprintf('\n   run ID: %s \n\n',runID);
 
 
 %define individualy
-load ocean;                  % load custom colormap
+                 % load custom colormap
 run(['../cal/cal_',calID]);  % load melt model calibration
+
+% load and process custom colormaps
+switch colourmap
+    case 'ocean'
+        load ./colmap/ocean.mat
+        colmap = ocean;   
+    case 'acton'
+        load ./colmap/acton.mat 
+        colmap = acton;
+    case 'devon'
+        load ./colmap/devon.mat
+        colmap = devon;
+    case 'lajolla'
+        load ./colmap/lajolla.mat
+        colmap = lajolla;
+    case 'lipari'
+        load ./colmap/lipari.mat
+        colmap = lipari;  
+    case 'lapaz'
+        load ./colmap/lapaz.mat
+        colmap = lapaz;  
+    case 'glasgow'
+        load ./colmap/glasgow.mat
+        colmap = glasgow;  
+end
+nclmp = length(colmap);
+lncls = colmap([5,135],:);
 
 
     BCA     =  {'',''};  % boundary condition on advection (top,bot,left,right)
@@ -343,7 +370,7 @@ TRCo = TRC;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
-Gem = 0.*m; Gex = 0.*x; 
+Gem = 0.*m; Gex = 0.*x; Gin = 0.*x;
 Gemc = 0.*c; Gexc = 0.*c;
 Gemt = 0.*trc; Gext = 0.*trc;
 
@@ -415,6 +442,7 @@ if restart
         store;
         fluidmech;
         update;
+        phseql;
         history;
         output;
     end
@@ -423,6 +451,7 @@ else
     store;
     fluidmech;
     update;
+    phseql;
     history;
     output;
     step = step+1;

@@ -23,56 +23,60 @@ xq = xq./(mq+xq);
 cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
 
-% phase mass transfer rates 
+% phase mass transfer rates
 Gm  = (mq-m).*RHO/(tau_r+3*dt);
-Gx  = (xq-x).*RHO/(tau_r+3*dt); 
+Gx  = (xq-x).*RHO/(tau_r+3*dt);
 
 Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+3*dt);
 Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 
-% extract and erupt melt
+% extract, extrude, and intrude melt
 
-findmoho
+findmoho;
 
- Gem = min(0,mthr-m).*RHO/(tau_e+3*dt);
+Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt);
+Gemc = cm.*Gem;
+Gemt = trcm.*Gem;
+Gems = sm.*Gem;
 
-% Eruption
+findmelt;
 
- Gex_erupt = topshape.*(-sum(Gem,1))./sum(topshape,1);
- for i=1:4; Gex_erupt = Gex_erupt + diff(Gex_erupt(:,icx),2,2)./8; end
+%Extrusion
 
- Gemc = cm.*Gem;
- Gexc_erupt = topshape.*(-sum(Gemc,1))./sum(topshape,1);
- for i=1:4; Gexc_erupt = Gexc_erupt + diff(Gexc_erupt(:,icx,:),2,2)./8; end
+extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w) + path_ratio.*(ZZ<=melt_depth);
+Gex = erupt_ratio *extr_shape.*(-sum(Gem,1))./sum(extr_shape,1);
+for i=1:4; Gex = Gex + diff(Gex(:,icx),2,2)./8; end
 
- Gemt = trcm.*Gem;
- Gext_erupt = topshape.*(-sum(Gemt,1))./sum(topshape,1);
- for i=1:4; Gext_erupt = Gext_erupt + diff(Gext_erupt(:,icx,:),2,2)./8; end
+Gexc = erupt_ratio *extr_shape.*(-sum(Gemc,1))./sum(extr_shape,1);
+for i=1:4; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./8; end
 
-% Emplacement 
+Gext = erupt_ratio *extr_shape.*(-sum(Gemt,1))./sum(extr_shape,1);
+for i=1:4; Gext = Gext + diff(Gext(:,icx,:),2,2)./8; end
 
- mohoshape = exp( -abs(ZZ - moho_depth) / bnd_w );
- Gex_intr = mohoshape.*(-sum(Gem,1))./sum(mohoshape,1);
- for i=1:4; Gex_intr = Gex_intr + diff(Gex_intr(:,icx),2,2)./8; end
+Gexs = -sx.*Gem;
+Gexs = erupt_ratio *extr_shape.*( sum(Gexs,1))./sum(extr_shape,1);
+for i=1:4; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./8; end
 
- Gemc = cm.*Gem;
- Gexc_intr = mohoshape.*(-sum(Gemc,1))./sum(mohoshape,1);
- for i=1:4; Gexc_intr = Gexc_intr + diff(Gexc_intr(:,icx,:),2,2)./8; end
+% Intrusion
 
- Gemt = trcm.*Gem;
- Gext_intr = mohoshape.*(-sum(Gemt,1))./sum(mohoshape,1);
- for i=1:4; Gext_intr = Gext_intr + diff(Gext_intr(:,icx,:),2,2)./8; end
+intr_shape = (1-path_ratio).*exp(-abs(ZZ - moho_depth) / bnd_w) + path_ratio.*(ZZ>=moho_depth & ZZ<=melt_depth);
+Gin = (1-erupt_ratio) *intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
+for i=1:4; Gin = Gin + diff(Gin(:,icx),2,2)./8; end
 
+Ginc = (1-erupt_ratio) *intr_shape.*(-sum(Gemc,1))./sum(intr_shape,1);
+for i=1:4; Ginc = Ginc + diff(Ginc(:,icx,:),2,2)./8; end
+
+Gint = (1-erupt_ratio) *intr_shape.*(-sum(Gemt,1))./sum(intr_shape,1);
+for i=1:4; Gint = Gint + diff(Gint(:,icx,:),2,2)./8; end
+
+Gins = (1-erupt_ratio) *intr_shape.*(-sum(Gems,1))./sum(intr_shape,1);
+for i=1:4; Gins = Gins + diff(Gins(:,icx,:),2,2)./8; end
 
 %Combining the Eruption and Emplacement sections based on the ratio
 
-Gex  = erupt_ratio * Gex_erupt  + (1-erupt_ratio) * Gex_intr;
-Gexc = erupt_ratio * Gexc_erupt + (1-erupt_ratio) * Gexc_intr;
-Gext = erupt_ratio * Gext_erupt + (1-erupt_ratio) * Gext_intr;
-
-cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+% Gex  = erupt_ratio * Gex_extr  + (1-erupt_ratio) * Gix;
+% Gexc = erupt_ratio * Gexc_extr + (1-erupt_ratio) * Gixc;
+% Gext = erupt_ratio * Gext_extr + (1-erupt_ratio) * Gixt;
 
 eqtime = toc(eqtime);
 EQtime = EQtime + eqtime;
-

@@ -5,16 +5,23 @@ clear; close all;
 run('../usr/par_default')
 
 % test decreasing time step
-ATOL = [1e-6,1e-9,1e-12];
+ATOL = [1e-4,1e-7,1e-10];
 
 for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    nop      =  10;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  20;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
     plot_cv  =  1;                   % switch on to live plot iterative convergence
     save_op  =  0;
+
+     % set model domain parameters
+    D        =  200e3;                  % chamber depth [m]
+    L        =  1*D;                  % chamber width [m]
+    N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
+    h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
+    alpha    =  0.4;                % iterative step size parameter
 
     % set model timing parameters
     Nt       =  nop;                 % number of time steps to take

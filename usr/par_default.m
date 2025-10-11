@@ -7,6 +7,7 @@ nop      =  100;                 % output frame plotted/saved every 'nop' time s
 plot_op  =  1;                   % switch on to live plot results
 save_op  =  1;                   % switch on to save output to file
 plot_cv  =  0;                   % switch on to live plot iterative convergence
+colourmap = 'ocean';             % choose colourmap ('ocean','acton','devon','lajolla','lipari','lapaz','glasgow')
 
 % set model domain parameters
 D         =  200e3;               % System depth [m]
@@ -26,7 +27,7 @@ minage   =  20e6*yr;             % age of system before simuation
 % set up melt fraction variabels 
 minit     =  0.01;                % maximum initial melt fraction (Initial reduction of melt)
 mumin     =  1e-5;                % Setting lower limit for melt fraction in 
-mumax     =  0.2;                 % Setting upper limit for melt fraction in 
+mumax     =  0.05;                 % Setting upper limit for melt fraction in 
 
 % set up mid ocean ridge spreading 
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  

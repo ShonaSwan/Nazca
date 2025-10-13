@@ -26,22 +26,22 @@ mumin     =  1e-5;                % Setting lower limit for melt fraction in coe
 mumax     =  0.2;                 % Setting upper limit for melt fraction in coeff.
 
 % model set up switches (plume or MOR)
-init_mode =  'MOR';               % 'plume' or 'MOR'
-bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+init_mode =  'plume';               % 'plume' or 'MOR'
+bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.05;               % melt spread across the extraction path 
-mthr      =  0.10;                % threshold melt fraction for extraction/eruption
+mthr        = 0.10;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
-sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+sprate    =  0.00/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  
 bnd_sprw  =  5e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
-minage    =  7e5*yr;             %(20e6 / 7e5) 
+minage    =  20e6*yr;             % (20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
@@ -52,7 +52,7 @@ dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
-crust_sw  =  0;                     % 0 = no crust, 1 = crust 
+crust_sw  =  1;                     % 0 = no crust, 1 = crust 
 Hcmin     =  6e3;                   % Minimum crustal thickness 
 c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]

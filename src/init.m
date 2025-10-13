@@ -109,9 +109,14 @@ if ~any(bnd_h)
             topshape = exp( ( -ZZ+h/2)/bnd_w);
             botshape = exp(-(D-ZZ+h/2)/bnd_w);
    
-        case 1  % top only
+        case 1  % Plume 
            topshape = exp( ( -ZZ)/bnd_w);
            botshape = exp(-(D-ZZ)/bnd_w);
+
+
+        case 2  % Plume-Ridge set up
+           topshape = exp( ( -ZZ+h/2)/bnd_w);
+           botshape = exp(-(D-ZZ+h/2)/bnd_w);
     end
 end 
 
@@ -131,9 +136,11 @@ Wtop  =  0;   Wbot  = -1;  Wleft  = -1;  Wright  = -1;
 Utop  =  -1;  Ubot  = -1;  Uleft  =  0;  Uright  =  0;
 qDxtop = -1;
 Pall = -1;
-% Pftop = -1;  Pfbot = +1;  Pfleft = -1;  Pfright = -1;
-% Pcall = -1;
-
+elseif bndmode == 2 %Plume-Ridge Setting 
+Wtop   =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
+Utop   = +1;  Ubot  = -1;  Uleft  =  0;  Uright  = -1;
+qDxtop = -1; 
+Pall = -1;  
 else %Error Message 
  disp('Invalid Bndmode');
 end
@@ -172,8 +179,6 @@ switch init_mode
         for i = 1:cal.ntrc
          trc(:,:,i) = trc0(i) + (trc_plume(i) - trc0(i)) .* pl_profile + (trc_crust(i) - trc0(i)) .* (1 - erf((ZZ/D - Hc/D + rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;
         end
-                
-
     case 'MOR'
         sprtime = XX./sprate + minage;
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
@@ -186,6 +191,28 @@ switch init_mode
             trc(:,:,i)  =  trc0(i) + (trc_crust(i)-trc0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
         end
 
+    case 'PRI'
+        sprtime = XX./sprate + minage;
+        Tp_MOR = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
+
+        pl_sigma = pl_width / (2 * sqrt(2 * log(2)));
+        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+        Tp_plume = dT_plume .* pl_profile;
+        
+        Tp = Tp_MOR + Tp_plume + dTr.*rp + dTg.gp;
+      
+        for i = 1:cal.ncmp
+            c(:,:,i)  =  c0(i) + ...
+            (c_plume(i) - c0(i)) .* pl_profile + ...
+            (c_crust(i)-c0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dcr(i).*rp + dcg(i).*gp;  % major elements
+        end
+        trc = zeros(Nz,Nx,cal.ntrc);
+        for i = 1:cal.ntrc
+            trc(:,:,i) = trc0(i) + ...
+            (trc_plume(i) - trc0(i)) .* pl_profile + ...
+            (trc_crust(i)-trc0(i)) .* (1-erf((ZZ/D-Hc/D+rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;  % trace elements
+        end
+    
 end 
 
 

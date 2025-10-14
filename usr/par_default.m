@@ -47,9 +47,9 @@ T0        =  5;                   % temperature top layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
 dTr       =  0;                   % amplitude of random noise [deg C]
 dTg       =  0;                   % amplitude of centred gaussian [deg C]
-c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.73 0.16 0.10 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0,0]*0e-3;     % amplitude of random noise [wt SiO2]
+dcr       =  [1,-1,0,0,0]*0e-3;     % amplitude of random noise [wt SiO2]
 dcg       =  [0,0,0,0,0,0,0];     % amplitude of centred gaussian [wt SiO2]
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
@@ -61,19 +61,19 @@ dg_trc   =  [0,0,0,0,0,0];       % trace elements centred gaussian [wt ppm]
 % set initial thermo-chemical state (Crust)
 crust_sw  =  1;                     % 0 = no crust, 1 = crust 
 Hcmin     =  6e3;                   % Minimum crustal thickness 
-c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
+c_crust   =  [0.01 0.13 0.80 0.06 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state (Plume)
 dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
 pl_width  = 50e3;                               % Width of the plume [m]
 pl_local  = L/2;                                % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+c_plume   = [0.70 0.18 0.11 0.01 0];            % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
 trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
 
 % Plastic Deformation 
-tyield    =  1e8;                 % yield stress for shear failure [Pa]
-pyield    =  1e9;                 % yield pressure for tensile failure [Pa]
+tyield    =  5e7;                 % yield stress for shear failure [Pa]
+pyield    =  1e7;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
 
 % Melt Extraction Algorythm 
@@ -113,11 +113,6 @@ bPm      =  1e-11;               % melt  compressibility [1/Pa]
 dm0      =  1e-3;                % melt film size [m]
 dx0      =  1e-2;                % crystal size [m]
 g0       =  10.;                 % gravity [m/s2]
-
-% set chamber pressure parameters
-Pchmb0   =  0;                   % initial chamber pressure [Pa]
-eta_wall =  1e15;                % wall rock viscosity [Pas]
-mod_wall =  1e10;                % wall rock elastic modulus [Pa]
 
 % set numerical model parameters
 meansw   =  0;                   % 0 = Geometric mean 1 = Arithmetic mean

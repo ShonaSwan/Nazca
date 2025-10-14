@@ -353,10 +353,12 @@ else % create 2D plots
     % plot temperature and composition in Fig. 2
     set(0,'CurrentFigure',fh2)
     set(fh2,'CurrentAxes',ax(21));
-    imagesc(Xsc,Zsc,Tp-273.15); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,Tp-273.15); axis ij equal tight; box on; cb = colorbar; hold on
+    plot(Xsc,LAB_depth./SpaceScale,'w--','LineWidth',1.5)
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$T_p$ [$^\circ$C]',TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh2,'CurrentAxes',ax(22));
-    imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Si)./sum(c_oxd(:,:,1:end-1),3).*100)); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Si)./sum(c_oxd(:,:,1:end-1),3).*100)); axis ij equal tight; hold on; box on; cb = colorbar;
+    plot(Xsc,MOHO_depth./SpaceScale,'w--','LineWidth',1.5)
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('SiO$_2$ [wt\%]',TX{:},FS{:}); set(gca,'YTickLabel',[]); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh2,'CurrentAxes',ax(23));
@@ -808,9 +810,9 @@ if save_op && ~restart
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];
-    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','VolSrc','Div_V','qDz','qDx','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
     name = [outdir,'/',runID,'/',runID,'_cont'];
-    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','VolSrc','Div_V','qDz','qDx','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
     name = [outdir,'/',runID,'/',runID,'_hist'];
     save(name,'hist');
 

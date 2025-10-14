@@ -46,23 +46,23 @@ minage    =  7e5*yr;             %(20e6 / 7e5)
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.82 0.17 0.01 0];  % components (maj comp, H2O) top  layer [wt] (will be normalised to unit sum!)
+c0        =  [0.73 0.16 0.10 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0,0]*0e-3;     % Random perturbation of the composition field
+dcr       =  [1,-1,0,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  1;                     % 0 = no crust, 1 = crust 
 Hcmin     =  6e3;                   % Minimum crustal thickness 
-c_crust   =  [0.01 0.90 0.09 0];    % components (maj comp, H2O) Crustal layer
+c_crust   =  [0.01 0.13 0.80 0.06 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
 pl_width  = 50e3;                               % Width of the plume [m]
 pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+c_plume   = [0.70 0.18 0.11 0.01 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
 trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
@@ -97,7 +97,7 @@ TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
 CFL       =  0.50;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-4;                % outer its relative tolerance
-atol      =  1e-8;          my       % outer its absolute tolerance
+atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
 alpha     =  0.40;                % iterative step size
 gamma     =  0.20;                % relaxing parameter for viscosity update

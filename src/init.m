@@ -168,7 +168,7 @@ switch init_mode
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * minage)));
 
         %Defining the Gaussian inflow profile of the plume 
-        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D*0.75).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
 
         Tp = Tp + dT_plume .* pl_profile + dTr.*rp + dTg.*gp;
         
@@ -253,7 +253,6 @@ c0_oxd_all = zeros(size(c0,1),9);
 c0_oxd_all(:,cal.ioxd) = c0_oxd;
 rhom0  = mean(cal.rhox0-500).*ones(size(Tp));
 rhox0  = mean(cal.rhox0).*ones(size(Tp)); 
-Pchmb  = Pchmb0;  Pchmbo = Pchmb;  Pchmboo = Pchmbo;  dPchmbdt = Pchmb;  dPchmbdto = dPchmbdt; dPchmbdtoo = dPchmbdto;  upd_Pchmb = dPchmbdt;
 Pt     = Ptop + mean(rhox0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
 rhox   = rhox0.*(1+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1+bPm.*(Pt-Pref));
@@ -408,6 +407,15 @@ dTdt   = 0.*T;  dTdto  = dTdt;
 dCdt   = 0.*c;  dCdto  = dCdt;
 dXdt   = 0.*x;  dXdto  = dXdt;
 dMdt   = 0.*m;  dMdto  = dMdt;
+qz_advn_Sx = 0.*W; qx_advn_Sx = 0.*U;
+qz_advn_Sm = 0.*W; qx_advn_Sm = 0.*U;
+qz_dffn_S  = 0.*W; qx_dffn_S  = 0.*U;
+qz_advn_Cx = 0.*W; qx_advn_Cx = 0.*U;
+qz_advn_Cm = 0.*W; qx_advn_Cm = 0.*U;
+qz_advn_TRCx = 0.*W; qx_advn_TRCx = 0.*U;
+qz_advn_TRCm = 0.*W; qx_advn_TRCm = 0.*U;
+qz_advn_X  = 0.*W; qx_advn_X  = 0.*U;
+qz_advn_M  = 0.*W; qx_advn_M  = 0.*U;
 bnd_TRC = zeros(Nz,Nx,cal.ntrc);
 adv_TRC = zeros(Nz,Nx,cal.ntrc);
 dff_TRC = zeros(Nz,Nx,cal.ntrc);
@@ -447,7 +455,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','VolSrc','Div_V','qDz','qDx','wx','wm','cal');
+        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 

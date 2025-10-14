@@ -11,7 +11,7 @@ for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    nop      =  10;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  5;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
     plot_cv  =  1;                   % switch on to live plot iterative convergence
     save_op  =  0;
@@ -23,8 +23,8 @@ for atol = ATOL
     h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
  
     % set model timing parameters
-    Nt       =  nop;                 % number of time steps to take
-    dt       =  1e2*yr;                   % set initial time step
+    Nt       =  6*nop;                 % number of time steps to take
+    dt       =  30*yr;                 % set initial time step
 
     % model set up switches (plume or MOR)
     init_mode   =  'plume';             % 'plume' or 'MOR'
@@ -33,27 +33,26 @@ for atol = ATOL
     erupt_ratio =  0.5;                 % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
     path_ratio  =  0.05;
     minage      =  20e6*yr;
-    minit       =  0.01;                % maximum initial melt fraction (Initial reduction of melt)
+    minit       =  0.05;                % maximum initial melt fraction (Initial reduction of melt)
     mumin       =  1e-4;                % Setting lower limit for melt fraction in
     mumax       =  0.25;                % Setting upper limit for melt fraction in
-    mthr        =  0.10;                % threshold melt fraction for extraction/eruption
+    mthr        =  0.04;                % threshold melt fraction for extraction/eruption
     
+    Hcmin       =  10e3;                % Minimum crustal thickness 
+
     % set initial thermo-chemical state of the Plume 
-    dT_plume  = 200;                                % Temperature difference between the plume and the mantle 
+    dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
     pl_width  = 50e3;                               % Width of the plume [m]
     pl_local  = L/2; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
-    c_plume   = [0.80 0.18 0.02 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
-    trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
-
 
     % set numerical model parameters
     TINT     =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
     ADVN     =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-    CFL      =  0.75;                   % (physical) time stepping courant number (multiplies stable step) [0,1]
+    CFL      =  0.5;                % (physical) time stepping courant number (multiplies stable step) [0,1]
     rtol     =  atol/1e6;            % outer its absolute tolerance
     alpha    =  0.50;                % iterative step size parameter
-    beta     =  0.25;                % iterative damping parameter
-    gamma    =  0.25;                % iterative lagging of viscosities
+    beta     =  0.2;                % iterative damping parameter
+    gamma    =  0.2;                % iterative lagging of viscosities
     maxit    =  100;                  % maximum outer its
    
 
@@ -66,29 +65,29 @@ for atol = ATOL
     run('../src/main')
 
     % plot convergence
-    ES = norm(diff(hist.ES(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.ES(Nt/2:Nt))         ));
-    EB = norm(diff(hist.EB(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.EB(Nt/2:Nt))         ));
-    EM = norm(diff(hist.EM(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.EM(Nt/2:Nt))         ));
-    EX = norm(diff(hist.EX(Nt/2:Nt  ))./diff(hist.time(Nt/2:Nt)),'fro')./sqrt(length(diff(hist.EX(Nt/2:Nt))         ));
-    EC = norm(diff(hist.EC(Nt/2:Nt,:))./repmat(diff(hist.time(Nt/2:Nt)),cal.ncmp,1).','fro')./sqrt(length(diff(hist.EC(Nt/2:Nt))*cal.ncmp));
-    ET = norm(diff(hist.ET(Nt/2:Nt,:))./repmat(diff(hist.time(Nt/2:Nt)),cal.ntrc,1).','fro')./sqrt(length(diff(hist.ET(Nt/2:Nt))*cal.ntrc));
+    ES = norm(diff(hist.ES(Nt/2:Nt  )),'fro')./sqrt(length(diff(hist.ES(Nt/2:Nt))         ));
+    EB = norm(diff(hist.EB(Nt/2:Nt  )),'fro')./sqrt(length(diff(hist.EB(Nt/2:Nt))         ));
+    EM = norm(diff(hist.EM(Nt/2:Nt  )),'fro')./sqrt(length(diff(hist.EM(Nt/2:Nt))         ));
+    EX = norm(diff(hist.EX(Nt/2:Nt  )),'fro')./sqrt(length(diff(hist.EX(Nt/2:Nt))         ));
+    EC = norm(diff(hist.EC(Nt/2:Nt,:)),'fro')./sqrt(length(diff(hist.EC(Nt/2:Nt))*cal.ncmp));
+    ET = norm(diff(hist.ET(Nt/2:Nt,:)),'fro')./sqrt(length(diff(hist.ET(Nt/2:Nt))*cal.ntrc));
 
     clist = [colororder;[0 0 0]];
 
     fh20 = figure(20);
     subplot(4,1,1);
-    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.ES(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on;
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.ES(Nt/2:Nt))),'-',LW{:}); hold on; axis tight; box on;
     ylabel('$\Delta E_S$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
     subplot(4,1,2);
-    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EB(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on; hold on
-    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EM(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on;
-    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EX(Nt/2:Nt)))./diff(hist.time(Nt/2:Nt)),'-',LW{:}); hold on; axis tight; box on;
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EB(Nt/2:Nt))),'-',LW{:}); hold on; axis tight; box on; hold on
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EM(Nt/2:Nt))),'-',LW{:}); hold on; axis tight; box on;
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EX(Nt/2:Nt))),'-',LW{:}); hold on; axis tight; box on;
     ylabel('$\Delta E_{\bar{\rho}}, \Delta E_{F^i}$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
     subplot(4,1,3);
-    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EC(Nt/2:Nt,:)))./repmat(diff(hist.time(Nt/2:Nt)),cal.ncmp,1).','-',LW{:}); hold on; axis tight; box on;
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.EC(Nt/2:Nt,:))),'-',LW{:}); hold on; axis tight; box on;
     ylabel('$\Delta E_{C_j}$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
     subplot(4,1,4);
-    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.ET(Nt/2:Nt,:)))./repmat(diff(hist.time(Nt/2:Nt)),cal.ntrc,1).','-',LW{:}); hold on; axis tight; box on;
+    semilogy((hist.time(Nt/2:Nt-1)+hist.time(Nt/2+1:Nt))/2,abs(diff(hist.ET(Nt/2:Nt,:))),'-',LW{:}); hold on; axis tight; box on;
     ylabel('$\Delta E_{\Theta_k}$',TX{:},FS{:}); set(gca,TL{:},TS{:},'XTickLabel',[]);
     xlabel('Time [s]',TX{:},FS{:});
 

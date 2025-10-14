@@ -14,8 +14,8 @@ for i = 1:cal.ntrc
     trcx(:,:,i) = trc(:,:,i)./(m./Ktrc(:,:,i) + x);
 
     % get trace element advection
-    adv_TRC(:,:,i) = - advect(M.*trcm(:,:,i),Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...
-                     - advect(X.*trcx(:,:,i),Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+    [advn_TRCm,qz_advn_TRCm,qx_advn_TRCm] = advect(M.*trcm(:,:,i),Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+    [advn_TRCx,qz_advn_TRCx,qx_advn_TRCx] = advect(X.*trcx(:,:,i),Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
     % get trace element diffusion (regularisation)
     % dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);
@@ -27,7 +27,7 @@ for i = 1:cal.ntrc
 end
 
 % get total rate of change
-dTRCdt = adv_TRC + bnd_TRC + Gemt + Gext + Gint;
+dTRCdt = - advn_TRCm - advn_TRCx + bnd_TRC + Gemt + Gext + Gint;
 
 % residual of trace element evolution
 res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo)/dt - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo);

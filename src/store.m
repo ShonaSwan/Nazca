@@ -6,7 +6,6 @@
 [TRCoo  , TRCo  ] = deal(TRCo  , TRC  );
 [Too    , To    ] = deal(To    , T    );
 [Tpoo   , Tpo   ] = deal(Tpo   , Tp   );
-[Pchmboo, Pchmbo] = deal(Pchmbo, Pchmb);
 
 [dSdtoo    , dSdto    ] = deal(dSdto    , dSdt    );
 [dCdtoo    , dCdto    ] = deal(dCdto    , dCdt    );
@@ -16,7 +15,6 @@
 [dTRCdtoo  , dTRCdto  ] = deal(dTRCdto  , dTRCdt  );
 [dTpdtoo   , dTpdto   ] = deal(dTpdto   , dTpdt   );
 [dTdtoo    , dTdto    ] = deal(dTdto    , dTdt    );
-[dPchmbdtoo, dPchmbdto] = deal(dPchmbdto, dPchmbdt);
 
 [Gmo,Gxo] = deal(Gm,Gx);
 

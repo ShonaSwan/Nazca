@@ -7,10 +7,10 @@ if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; end
 %***  update heat content (entropy) density
 
 % heat advection
-advn_S = - advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  % melt  advection
-         - advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
+[advn_Sm,qz_advn_Sm,qx_advn_Sm] = advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % melt  advection
+[advn_Sx,qz_advn_Sx,qx_advn_Sx] = advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
-diff_S = diffus(T,kT./T,h,[1,2],BCD);
+[dffn_S,qz_dffn_S,qx_dffn_S] = diffus(T,kT./T,h,[1,2],BCD);
 
 % heat dissipation
 diss_h = diss ./ T;
@@ -23,7 +23,7 @@ bnd_S = RHO.*cP.*bnd_T ./ T;
 
 
 % total rate of change
-dSdt  = advn_S + diff_S + diss_h + bnd_S + Gems + Gexs + Gins;
+dSdt  = - advn_Sm - advn_Sx + dffn_S + diss_h + bnd_S + Gems + Gexs + Gins;
 
 % residual of entropy evolution
 res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
@@ -41,21 +41,21 @@ sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 %***  update major component densities
 
 % major component advection
-advn_C = - advect(M.*cm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA) ...  % melt  advection
-         - advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
+[advn_Cm,qz_advn_Cm,qx_advn_Cm] = advect(M.*cm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % melt  advection
+[advn_Cx,qz_advn_Cx,qx_advn_Cx] = advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
 % major component diffusion (regularisation)
 % diff_C = diffus(cm,M.*kc,h,[1,2],BCD) + diffus(cx,X.*kc,h,[1,2],BCD);
 
-% boundary layers
-bnd_C = zeros(size(C));
-for i = 1:cal.ncmp
-    if ~isnan(cwall(1)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(1,i)-C(:,:,i)).*mu./tau_a .* topshape; end
-    if ~isnan(cwall(2)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(2,i)-C(:,:,i)).*mu./tau_a .* botshape; end
-end
+% % boundary layers
+% bnd_C = zeros(size(C));
+% for i = 1:cal.ncmp
+%     if ~isnan(cwall(1)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(1,i)-C(:,:,i)).*mu./tau_a .* topshape; end
+%     if ~isnan(cwall(2)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(2,i)-C(:,:,i)).*mu./tau_a .* botshape; end
+% end
 
 % total rate of change
-dCdt = advn_C + bnd_C + Gemc + Gexc + Ginc;                                      
+dCdt = - advn_Cm - advn_Cx + bnd_C + Gemc + Gexc + Ginc;                                      
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -75,13 +75,13 @@ if Rcouple; phseql; end
 %***  update phase fraction densities
 
 % phase advection rates
-advn_X   = - advect(X,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-advn_M   = - advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+[advn_X,qz_advn_X,qx_advn_X] = advect(X,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+[advn_M,qz_advn_M,qx_advn_M] = advect(M,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
 % total rates of change
-dXdt   = advn_X + Gx + Gex;
-dMdt   = advn_M + Gm + Gem + Gin;
-drhodt = advn_X + advn_M + Gem + Gex + Gin;
+dXdt   = - advn_X + Gx + Gex;
+dMdt   = - advn_M + Gm + Gem + Gin;
+drhodt = - advn_X - advn_M + Gem + Gex + Gin;
 
 % residual of phase density evolution
 res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);
@@ -92,7 +92,6 @@ upd_X = - alpha*res_X*dt/a1 + beta*upd_X;
 upd_M = - alpha*res_M*dt/a1 + beta*upd_M;
 X     = max(eps,min(rho-0, X + upd_X ));
 M     = max(0,min(rho-eps, M + upd_M ));
-
 
 %***  update phase fractions and component concentrations
 
@@ -110,7 +109,7 @@ subsol  = m<=eps^0.5 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
 supliq  = x<=eps^0.5 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
 subsolc = repmat(subsol,1,1,cal.ncmp);
 supliqc = repmat(supliq,1,1,cal.ncmp);
-rnorm   = 1;  tol  = atol*10;
+rnorm   = 1;  tol  = atol;
 it      = 1;  mxit = 100;
 upd_cm  = 0.*cm;  upd_cx = 0.*cx;
 cm = cmq;  cx = cxq;

@@ -7,14 +7,14 @@ clear cal;
 cal.noxd   = 8;
 cal.nmem   = 10;
 cal.nmsy   = 5;
-cal.ncmp   = 4;
+cal.ncmp   = 5;
 
 % label strings for all compositional representations
 cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','FeO','MgO','CaO','Na$_2$O + K$_2$O','H$_2$O'};
      elStr = {'Si','Ti','Al','Fe','Mg','Ca','Na','H'};
 cal.memStr = {'for','fay','ant','alb','dps','aug','ulv','mgt','qtz','wat'};
 cal.msyStr = {'olv','fsp','cxp','spn','qtz'};
-cal.cmpStr = {'dun','bas','rhy','vol'};
+cal.cmpStr = {'dun','pyx','bas','rhy','vol'};
 
 for i = 1:cal.ncmp; cal.(cal.cmpStr{i}) = i; end
 for i = 1:cal.nmsy; cal.(cal.msyStr{i}) = i; end
@@ -54,11 +54,13 @@ cal.msy_mem = [1  1  0  0  0  0  0  0  0  0    % olivine (olv)
 
 % mineral end-member composition of melting model components
 %               for   fay   ant   alb   dps   aug   ulv   mgt   qtz    wat
-cal.cmp_mem = [95.0   5.0     0     0     0     0     0     0     0     0   % dun
+cal.cmp_mem = [96.0   4.0     0     0     0     0     0     0     0     0   % dun
            
-                7.0   5.0  28.0  10.0  30.0  16.0   4.0     0     0     0   % bas
+               16.0   5.5   8.0   0.5  58.0  12.0     0     0     0     0   % pyx
+
+                5.0   7.0  28.0  12.0  18.0  24.0   6.0     0     0     0   % bas
                  
-                  0     0   1.0  50.0   0.5   5.0     0   3.5  40.0     0   % bas
+                  0     0   1.0  51.0     0   5.0     0   3.0  40.0     0   % rhy
 
                   0     0     0     0     0     0     0     0     0 100.0]; % vol
 cal.cmp_mem = cal.cmp_mem./sum(cal.cmp_mem,2)*100;
@@ -77,22 +79,22 @@ for i=1:cal.ncmp
 end
 
 % set pure component melting points T_m^i at P=0
-cal.T0  = [1850  1050  850];
+cal.T0  = [1850 1250 1050  850];
 
 % set first coeff. for P-dependence of T_m^i [GPa]
-cal.A   = [7.5  2.8  2.0];
+cal.A   = [7.5 5.5 2.8  2.0];
 
 % set second coeff. for P-dependence of T_m^i [1]
-cal.B   = [7.5  2.8  2.0];
+cal.B   = [7.5 5.5 2.8  2.0];
 
 % set coeff. for T-dependence of partition coefficients K^i [1/K]
-cal.r  = [37.0  6.0  8.0];
+cal.r  = [37.0  8.0  6.0  8.0];
 
 % set entropy gain of fusion DeltaS [J/K]
 cal.Dsx = 350;
 
 % specify melting point dependence on H2O
-cal.dTH2O = [900  1500  2000];  % solidus shift from water content prefactor [K/wt^pH2O]
+cal.dTH2O = [900 1100 1500 2000];  % solidus shift from water content prefactor [K/wt^pH2O]
 cal.pH2O  = 0.75;               % solidus shift from water content exponent
 
 % specify geochemical model parameters

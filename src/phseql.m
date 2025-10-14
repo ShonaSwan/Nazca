@@ -24,11 +24,11 @@ cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
 
 % phase mass transfer rates
-Gm  = (mq-m).*RHO/(tau_r+5*dt);
-Gx  = (xq-x).*RHO/(tau_r+5*dt);
+Gm  = (mq-m).*RHO/(tau_r+3*dt);
+Gx  = (xq-x).*RHO/(tau_r+3*dt);
 
-Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+5*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+5*dt);
+Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+3*dt);
+Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 
 % extract, extrude, and intrude melt
 
@@ -59,7 +59,7 @@ for i=1:4; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./8; end
 
 % Intrusion
 
-intr_shape = (1-path_ratio).*exp(-abs(ZZ - moho_depth) / bnd_w) + path_ratio.*(ZZ>=moho_depth & ZZ<=melt_depth);
+intr_shape = (1-path_ratio).*exp(-abs(ZZ - MOHO_depth) / bnd_w) + path_ratio.*(ZZ>=MOHO_depth & ZZ<=melt_depth);
 Gin = (1-erupt_ratio) *intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
 for i=1:4; Gin = Gin + diff(Gin(:,icx),2,2)./8; end
 

@@ -1,24 +1,25 @@
 %get vertical gradient of bulk SiO2
-[~,dSiO2dz] = gradient(c_oxd(:,:,1));
-dSiO2dz(dSiO2dz > 0) = 0;
-iz = floor(Nz/4);
-dSiO2dz(iz+1:end,:) = repmat(dSiO2dz(iz,:),Nz-iz,1);
+SiO2ByMgO = c_oxd(:,:,cal.Si)./c_oxd(:,:,cal.Mg);
 
-% maxgrad = max(-dSiO2dz(:));
-% minProm = 0.1 * maxgrad;    
-% 
-% % find local max along vertical columns 
-% bound_zc = islocalmax(-dSiO2dz,1,'MinProminence',minProm,'MaxNumExtrema',1);
-% bound_zc(1,~any(bound_zc,1)) = 1;
+[~,gradSiO2ByMgO] = gradient(SiO2ByMgO);
+gradSiO2ByMgO(gradSiO2ByMgO > 0) = 0;
 
-[ival,imax] = max(-dSiO2dz,[],1);
+indLAB    = (T-273.15) < 1200;
+[LAB_depth,LAB_iz] = max(ZZ.*indLAB,[],1);
+
+for ix = 1:Nx
+gradSiO2ByMgO(LAB_iz(ix):end,ix) = gradSiO2ByMgO(LAB_iz(ix),ix);
+end
+
+[~,MOHO_iz] = max(-gradSiO2ByMgO,[],1);
 
 % retrieve moho location
-moho_depth = Zc(imax);
+MOHO_depth = Zc(MOHO_iz);
 
-figure(200);
-imagesc(Xc,Zc,-dSiO2dz); axis equal tight; colorbar;colormap(colmap); hold on
-plot(Xc,moho_depth,'w','LineWidth',1.5)
+% figure(200);
+% imagesc(Xc,Zc,-gradSiO2ByMgO); axis equal tight; colorbar;colormap(colmap); hold on
+% plot(Xc,MOHO_depth,'w','LineWidth',1.5)
+% plot(Xc,LAB_depth,'w--','LineWidth',1.5)
 
 
 % moho_depth = NaN(1, Nx);

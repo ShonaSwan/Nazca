@@ -27,7 +27,7 @@ minage   =  20e6*yr;             % age of system before simuation
 % set up melt fraction variabels 
 minit     =  0.01;                % maximum initial melt fraction (Initial reduction of melt)
 mumin     =  1e-5;                % Setting lower limit for melt fraction in 
-mumax     =  0.05;                 % Setting upper limit for melt fraction in 
+mumax     =  0.25;                % Setting upper limit for melt fraction in 
 
 % set up mid ocean ridge spreading 
 bnd_sprc  =  6e3;                 % Top boundary horizontal coordinate (centre) of spreading rate 'S' function [km]  

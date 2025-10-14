@@ -17,10 +17,10 @@ if ~bnchm && step>0 && ~restart
 % drhodt   = - rho.*Div_Vmix - VGradRho + Gem + Gex;
 
 
-res_rho  = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
+res_MFD  = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
-upd_rho  = - alpha*res_rho./b1;
-VolSrc   = VolSrc + upd_rho;
+upd_MFD  = - alpha*res_MFD./b1 + beta.*upd_MFD;
+MFDSrc   = MFDSrc + upd_MFD;
 
 % VGradRho = - advect(rho,Umix(2:end-1,:),Wmix(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA);
 % VolSrc   = (- (a1*rho-a2*rhoo-a3*rhooo)/dt + Gem + Gex);  % correct volume source term by scaled residual
@@ -60,7 +60,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; -rho2(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; +rho3(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -rho4(:)/(h/h0)];
 
-aa  = VolSrc(end,:)/(Drho0*u0/h0); 
+aa  = MFDSrc(end,:)/(Drho0*u0/h0); 
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 else
@@ -412,7 +412,7 @@ aa  = zeros(size(ii));
 % Coefficients multiplying fluid pressure Pf
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
-rr  = VolSrc/(Drho0*u0/h0);
+rr  = MFDSrc/(Drho0*u0/h0);
 if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1)/(Drho0*u0/h0); end
 
 IIR = [IIR; ii(:)];

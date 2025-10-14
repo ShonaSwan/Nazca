@@ -24,11 +24,11 @@ cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
 
 % phase mass transfer rates
-Gm  = (mq-m).*RHO/(tau_r+3*dt);
-Gx  = (xq-x).*RHO/(tau_r+3*dt);
+Gm  = (mq-m).*RHO/(tau_r+5*dt);
+Gx  = (xq-x).*RHO/(tau_r+5*dt);
 
-Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+3*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
+Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+5*dt);
+Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+5*dt);
 
 % extract, extrude, and intrude melt
 

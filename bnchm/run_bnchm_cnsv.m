@@ -5,13 +5,13 @@ clear; close all;
 run('../usr/par_default')
 
 % test decreasing time step
-ATOL = [1e-4,1e-7,1e-10];
+ATOL = [1e-2,1e-4,1e-6];
 
 for atol = ATOL
 
     % set run parameters
     runID    =  'bnchm_cnsv';        % run identifier
-    nop      =  20;                  % output frame plotted/saved every 'nop' time steps
+    nop      =  10;                  % output frame plotted/saved every 'nop' time steps
     plot_op  =  1;                   % switch on to live plot of results
     plot_cv  =  1;                   % switch on to live plot iterative convergence
     save_op  =  0;
@@ -21,20 +21,22 @@ for atol = ATOL
     L        =  1*D;                  % chamber width [m]
     N        =  100;                 % number of grid points in z-direction (incl. 2 ghosts)
     h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-    alpha    =  0.4;                % iterative step size parameter
-
+ 
     % set model timing parameters
     Nt       =  nop;                 % number of time steps to take
     dt       =  1e2*yr;                   % set initial time step
 
     % model set up switches (plume or MOR)
-    init_mode   =  'plume';               % 'plume' or 'MOR'
+    init_mode   =  'plume';             % 'plume' or 'MOR'
     bndmode     =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
     meansw      =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
-    erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
-    minage    =  20e6*yr;
-    minit       = 0.05;                % maximum initial melt fraction (Initial reduction of melt)
-    mthr      =  0.10;                % threshold melt fraction for extraction/eruption
+    erupt_ratio =  0.5;                 % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
+    path_ratio  =  0.05;
+    minage      =  20e6*yr;
+    minit       =  0.01;                % maximum initial melt fraction (Initial reduction of melt)
+    mumin       =  1e-4;                % Setting lower limit for melt fraction in
+    mumax       =  0.25;                % Setting upper limit for melt fraction in
+    mthr        =  0.10;                % threshold melt fraction for extraction/eruption
     
     % set initial thermo-chemical state of the Plume 
     dT_plume  = 200;                                % Temperature difference between the plume and the mantle 
@@ -47,11 +49,11 @@ for atol = ATOL
     % set numerical model parameters
     TINT     =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
     ADVN     =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-    CFL      =  0.50;                   % (physical) time stepping courant number (multiplies stable step) [0,1]
+    CFL      =  0.75;                   % (physical) time stepping courant number (multiplies stable step) [0,1]
     rtol     =  atol/1e6;            % outer its absolute tolerance
-    alpha    =  0.40;                % iterative step size parameter
-    beta     =  0.00;                % iterative damping parameter
-    gamma    =  0.20;                % iterative lagging of viscosities
+    alpha    =  0.50;                % iterative step size parameter
+    beta     =  0.25;                % iterative damping parameter
+    gamma    =  0.25;                % iterative lagging of viscosities
     maxit    =  100;                  % maximum outer its
    
 

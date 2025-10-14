@@ -93,12 +93,13 @@ upd_M = - alpha*res_M*dt/a1 + beta*upd_M;
 X     = max(eps,min(rho-0, X + upd_X ));
 M     = max(0,min(rho-eps, M + upd_M ));
 
+
 %***  update phase fractions and component concentrations
 
 % update phase fractions
 RHO = X + M;
-x = X./RHO; 
-m = M./RHO;
+x   = X./RHO; 
+m   = M./RHO;
 
 hasx = x >= eps^0.5;
 hasm = m >= eps^0.5;

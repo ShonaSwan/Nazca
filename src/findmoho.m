@@ -8,7 +8,7 @@ indLAB    = (T-273.15) < 1200;
 [LAB_depth,LAB_iz] = max(ZZ.*indLAB,[],1);
 
 for ix = 1:Nx
-gradSiO2ByMgO(LAB_iz(ix):end,ix) = gradSiO2ByMgO(LAB_iz(ix),ix);
+gradSiO2ByMgO(ceil(LAB_iz(ix)/2):end,ix) = gradSiO2ByMgO(ceil(LAB_iz(ix)/2),ix);
 end
 
 [~,MOHO_iz] = max(-gradSiO2ByMgO,[],1);

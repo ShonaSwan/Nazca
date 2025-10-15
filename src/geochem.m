@@ -14,8 +14,8 @@ for i = 1:cal.ntrc
     trcx(:,:,i) = trc(:,:,i)./(m./Ktrc(:,:,i) + x);
 
     % get trace element advection
-    [advn_TRCm,qz_advn_TRCm,qx_advn_TRCm] = advect(M.*trcm(:,:,i),Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-    [advn_TRCx,qz_advn_TRCx,qx_advn_TRCx] = advect(X.*trcx(:,:,i),Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+    [advn_TRCm(:,:,i),qz_advn_TRCm(:,:,i),qx_advn_TRCm(:,:,i)] = advect(M.*trcm(:,:,i),Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+    [advn_TRCx(:,:,i),qz_advn_TRCx(:,:,i),qx_advn_TRCx(:,:,i)] = advect(X.*trcx(:,:,i),Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
     % get trace element diffusion (regularisation)
     % dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);

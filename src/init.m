@@ -199,7 +199,7 @@ switch init_mode
         pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
         Tp_plume = dT_plume .* pl_profile;
         
-        Tp = Tp_MOR + Tp_plume + dTr.*rp + dTg.gp;
+        Tp = Tp_MOR + Tp_plume + dTr.*rp + dTg.*gp;
       
         for i = 1:cal.ncmp
             c(:,:,i)  =  c0(i) + ...

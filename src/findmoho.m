@@ -8,10 +8,10 @@ indLAB    = (T-273.15) < 1200;
 [LAB_depth,LAB_iz] = max(ZZ.*indLAB,[],1);
 
 for ix = 1:Nx
-gradSiO2ByMgO(ceil(LAB_iz(ix)/2):end,ix) = gradSiO2ByMgO(ceil(LAB_iz(ix)/2),ix);
+gradSiO2ByMgO(ceil(LAB_iz(ix)/2):end,ix) = 0;%gradSiO2ByMgO(ceil(LAB_iz(ix)/2),ix);
 end
 
-[~,MOHO_iz] = max(-gradSiO2ByMgO,[],1);
+[~,MOHO_iz] = max(max(1e-6,-gradSiO2ByMgO),[],1);
 
 % retrieve moho location
 MOHO_depth = Zc(MOHO_iz);

@@ -155,9 +155,10 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
+indm = U((2:end-1),end-1) < 0;
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Uright];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uright];
 aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 

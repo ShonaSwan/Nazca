@@ -284,7 +284,7 @@ TCtime  = 0;
 UDtime  = 0;
 a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
-res  = 1;  tol = 1e-9;  it = 1; iter = 1;
+res  = 1;  tol = 1e-7;  it = 1; iter = 1;
 
 while res > tol
 
@@ -330,12 +330,18 @@ while res > tol
       % if bndmode == 0 % Mid ocean Ridge set up 
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
-            m = m * (minit./max(m(:)))^0.1;
+            mi = m;
+            m = m - (max(0,m-minit)/20);%* (minit./max(m(:)))^0.05;
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
-            s = x.*sx + m.*sm;
+
             rho = 1./(m./rhom  + x./rhox);
+
+            Tp = Tp - (mi-m).*T.*Dsm./cP;
+            sm   = cPm.*log(Tp./Tref) + Dsm;
+            sx   = cPx.*log(Tp./Tref);
+            s = x.*sx + m.*sm;
         else
             s = x.*sx + m.*sm;
         end
@@ -353,9 +359,9 @@ while res > tol
         Pf(2:end-1,2:end-1) = Pt;
         Px = Pt;
 
-        [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
+        % [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
-        sm = si(:,:,1); sx = si(:,:,2);
+        % sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
              + norm( T(:)-Ti  (:),2)./norm( T(:),2);

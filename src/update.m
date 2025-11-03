@@ -179,7 +179,7 @@ KD     = mucff.^2./Cv;  % Darcy coeff
 zeta0  = eta./mucff;  % solid compaction coeff
 
 % get yield viscosity
-zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin./mucff;
+zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin;
 zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % apply min/max bounds to viscosities
@@ -189,23 +189,22 @@ zetamax = 1./(1./(eta./mucff) + 1./(etamax./mucff));
 zetamin = etamin./mucff;
 zeta   = 1./(1./zetamax + 1./zeta) + zetamin;
 
-% for i = 1:2
+for i = 1:2
     eta = log10(eta);
     eta = eta + diffus(eta,1/8*ones(size(eta)),1,[1,2],BCD);
     eta = 10.^eta;
-% end
-% for i = 1:2
+end
+for i = 1:2
     zeta = log10(zeta);
     zeta = zeta + diffus(zeta,1/8*ones(size(zeta)),1,[1,2],BCD);
     zeta = 10.^zeta;
-% end
+end
 
-if meansw == 0 % Geometric
-    % interpolate to staggered stencil nodes
+% interpolate to staggered stencil nodes
+if     meansw == 0 % Geometric
     etaco  = (eta(icz(1:end-1),icx(1:end-1)).*eta(icz(2:end),icx(1:end-1)) ...
            .* eta(icz(1:end-1),icx(2:end  )).*eta(icz(2:end),icx(2:end  ))).^0.25;
 elseif meansw == 1 % Arithmetic
-    % interpolate to staggered stencil nodes
     etaco  = (eta(icz(1:end-1),icx(1:end-1))+eta(icz(2:end),icx(1:end-1)) ...
            +  eta(icz(1:end-1),icx(2:end  ))+eta(icz(2:end),icx(2:end  ))).*0.25;
 end

@@ -110,7 +110,6 @@ tau_r    =  1e3*yr;              % reaction time scale (set to zero for quasi-eq
 % set model buoyancy and pressure parameters
 bPx      =  1e-11;               % solid compressibility [1/Pa]
 bPm      =  1e-11;               % melt  compressibility [1/Pa]
-dm0      =  1e-3;                % melt film size [m]
 dx0      =  1e-2;                % crystal size [m]
 g0       =  10.;                 % gravity [m/s2]
 

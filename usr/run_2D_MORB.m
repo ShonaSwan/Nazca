@@ -23,8 +23,8 @@ L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
-mumin     =  3e-4;                % Setting lower limit for melt fraction in coeff. 
-mumax     =  0.25;                 % Setting upper limit for melt fraction in coeff.
+mumin     =  1e-4;                % Setting lower limit for melt fraction in coeff. 
+mumax     =  0.15;                % Setting upper limit for melt fraction in coeff.
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
@@ -32,9 +32,9 @@ bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plu
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
-erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
+erupt_ratio = 0.75;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.05;               % melt spread across the extraction path 
-mthr        = 0.05;               % threshold melt fraction for extraction/eruption
+mthr        = 0.10;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -46,7 +46,7 @@ minage    =  1e5*yr;              % (20e6 / 7e5)
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.73 0.16 0.10 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.71 0.18 0.10 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,-1,0,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
@@ -67,15 +67,15 @@ trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [w
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/2;                 % boundary layer width [m]
-tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
+tau_T     =  5e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 Ptop      =  4.0e7;               % top pressure [Pa]
 
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';           % phase diagram calibration
-tau_r     =  1e3*yr;              % phase change reaction time (set to 0 to tie to dt)
-tau_e     =  1e4*yr;              % extraction/eruption time (set to 0 to tie to dt)
+tau_r     =  1e2*yr;              % phase change reaction time (set to 0 to tie to dt)
+tau_e     =  1e2*yr;              % extraction/eruption time (set to 0 to tie to dt)
 minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
@@ -88,9 +88,9 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  1e8;                 % yield stress for shear failure [Pa]
-pyield    =  2e7;                 % yield pressure for tensile failure [Pa]
-etaymin   =  1e20;                % minimum yield viscosity
+tyield    =  6e7;                 % yield stress for shear failure [Pa]
+pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e19;                % minimum yield viscosity
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
@@ -99,7 +99,7 @@ CFL       =  0.50;                % (physical) time stepping courant number (mul
 rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.60;                % iterative step size
+alpha     =  0.50;                % iterative step size
 beta      =  0.25;                % relaxing parameter for thermochem update
 gamma     =  0.25;                % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast

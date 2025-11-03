@@ -91,7 +91,7 @@ cal.B   = [7.5 5.5 2.8  2.0];
 cal.r  = [37.0  8.0  6.0  8.0];
 
 % set entropy gain of fusion DeltaS [J/K]
-cal.Dsx = 350;
+cal.Dsx = 300;
 
 % specify melting point dependence on H2O
 cal.dTH2O = [900 1100 1500 2000];  % solidus shift from water content prefactor [K/wt^pH2O]

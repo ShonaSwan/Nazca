@@ -48,6 +48,13 @@ while time <= tend && step <= Nt
 
     % print model diagnostics
     diagnose;
+    
+    if tracer_sw == 1
+    u_tracer = interp2(XXu, ZZu, U, tracer_X, tracer_Z, 'linear');  
+    w_tracer = interp2(XXw, ZZw, W, tracer_X, tracer_Z, 'linear');
+    tracer_X = tracer_X + u_tracer * dt;
+    tracer_Z = tracer_Z + w_tracer * dt;
+    end
 
     % plot model results
     if ~mod(step,nop); output; end

@@ -42,6 +42,7 @@ end
 Xsc = Xc./SpaceScale;
 Zsc = Zc./SpaceScale;
 
+
 if Nx <= 1 && Nz <= 1  % create 0D plots
 
     if ~exist('fh1','var'); fh1 = figure(VIS{:});
@@ -333,6 +334,11 @@ else % create 2D plots
     set(fh1,'CurrentAxes',ax(11));
     imagesc(Xsc,Zsc,-W./SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$W$ [',SpeedUnits,']'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    hold on
+    if tracer_sw == 1
+    plot(tracer_X./SpaceScale, tracer_Z./SpaceScale, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+    end
+    hold off
     set(fh1,'CurrentAxes',ax(12));
     imagesc(Xsc,Zsc, U./SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$U$ [',SpeedUnits,']'],TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);

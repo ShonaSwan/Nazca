@@ -8,7 +8,7 @@ run('./par_default')
 
 runID     =  '2D_MOR_N100';     % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  20;                   % output frame plotted/saved every 'nop' time steps
+nop       =  10;                   % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
@@ -25,6 +25,7 @@ tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
 mumin     =  1e-4;                % Setting lower limit for melt fraction in coeff. 
 mumax     =  0.15;                % Setting upper limit for melt fraction in coeff.
+tracer_sw =  1;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
@@ -88,7 +89,7 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  6e7;                 % yield stress for shear failure [Pa]
+tyield    =  1e7;                 % yield stress for shear failure [Pa]
 pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e19;                % minimum yield viscosity
 

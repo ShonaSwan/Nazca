@@ -113,7 +113,6 @@ if ~any(bnd_h)
            topshape = exp( ( -ZZ)/bnd_w);
            botshape = exp(-(D-ZZ)/bnd_w);
 
-
         case 2  % Plume-Ridge set up
            topshape = exp( ( -ZZ+h/2)/bnd_w);
            botshape = exp(-(D-ZZ+h/2)/bnd_w);
@@ -450,6 +449,20 @@ dsumMdto = 0;  dsumMdt = 0;
 dsumXdto = 0;  dsumXdt = 0;
 dsumCdto = 0;  dsumCdt = 0;
 dsumTdto = 0;  dsumTdt = 0;
+
+
+% tracer switch 
+if tracer_sw == 1
+num_tracers = 15;
+tracer_X = linspace(Xc(1), Xc(end), num_tracers);  % evenly spaced along X
+tracer_Z = D * ones(1, num_tracers);               % at the bottom (Z = D)
+
+u_tracer = interp2(XXu, ZZu, U, tracer_X, tracer_Z, 'linear');  
+w_tracer = interp2(XXw, ZZw, W, tracer_X, tracer_Z, 'linear');  
+
+tracer_X = tracer_X + u_tracer * dt;
+tracer_Z = tracer_Z + w_tracer * dt;
+end
 
 % overwrite fields from file if restarting run
 if restart

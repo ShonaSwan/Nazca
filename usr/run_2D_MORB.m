@@ -25,6 +25,7 @@ tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
 mumin     =  1e-4;                % Setting lower limit for melt fraction in coeff. 
 mumax     =  0.15;                % Setting upper limit for melt fraction in coeff.
+tracer_sw =  1;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'

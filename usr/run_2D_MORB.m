@@ -6,16 +6,16 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MOR_N100';     % run identifier
+runID     =  '2D_MOR_N120';       % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  20;                   % output frame plotted/saved every 'nop' time steps
+nop       =  20;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  100;                 % number of grid points in z-direction
+N         =  120;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -34,7 +34,7 @@ meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.75;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.05;               % melt spread across the extraction path 
-mthr        = 0.10;               % threshold melt fraction for extraction/eruption
+mthr        = 0.15;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -88,9 +88,13 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  6e7;                 % yield stress for shear failure [Pa]
-pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
-etaymin   =  1e19;                % minimum yield viscosity
+tyield    =  1e8;                 % yield stress for shear failure [Pa]
+pyield    =  1e8;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e20;                % minimum yield viscosity
+n_disl    =   3;                  % dislocation creep powerlaw 
+lmbd_melt =  27;                  % exponential melt weakening prefactor
+b_perm    = 100;                  % permeability geometric factor [50-1000]
+cff_reg   =   2;                  % rheological coefficient regularisation level
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
@@ -99,10 +103,10 @@ CFL       =  0.50;                % (physical) time stepping courant number (mul
 rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.50;                % iterative step size
+alpha     =  0.65;                % iterative step size
 beta      =  0.25;                % relaxing parameter for thermochem update
 gamma     =  0.25;                % relaxing parameter for viscosity update
-etacntr   =  1e5;                 % maximum viscosity contrast
+etacntr   =  1e6;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling

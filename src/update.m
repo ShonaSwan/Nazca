@@ -132,72 +132,88 @@ if Nz==1; Pt    = max(Ptop,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcoupl
 end
 Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
 
- %Diffusion Creep viscosity 
 % update pure phase viscosities
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
-%Get reference viscosity
 etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
-%diffusion creep 
-etax   = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
 
-%Dislocation creep Viscosity 
-etax0_diss = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
-etax_diss  = etax0_diss .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
-n = 3;
-eps_ref = 1e-15;  
-eta_diss = etax_diss .* (max(eII, 1e-18) / eps_ref).^((1/n)-1);
+% T-dependence of solid shear viscosity
+etax0  = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
 
+% diffusion creep viscosity
+dx_ref   = 0.001;  
+eta_diff = etax0 .* (dx0./dx_ref).^2;
 
-% get coefficient contrasts
-kv = permute(cat(3,etax,etam),[3,1,2]);
-Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
+% dislocation creep viscosity 
+eps_ref  = 1e-15;  
+eta_disl = etax0 .* (max(eII, 1e-18) / eps_ref).^((1/n_disl)-1);
 
-% get permission weights
-ff = permute(cat(3,1-mucff,mucff),[3,1,2]);
-FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
-Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
-Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
+etax     = (1./eta_diff + 1./eta_disl).^-1;
 
-% get momentum flux and transfer coefficients
-thtv = squeeze(prod(Mv.^Xf,2));
-Kv   = ff.*kv.*thtv;
-Cv   = (1-ff).*Kv./dx0.^2;
+% % get coefficient contrasts
+% kv = permute(cat(3,etax,etam),[3,1,2]);
+% Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
 
-
-% get effective viscosity
-eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
-
-% get yield viscosity
-etay   = tyield./(eII + eps^1.25) + etaymin;
-eta    = (eta + (1./etay + 1./eta0 + 1./eta_diss).^-1)/2;
-
+% % get permission weights
+% ff = permute(cat(3,1-mucff,mucff),[3,1,2]);
+% FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
+% Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
+% Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
+% 
+% % get momentum flux and transfer coefficients
+% thtv = squeeze(prod(Mv.^Xf,2));
+% Kv   = ff.*kv.*thtv;
+% Cv   = (1-ff).*Kv./dx0.^2;
+% 
+% 
+% % get effective viscosity
+% eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
 
 % traditional two-phase coefficients
-Cv     = squeeze(Cv(2,:,:));
-Ks     = mucff   ./Cv;  % melt segregation coeff
-KD     = mucff.^2./Cv;  % Darcy coeff
-zeta0  = eta./mucff;  % solid compaction coeff
+% Cv     = squeeze(Cv(2,:,:));
+% Ks     = mucff   ./Cv;  % melt segregation coeff
+% KD     = mucff.^2./Cv;  % Darcy coeff
 
-% get yield viscosity
+% canonical two-phase coefficients
+eta0   = etax.*exp(-lmbd_melt.*mucff);   % matrix shear viscosity
+zeta0  = eta0./mucff;                    % matrix compaction viscosity
+kphi   = dx0^2./b_perm .* mucff.^3;      % matrix permeability
+KD     = kphi ./ etam;                   % Darcy coefficient
+Ks     = KD./mucff;                      % segregation drag coefficient
+
+% get yield shear viscosity
+etay   = tyield./(eII + eps^1.25) + etaymin;
+eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
+
+% get yield compaction viscosity
 zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin;
 zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
 
 % apply min/max bounds to viscosities
-etamax = etacntr.*max(min(eta(:)),etamin);
-eta    = 1./(1./etamax + 1./eta) + etamin;
-zetamax = 1./(1./(eta./mucff) + 1./(etamax./mucff));
+etamax  = etacntr.*max(min(eta(:)),etamin);
+eta     = 1./(1./etamax + 1./eta) + etamin;
+zetamax = etamax./mucff;
 zetamin = etamin./mucff;
-zeta   = 1./(1./zetamax + 1./zeta) + zetamin;
+zeta    = 1./(1./zetamax + 1./zeta) + zetamin;
 
-for i = 1:2
+for i = 1:cff_reg
     eta = log10(eta);
     eta = eta + diffus(eta,1/8*ones(size(eta)),1,[1,2],BCD);
     eta = 10.^eta;
 end
-for i = 1:2
+for i = 1:cff_reg
     zeta = log10(zeta);
     zeta = zeta + diffus(zeta,1/8*ones(size(zeta)),1,[1,2],BCD);
     zeta = 10.^zeta;
+end
+for i = 1:cff_reg
+    KD = log10(KD);
+    KD = KD + diffus(KD,1/8*ones(size(KD)),1,[1,2],BCD);
+    KD = 10.^KD;
+end
+for i = 1:cff_reg
+    Ks = log10(Ks);
+    Ks = Ks + diffus(Ks,1/8*ones(size(Ks)),1,[1,2],BCD);
+    Ks = 10.^Ks;
 end
 
 % interpolate to staggered stencil nodes
@@ -218,9 +234,10 @@ elseif meansw == 1 % Arithmetic
 end
 
 % update velocity magnitudes
-Vel = sqrt(((W(1:end-1,2:end-1)+W(2:end,2:end-1))/2).^2 ...
+Vx  = sqrt(((W(1:end-1,2:end-1)+W(2:end,2:end-1))/2).^2 ...
          + ((U(2:end-1,1:end-1)+U(2:end-1,2:end))/2).^2);
-
+Vm  = sqrt(((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))/2).^2 ...
+         + ((um(2:end-1,1:end-1)+um(2:end-1,2:end))/2).^2);
 qD  = sqrt(((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))/2).^2 ...
          + ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))/2).^2);
 
@@ -240,15 +257,10 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
        + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
        +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
 
-% ks  = kmin.*rho.*cP./T;                                         % regularised heat diffusion
-% kc  = kmin;                                                     % regularised component diffusion
-
 % update dimensionless numbers
-Ra     = Vel.*D/10./((kT)./rho./cP);
-Re     = Vel.*D/10./( eta./rho    );
-Rum    = abs(wm(1:end-1,2:end-1)+wm(2:end,2:end-1))/2./Vel;
-% Pr     = (eta./rho)./((kT+ks.*T)./rho./cP);
-% Sc     = (eta./rho)./( kc                 );
+Ra     = Vx.*D/10./((kT)./rho./cP);
+Re     = Vx.*D/10./( eta./rho    );
+Rc     = Vx./Vm;
 delta  = sqrt(KD.*zeta);
 
 % update stresses
@@ -269,8 +281,8 @@ else
     diss = min(1e-3,diss ...
          + kT./T.*(grdTz (2:end-1,2:end-1).^2 + grdTx (2:end-1,2:end-1).^2) ...
          + eta.*exx.^2 + eta.*ezz.^2 + 2.*eta.*exz_ce.^2 ...
-         + Cv .* ((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))./2).^2 ...
-         + Cv .* ((um(2:end-1,1:end-1)+um(2:end-1,2:end))./2).^2)/2;
+         + mucff./Ks .* ((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))./2).^2 ...
+         + mucff./Ks .* ((um(2:end-1,1:end-1)+um(2:end-1,2:end))./2).^2)/2;
 end
 
 % update time step

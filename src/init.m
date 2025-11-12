@@ -228,7 +228,7 @@ tein = trc;
 
 U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U;  um = 0.*U; qDx = 0.*U; Umix = 0.*U;
 W   =  zeros(Nz+1,Nx+2);  WBG = W; Wi = W; wx = 0.*W; wm = 0.*W; upd_W = 0*W;  qDz = 0.*W; Wmix = 0.*W;
-Pf  =  zeros(Nz+2,Nx+2);  Vel = 0.*Tp; upd_Pf= 0*Pf; %Div_rhoV = 0.*P;  DD = sparse(length(P(:)),length([W(:);U(:)]));
+Pf  =  zeros(Nz+2,Nx+2);  Vx = 0.*Tp; Vm = 0.*Tp; upd_Pf= 0*Pf; %Div_rhoV = 0.*P;  DD = sparse(length(P(:)),length([W(:);U(:)]));
 Pc   =  zeros(Nz+2,Nx+2);
 SOL = [W(:);U(:);Pf(:);Pc(:)];
 

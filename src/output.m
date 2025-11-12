@@ -29,13 +29,13 @@ elseif D >= 1e3
     SpaceScale = 1e3;
     SpaceUnits = 'km';
 end
-if max(Vel(:)) < 1000/yr
+if max(Vx(:)) < 1000/yr
     SpeedScale = 1/yr;
     SpeedUnits = 'm/yr';
-elseif max(Vel(:)) >= 1000/yr && max(Vel(:)) < 1000/hr
+elseif max(Vx(:)) >= 1000/yr && max(Vx(:)) < 1000/hr
     SpeedScale = 1/hr;
     SpeedUnits = 'm/hr';
-elseif max(Vel(:)) >= 1000/hr
+elseif max(Vx(:)) >= 1000/hr
     SpeedScale = 1;
     SpeedUnits = 'm/s';
 end

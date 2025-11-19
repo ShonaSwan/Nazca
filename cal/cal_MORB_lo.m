@@ -54,11 +54,11 @@ cal.msy_mem = [1  1  0  0  0  0  0  0  0  0    % olivine (olv)
 
 % mineral end-member composition of melting model components
 %               for   fay   ant   alb   dps   aug   ulv   mgt   qtz    wat
-cal.cmp_mem = [96.0   4.0     0     0     0     0     0     0     0     0   % dun
+cal.cmp_mem = [97.0   3.0     0     0     0     0     0     0     0     0   % dun
            
-               16.0   5.5   8.0   0.5  58.0  12.0     0     0     0     0   % pyx
+               21.0   5.0   4.0     0  58.0  12.0     0     0     0     0   % pyx
 
-                5.0   7.0  28.0  12.0  18.0  24.0   6.0     0     0     0   % bas
+                8.0   4.0  26.0  10.0  20.0  26.0   6.0     0     0     0   % bas
                  
                   0     0   1.0  51.0     0   5.0     0   3.0  40.0     0   % rhy
 
@@ -104,7 +104,7 @@ cal.Ktrc_mem = [0.01;0.10;1.0;3.0;10.0;1.0].*ones(cal.ntrc,cal.nmem);
 
 % specify density parameters
 %               for  fay  ant  san  dps  aug  ulv  mgt  qtz  wat
-cal.rhox0   = [3210,4200,2680,2550,3210,3520,3930,4730, 2540,1000]; % mem ref densities [kg/m3]
+cal.rhox0   = [3200,4000,2680,2550,3210,3520,3930,4730, 2540,1000]; % mem ref densities [kg/m3]
 
 % specify three-phase coefficient model parameters
 %              for  fay  ant  alb   dps  aug  ulv  mgt  qtz  wat

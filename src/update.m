@@ -125,10 +125,10 @@ if iter==1 % update two-phase masking once per time step
 end 
 
 % update lithostatic pressure
-if Nz==1; Pt    = max(Ptop,(1-alpha).*Pt + alpha.*(Ptop.*ones(size(Tp)) + Pcouple*Pf(2:end-1,2:end-1))); else
+if Nz==1; Pt    = max(Ptop,(1-delta).*Pt + delta.*(Ptop.*ones(size(Tp)) + Pcouple*Pf(2:end-1,2:end-1))); else
     Pl(1,:)     = repmat(mean(rhow(1,:),2).*g0.*h/2,1,Nx) + Ptop;
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
-    Pt          = max(Ptop,(1-alpha).*Pt + alpha.*(Pl + Pcouple*Pf(2:end-1,2:end-1)));   
+    Pt          = max(Ptop,(1-delta).*Pt + delta.*(Pl + Pcouple*Pf(2:end-1,2:end-1)));   
 end
 Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
 
@@ -182,11 +182,11 @@ Ks     = KD./mucff;                      % segregation drag coefficient
 
 % get yield shear viscosity
 etay   = tyield./(eII + eps^1.25) + etaymin;
-eta    = eta.*gamma + ((1./etay + 1./eta0).^-1).*(1-gamma);
+eta    = eta.*(1-delta) + ((1./etay + 1./eta0).^-1).*delta;
 
 % get yield compaction viscosity
 zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin;
-zeta   = zeta.*gamma + ((1./zetay + 1./zeta0).^-1).*(1-gamma);
+zeta   = zeta.*(1-delta) + ((1./zetay + 1./zeta0).^-1).*delta;
 
 % apply min/max bounds to viscosities
 etamax  = etacntr.*max(min(eta(:)),etamin);
@@ -243,10 +243,15 @@ qD  = sqrt(((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))/2).^2 ...
 
 
 % update velocity divergences
-Div_V    = ddz(W   (:,2:end-1),h) + ddx(U   (2:end-1,:),h); % get velocity divergence
-Div_DV   = ddz(wm  (:,2:end-1),h) + ddx(um  (2:end-1,:),h); % get velocity divergence
-Div_Vmix = ddz(Wmix(:,2:end-1),h) + ddx(Umix(2:end-1,:),h);
-
+Div_V    = ddz(W   (:,2:end-1),h) + ddx(U   (2:end-1,:),h); % get matrix velocity divergence
+Div_DV   = ddz(wm  (:,2:end-1),h) + ddx(um  (2:end-1,:),h); % get segregation velocity divergence
+Div_Vmix = ddz(Wmix(:,2:end-1),h) + ddx(Umix(2:end-1,:),h); % get mixture velocity divergence
+rhoW     = rhow(:,icx).*W;
+rhoU     = rhou(icz,:).*U;
+Mwm      = Mz(:,icx).*wm;
+Mum      = Mx(icz,:).*um;
+Div_rhoV = ddz(rhoW(:,2:end-1),h) + ddx(rhoU(2:end-1,:),h) ...
+         + ddz(Mwm (:,2:end-1),h) + ddx(Mum (2:end-1,:),h); 
 
 % update strain rates
 exx = diff(U(2:end-1,:),1,2)./h - Div_V./3;                                % x-normal strain rate
@@ -261,7 +266,7 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
 Ra     = Vx.*D/10./((kT)./rho./cP);
 Re     = Vx.*D/10./( eta./rho    );
 Rc     = Vx./Vm;
-delta  = sqrt(KD.*zeta);
+deltac = sqrt(KD.*zeta);
 
 % update stresses
 txx = eta   .* exx;                                                        % x-normal stress

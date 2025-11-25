@@ -2,13 +2,11 @@
 
 tic;
 
-if iter==1; upd_S = 0; upd_C = 0; upd_M = 0; upd_X = 0; end
-
 %***  update heat content (entropy) density
 
 % heat advection
 [advn_Sm,qz_advn_Sm,qx_advn_Sm] = advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % melt  advection
-[advn_Sx,qz_advn_Sx,qx_advn_Sx] = advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
+[advn_Sx,qz_advn_Sx,qx_advn_Sx] = advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % solid advection
 
 [dffn_S,qz_dffn_S,qx_dffn_S] = diffus(T,kT./T,h,[1,2],BCD);
 
@@ -29,8 +27,7 @@ dSdt  = - advn_Sm - advn_Sx + dffn_S + diss_h + bnd_S + Gems + Gexs + Gins;
 res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
 
 % semi-implicit update of bulk entropy density
-upd_S = - alpha*res_S*dt/a1 + beta*upd_S;
-S     = S + upd_S;
+[S,XHST.S,RHST.S,rho_est.S,rho_mean.S] = iterate(S,res_S*dt/a1,rho_est.S,rho_mean.S,XHST.S,RHST.S,itpar,frst*step*iter);
 
 % convert entropy S to natural temperature T and potential temperature Tp
 [Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
@@ -44,16 +41,6 @@ sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 [advn_Cm,qz_advn_Cm,qx_advn_Cm] = advect(M.*cm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % melt  advection
 [advn_Cx,qz_advn_Cx,qx_advn_Cx] = advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
-% major component diffusion (regularisation)
-% diff_C = diffus(cm,M.*kc,h,[1,2],BCD) + diffus(cx,X.*kc,h,[1,2],BCD);
-
-% % boundary layers
-% bnd_C = zeros(size(C));
-% for i = 1:cal.ncmp
-%     if ~isnan(cwall(1)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(1,i)-C(:,:,i)).*mu./tau_a .* topshape; end
-%     if ~isnan(cwall(2)); bnd_C(:,:,i) = bnd_C(:,:,i) + (RHO.*cwall(2,i)-C(:,:,i)).*mu./tau_a .* botshape; end
-% end
-
 % total rate of change
 dCdt = - advn_Cm - advn_Cx + bnd_C + Gemc + Gexc + Ginc;                                      
   
@@ -61,8 +48,10 @@ dCdt = - advn_Cm - advn_Cx + bnd_C + Gemc + Gexc + Ginc;
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
 
 % semi-implicit update of major component density
-upd_C = max(-C, - alpha*res_C*dt/a1 + beta*upd_C );
-C     = C + upd_C;
+[C,XHST.C,RHST.C,rho_est.C,rho_mean.C] = iterate(C,res_C*dt/a1,rho_est.C,rho_mean.C,XHST.C,RHST.C,itpar,frst*step*iter);
+
+% impose min/max limits on component densities
+C = max(0,min(rho, C ));
 
 % convert component density to concentration
 c = C./sum(C,3);
@@ -88,10 +77,13 @@ res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);
 res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
 
 % semi-implicit update of phase fraction densities
-upd_X = - alpha*res_X*dt/a1 + beta*upd_X;
-upd_M = - alpha*res_M*dt/a1 + beta*upd_M;
-X     = max(eps,min(rho-0, X + upd_X ));
-M     = max(0,min(rho-eps, M + upd_M ));
+res_PHS = cat(3,res_X,res_M);
+PHS     = cat(3,X,M);
+[PHS,XHST.PHS,RHST.PHS,rho_est.PHS,rho_mean.PHS] = iterate(PHS,res_PHS*dt/a1,rho_est.PHS,rho_mean.PHS,XHST.PHS,RHST.PHS,itpar,frst*step*iter);
+
+% impose min/max limits on phase densities
+X     = max(0,min(rho, PHS(:,:,1) ));
+M     = max(0,min(rho, PHS(:,:,2) ));
 
 %***  update phase fractions and component concentrations
 
@@ -102,6 +94,7 @@ m   = M./RHO;
 
 hasx = x >= eps^0.5;
 hasm = m >= eps^0.5;
+
 
 % update major component phase composition
 Kx      = reshape(cal.Kx,Nz,Nx,cal.ncmp);

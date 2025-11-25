@@ -1,29 +1,13 @@
 tic;
 
-% define dimensional scales
-h0    = D/10;
-e0    = 1e18;
-Drho0 = 500;
-p0    = Drho0*g0*h0;
-u0    = p0*h0./e0;
-K0    = h0^2/e0;
-t0    = h0/u0;
-
-
 if ~bnchm && step>0 && ~restart
 
 % residual of mixture mass evolution
-% VGradRho = - advect(rho,Umix(2:end-1,:),Wmix(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA);
-% drhodt   = - rho.*Div_Vmix - VGradRho + Gem + Gex;
-
-
 res_MFD  = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
-upd_MFD  = - alpha*res_MFD./b1 + beta.*upd_MFD;
-MFDSrc   = MFDSrc + upd_MFD;
-
-% VGradRho = - advect(rho,Umix(2:end-1,:),Wmix(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA);
-% VolSrc   = (- (a1*rho-a2*rhoo-a3*rhooo)/dt + Gem + Gex);  % correct volume source term by scaled residual
+% update MFD
+[MFDSrc,XHST.MFD,RHST.MFD,rho_est.MFD,rho_mean.MFD] = iterate(MFDSrc/MFD0,res_MFD/b1/MFD0,rho_est.MFD,rho_mean.MFD,XHST.MFD,RHST.MFD,itpar,frst*step*iter);
+MFDSrc = MFDSrc*MFD0;
 
 end
 
@@ -60,7 +44,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; -rho2(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; +rho3(:)/(h/h0)];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; -rho4(:)/(h/h0)];
 
-aa  = MFDSrc(end,:)/(Drho0*u0/h0); 
+aa  = MFDSrc(end,:)/MFD0; 
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 else
@@ -114,7 +98,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-rr  = + (Drhow(2:end-1,:).*g0)/(Drho0*g0);
+rr  = + buoy .* (Drhow(2:end-1,:).*g0)/(Drho0*g0);
 
 if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1)/(p0/h0); end
 
@@ -413,8 +397,8 @@ aa  = zeros(size(ii));
 % Coefficients multiplying fluid pressure Pf
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
-rr  = MFDSrc/(Drho0*u0/h0);
-if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1)/(Drho0*u0/h0); end
+rr  = MFDSrc/MFD0;
+if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1)/MFD0; end
 
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
@@ -567,52 +551,52 @@ OF = sparse(NV,NP);
 OP = sparse(NP,NP);
 
 % % Sizes of blocks
-[n1, m1] = size(KV);
-[n2, m2] = size(KF);
-[n3, m3] = size(KP);
-[n4, m4] = size(KC);
+% [n1, m1] = size(KV);
+% [n2, m2] = size(KF);
+% [n3, m3] = size(KP);
+% [n4, m4] = size(KC);
+% 
+% % Total size
+% Ntot = n1 + n2 + n3 + n4;
+% 
+% % Preallocate LL as sparse
+% if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC) + 3*nnz(GG) + 2*nnz(OV) + 2*nnz(OF) + nnz(DD) + nnz(DDs) + nnz(DDm) + 2*nnz(OP);  end
+% LL = spalloc(Ntot, Ntot, total_nnz);
+% 
+% i1 = 1:n1;
+% i2 = n1+1:n1+n2;
+% i3 = n1+n2+1:n1+n2+n3;
+% i4 = n1+n2+n3+1:Ntot;
+% 
+% % Assign top row
+% LL(i1, i1) = KV;
+% LL(i1, i2) = OV;
+% LL(i1, i3) = GG;
+% LL(i1, i4) = GG;
+% 
+% % Second row
+% LL(i2, i1) = OV.'; 
+% LL(i2, i2) = KF;
+% LL(i2, i3) = GG;
+% LL(i2, i4) = OF;
+% 
+% % Third row
+% LL(i3, i1) = DDs;
+% LL(i3, i2) = DDm;
+% LL(i3, i3) = KP;
+% LL(i3, i4) = OP;
+% 
+% % Fourth row
+% LL(i4, i1) = DD;
+% LL(i4, i2) = OF.';
+% LL(i4, i3) = OP.';
+% LL(i4, i4) = KC;
 
-% Total size
-Ntot = n1 + n2 + n3 + n4;
-
-% Preallocate LL as sparse
-if ~exist('total_nnz','var'); total_nnz = nnz(KV) + nnz(KF) + nnz(KP) + nnz(KC) + 3*nnz(GG) + 2*nnz(OV) + 2*nnz(OF) + nnz(DD) + nnz(DDs) + nnz(DDm) + 2*nnz(OP);  end
-LL = spalloc(Ntot, Ntot, total_nnz);
-
-i1 = 1:n1;
-i2 = n1+1:n1+n2;
-i3 = n1+n2+1:n1+n2+n3;
-i4 = n1+n2+n3+1:Ntot;
-
-% Assign top row
-LL(i1, i1) = KV;
-LL(i1, i2) = OV;
-LL(i1, i3) = GG;
-LL(i1, i4) = GG;
-
-% Second row
-LL(i2, i1) = OV.'; 
-LL(i2, i2) = KF;
-LL(i2, i3) = GG;
-LL(i2, i4) = OF;
-
-% Third row
-LL(i3, i1) = DDs;
-LL(i3, i2) = DDm;
-LL(i3, i3) = KP;
-LL(i3, i4) = OP;
-
-% Fourth row
-LL(i4, i1) = DD;
-LL(i4, i2) = OF.';
-LL(i4, i3) = OP.';
-LL(i4, i4) = KC;
-
-% % Assign blocks
-% LL = [KV   OV   GG   GG; ...
-%       OV.' KF   GG   OF; ...
-%       DDs  DDm  KP   OP; ...
-%       DD   OF.' OP.' KC];
+% Assign blocks
+LL = [KV   OV   GG   GG; ...
+      OV.' KF   GG   OF; ...
+      DDs  DDm  KP   OP; ...
+      DD   OF.' OP.' KC];
 
 RR  = [RV; RF; RP; RC];
 
@@ -675,8 +659,6 @@ wm     = wm  * u0;
 um     = um  * u0;
 Pf     = Pf  * p0;
 Pc     = Pc  * p0;
-
-
 
 if ~bnchm
 

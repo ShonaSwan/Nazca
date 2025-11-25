@@ -6,16 +6,16 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MOR_N120';       % run identifier
+runID     =  '2D_MOR_N200';       % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  20;                  % output frame plotted/saved every 'nop' time steps
+nop       =  200;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  120;                 % number of grid points in z-direction
+N         =  200;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -96,17 +96,22 @@ n_disl    =   3;                  % dislocation creep powerlaw
 lmbd_melt =  27;                  % exponential melt weakening prefactor
 b_perm    = 100;                  % permeability geometric factor [50-1000]
 cff_reg   =   2;                  % rheological coefficient regularisation level
+buoy      =   1;
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
 CFL       =  0.50;                % (physical) time stepping courant number (multiplies stable step) [0,1]
-rtol      =  1e-3;                % outer its relative tolerance
+rtol      =  1e-2;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-alpha     =  0.65;                % iterative step size
-beta      =  0.25;                % relaxing parameter for thermochem update
-gamma     =  0.25;                % relaxing parameter for viscosity update
+itpar.cheb.alpha = 1.0;           % Chebychev first coefficient damping (0-1)
+itpar.cheb.beta  = 0.5;           % Chebychev second coefficient damping (0-1)
+itpar.cheb.gamma = 0.5;           % Chebychev third coefficient damping (0-1)
+itpar.anda.m     = 4;             % Anderson acceleration depth (2-5)
+itpar.anda.mix   = 0.5;           % Anderson acceleration mixing coefficient (0-1)
+itpar.anda.reg   = 0.25;          % Anderson acceleration regularisation coefficient (0-1)
+delta     =  0.20;                % relaxing parameter for viscosity update
 etacntr   =  1e6;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling

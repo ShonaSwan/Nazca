@@ -20,3 +20,15 @@
 
 dto = dt;
 Pto = Pt;
+
+% reset update history
+cheb_rho.S.est   = cheb_rho.S.mean + 0.*cheb_rho.S.est;
+cheb_rho.C.est   = cheb_rho.S.mean + 0.*cheb_rho.C.est;
+cheb_rho.PHS.est = cheb_rho.S.mean + 0.*cheb_rho.PHS.est;
+cheb_rho.TRC.est = cheb_rho.S.mean + 0.*cheb_rho.TRC.est;
+cheb_rho.MFD.est = cheb_rho.S.mean + 0.*cheb_rho.MFD.est;
+FHST.S   = 0.*FHST.S;
+FHST.C   = 0.*FHST.C;
+FHST.PHS = 0.*FHST.PHS;
+FHST.TRC = 0.*FHST.TRC;
+FHST.MFD = 0.*FHST.MFD;

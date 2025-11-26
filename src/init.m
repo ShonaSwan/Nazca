@@ -447,20 +447,21 @@ adv_TRC = zeros(Nz,Nx,cal.ntrc);
 dff_TRC = zeros(Nz,Nx,cal.ntrc);
 K_trc   = zeros(Nz,Nx,cal.ntrc);
 dTRCdt  = 0.*trc; dTRCdto = dTRCdt;
-rho_est.S   = 0.9.*ones(Nz*Nx,1); rho_mean.S   = 0.9;
-rho_est.X   = 0.9.*ones(Nz*Nx,1); rho_mean.X   = 0.9;
-rho_est.M   = 0.9.*ones(Nz*Nx,1); rho_mean.M   = 0.9;
-rho_est.MFD = 0.9.*ones(Nz*Nx,1); rho_mean.MFD = 0.9;
-rho_est.C   = 0.9.*ones(Nz*Nx*cal.ncmp,1); rho_mean.C   = 0.9;
-rho_est.TRC = 0.9.*ones(Nz*Nx*cal.ntrc,1); rho_mean.TRC = 0.9;
-rho_est.PHS = 0.9.*ones(Nz*Nx*2,1); rho_mean.PHS = 0.9;
-XHST.S   = zeros(Nz*Nx, itpar.anda.m+1);  FHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.X   = zeros(Nz*Nx, itpar.anda.m+1);  FHST.X   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.M   = zeros(Nz*Nx, itpar.anda.m+1);  FHST.M   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);  FHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);  FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
-XHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);  FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
-XHST.PHS = zeros(Nz*Nx*2, itpar.anda.m+1);  FHST.PHS = zeros(Nz*Nx*2, itpar.anda.m+1);
+cheb_rho.S.est   = 0.5.*ones(Nz*Nx,1);          cheb_rho.S.mean   = 0.5;
+cheb_rho.MFD.est = 0.5.*ones(Nz*Nx,1);          cheb_rho.MFD.mean = 0.5;
+cheb_rho.C.est   = 0.5.*ones(Nz*Nx*cal.ncmp,1); cheb_rho.C.mean   = 0.5;
+cheb_rho.TRC.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); cheb_rho.TRC.mean = 0.5;
+cheb_rho.PHS.est = 0.5.*ones(Nz*Nx*2       ,1); cheb_rho.PHS.mean = 0.5;
+XHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
+XHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
+XHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
+XHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
+XHST.PHS = zeros(Nz*Nx*2       , itpar.anda.m+1);
+FHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
+FHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
+FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
+FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
+FHST.PHS = zeros(Nz*Nx*2       , itpar.anda.m+1);
 
 % initialise timing and iterative parameters
 frst    = 1;
@@ -499,7 +500,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
+        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal','FHST','cheb_rho');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 

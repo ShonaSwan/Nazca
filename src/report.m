@@ -20,7 +20,7 @@ end
 
 % plot convergence of outer iterations
 if plot_cv
-    figure(100); if iter==1; clf; else; hold on; end
-    plot(iter,log10(resnorm),'k.','MarkerSize',15,'LineWidth',1.5); box on; axis tight;
+    figure(100); if iter==1; else; hold on; end
+    plot(iterglobal,log10(resnorm),'k.','MarkerSize',15,'LineWidth',1.5); box on; axis tight;
     drawnow;
 end

@@ -454,13 +454,13 @@ rho_est.MFD = 0.9.*ones(Nz*Nx,1); rho_mean.MFD = 0.9;
 rho_est.C   = 0.9.*ones(Nz*Nx*cal.ncmp,1); rho_mean.C   = 0.9;
 rho_est.TRC = 0.9.*ones(Nz*Nx*cal.ntrc,1); rho_mean.TRC = 0.9;
 rho_est.PHS = 0.9.*ones(Nz*Nx*2,1); rho_mean.PHS = 0.9;
-XHST.S   = zeros(Nz*Nx, itpar.anda.m+1);  RHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.X   = zeros(Nz*Nx, itpar.anda.m+1);  RHST.X   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.M   = zeros(Nz*Nx, itpar.anda.m+1);  RHST.M   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);  RHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);  RHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
-XHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);  RHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
-XHST.PHS = zeros(Nz*Nx*2, itpar.anda.m+1);  RHST.PHS = zeros(Nz*Nx*2, itpar.anda.m+1);
+XHST.S   = zeros(Nz*Nx, itpar.anda.m+1);  FHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
+XHST.X   = zeros(Nz*Nx, itpar.anda.m+1);  FHST.X   = zeros(Nz*Nx, itpar.anda.m+1);
+XHST.M   = zeros(Nz*Nx, itpar.anda.m+1);  FHST.M   = zeros(Nz*Nx, itpar.anda.m+1);
+XHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);  FHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
+XHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);  FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
+XHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);  FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
+XHST.PHS = zeros(Nz*Nx*2, itpar.anda.m+1);  FHST.PHS = zeros(Nz*Nx*2, itpar.anda.m+1);
 
 % initialise timing and iterative parameters
 frst    = 1;

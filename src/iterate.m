@@ -17,7 +17,7 @@
 %      .anda.reg   : regularisation coefficient for Anderson acceleration
 % count    : iter*step count to track history of run
 
-function [x,XHST,RHST,rho_est,rho_mean] = iterate(x,res,rho_est,rho_mean,XHST,RHST,itpar,count)
+function [x,XHST,FHST,rho_est,rho_mean] = iterate(x,res,rho_est,rho_mean,XHST,FHST,itpar,count)
 
 % allocate arrays of correct shape
 alpha = 0.*x;
@@ -25,20 +25,20 @@ beta  = 0.*x;
 gamma = 0.*x;
 x_new = 0.*x;
 x_acc = 0.*x;
-r     = 0.*x;
+f     = 0.*x;
 g     = 0.*x;
+
 
 % 1) Chebyshev-like fixed-point iterative update
 
 % Update per-DOF rho estimates from ratio of consecutive updates
-denom   = max(abs(RHST(:,end-1)), 1e-12);         % avoid blow-up
-ratio   = abs(RHST(:,end)) ./ denom;            % n×1
-rho_new = min(0.99, max(0.02, ratio));           % clamp to [0.02, 0.99]
+ratio   = abs(FHST(:,end)) ./ abs(FHST(:,end-1) + 1e-12);  % form ratio of two most recent updates
+rho_new = min(0.99, max(0.01, ratio));                     % clamp to [0.01, 0.99]
 
 % Moving average for stability
 rho_est  = 0.7*rho_est  + 0.3*rho_new;           % moving average
 rho_mean = 0.9*rho_mean + 0.1*mean(rho_est);     % moving average
-rho_est  = max(rho_est, 0.7*rho_mean);           % avoid crazy outliers
+rho_est  = max(rho_est, 0.5*rho_mean);           % avoid crazy outliers
 rho_est  = max(rho_est, 0.1);                    % global lower bound
 
 % Chebyshev-like coefficients
@@ -47,27 +47,28 @@ beta (:) =  2.*(2 - rho_est) ./ (2 + rho_est).*itpar.cheb.beta;
 gamma(:) = -1./(2 + rho_est).^2              .*itpar.cheb.gamma;
 
 % New residual/update and fixed-point iterate
-r(:) = -alpha(:).*res(:) + beta(:).*RHST(:,end) + gamma(:).*RHST(:,end-1);   % n×1
-g    = x + r;
+f(:) = -alpha(:).*res(:) + beta(:).*FHST(:,end) + gamma(:).*FHST(:,end-1);
+g    = x + f;
 
-% 3) Anderson acceleration (residual-based)
 
-% Shift histories and store current g, r
-XHST = [XHST(:,2:end) g(:)];
-RHST = [RHST(:,2:end) r(:)];
+% 2) Anderson acceleration (update-based)
+
+% Shift histories and store current g, f
+XHST = [XHST(:,2:end) g(:)];   % previous solution guesses
+FHST = [FHST(:,2:end) f(:)];   % previous solution updates
 
 if (count>itpar.anda.m || ~count) && itpar.anda.mix>eps  % only if enough history and mix>0
 
     % Differences of iterates and residuals
     DX  = XHST(:,2:end) - XHST(:,1:end-1);   % n×m
-    DR  = RHST(:,2:end) - RHST(:,1:end-1);   % n×m
-    reg = itpar.anda.reg.*rms(DR.'*DR,'all');
+    DF  = FHST(:,2:end) - FHST(:,1:end-1);   % n×m
+    reg = itpar.anda.reg.*rms(DF.'*DF,'all');
 
-    % Solve min_gamma || f - DF * gamma + reg*I ||_2  (global regularised least squares)
-    gamma = (DR.'*DR + reg*eye(itpar.anda.m)) \ (DR.'*r(:));
+    % Solve min_gamma || f - DF * delta + reg*I ||_2  (global regularised least squares)
+    delta = (DF.'*DF + reg*eye(itpar.anda.m)) \ (DF.'*f(:));
 
     % Standard Anderson Type-I update for fixed-point:
-    x_acc(:) = g(:) - DX * gamma;
+    x_acc(:) = g(:) - DX * delta;
 
     % Damped Anderson step
     x_new(:) = g(:) + itpar.anda.mix * (x_acc(:) - g(:));

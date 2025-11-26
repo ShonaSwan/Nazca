@@ -6,7 +6,7 @@ if ~bnchm && step>0 && ~restart
 res_MFD  = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
 % update MFD
-[MFDSrc,XHST.MFD,RHST.MFD,rho_est.MFD,rho_mean.MFD] = iterate(MFDSrc/MFD0,res_MFD/b1/MFD0,rho_est.MFD,rho_mean.MFD,XHST.MFD,RHST.MFD,itpar,frst*step*iter);
+[MFDSrc,XHST.MFD,FHST.MFD,rho_est.MFD,rho_mean.MFD] = iterate(MFDSrc/MFD0,res_MFD/b1/MFD0,rho_est.MFD,rho_mean.MFD,XHST.MFD,FHST.MFD,itpar,frst*step*iter);
 MFDSrc = MFDSrc*MFD0;
 
 end
@@ -139,7 +139,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
-indm = U((2:end-1),end-1) < 0;
+if iter==1; indm = U((2:end-1),end-1) < 0; end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uright];

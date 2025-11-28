@@ -6,7 +6,7 @@ if ~bnchm && step>0 && ~restart
 res_MFD  = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 
 % update MFD
-[MFDSrc,XHST.MFD,FHST.MFD,cheb_rho.MFD] = iterate(MFDSrc/MFD0,res_MFD/b1/MFD0,cheb_rho.MFD,XHST.MFD,FHST.MFD,itpar,iter*~frst);
+[MFDSrc,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDSrc/MFD0,res_MFD/b1/MFD0,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
 MFDSrc = MFDSrc*MFD0;
 
 end

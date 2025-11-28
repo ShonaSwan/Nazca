@@ -347,12 +347,11 @@ while res > tol
         eqtime = toc(eqtime);
         EQtime = EQtime + eqtime;
 
-      % if bndmode == 0 % Mid ocean Ridge set up 
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             mi  = m;
             m   = m - (max(0,m-minit)/20);
-            m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
+            m   = m + diffus(m,1e-4*ones(size(rp)),1,[1,2],BCD);
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
             c = x.*cx + m.*cm;
@@ -378,9 +377,7 @@ while res > tol
         TRC  = rho.*trc;
         S    = rho.*s;
 
-        % [Tp,~ ] = StoT(Tp,S./rho,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
-        % sm = si(:,:,1); sx = si(:,:,2);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
              + norm( T(:)-Ti  (:),2)./norm( T(:),2);
@@ -398,27 +395,7 @@ Co   = C;
 TRCo = TRC;
 Xo   = X;
 rhoo = rho;
-
 sm   = cPm.*log(Tp./Tref) + Dsm;  sx = cPx.*log(Tp./Tref);  
-
-
-% % get trace element phase compositions
-% Ktrc = zeros(Nz,Nx,cal.ntrc);
-% trcm = zeros(Nz,Nx,cal.ntrc);
-% trcx = zeros(Nz,Nx,cal.ntrc);
-% for i = 1:cal.ntrc
-%     for j=1:cal.nmem; Ktrc(:,:,i) = Ktrc(:,:,i) + cal.Ktrc_mem(i,j) .* c_mem(:,:,j)./100; end
-% 
-%     trcm(:,:,i)  = trc(:,:,i)./(m + x.*Ktrc(:,:,i));
-%     trcx(:,:,i)  = trc(:,:,i)./(m./Ktrc(:,:,i) + x);
-% end
-% 
-% % get geochemical component densities
-% TRC = zeros(Nz,Nx,cal.ntrc);
-% for i = 1:cal.ntrc
-%     TRC(:,:,i)  = rho.*(m.*trcm(:,:,i) + x.*trcx(:,:,i));
-% end
-% TRCo = TRC;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
@@ -447,21 +424,21 @@ adv_TRC = zeros(Nz,Nx,cal.ntrc);
 dff_TRC = zeros(Nz,Nx,cal.ntrc);
 K_trc   = zeros(Nz,Nx,cal.ntrc);
 dTRCdt  = 0.*trc; dTRCdto = dTRCdt;
-cheb_rho.S.est   = 0.5.*ones(Nz*Nx,1);          cheb_rho.S.mean   = 0.5;
-cheb_rho.MFD.est = 0.5.*ones(Nz*Nx,1);          cheb_rho.MFD.mean = 0.5;
-cheb_rho.C.est   = 0.5.*ones(Nz*Nx*cal.ncmp,1); cheb_rho.C.mean   = 0.5;
-cheb_rho.TRC.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); cheb_rho.TRC.mean = 0.5;
-cheb_rho.PHS.est = 0.5.*ones(Nz*Nx*2       ,1); cheb_rho.PHS.mean = 0.5;
-XHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
-XHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
-XHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
-XHST.PHS = zeros(Nz*Nx*2       , itpar.anda.m+1);
-FHST.S   = zeros(Nz*Nx, itpar.anda.m+1);
-FHST.MFD = zeros(Nz*Nx, itpar.anda.m+1);
-FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.anda.m+1);
-FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.anda.m+1);
-FHST.PHS = zeros(Nz*Nx*2       , itpar.anda.m+1);
+specrad.S.est   = 0.5.*ones(Nz*Nx,1);          specrad.S.mean   = 0.5;
+specrad.MFD.est = 0.5.*ones(Nz*Nx,1);          specrad.MFD.mean = 0.5;
+specrad.C.est   = 0.5.*ones(Nz*Nx*cal.ncmp,1); specrad.C.mean   = 0.5;
+specrad.TRC.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRC.mean = 0.5;
+specrad.PHS.est = 0.5.*ones(Nz*Nx*2       ,1); specrad.PHS.mean = 0.5;
+GHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
+GHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
+GHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
+GHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
+GHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
+FHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
+FHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
+FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
+FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
+FHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
 
 % initialise timing and iterative parameters
 frst    = 1;
@@ -475,7 +452,6 @@ dsumMdto = 0;  dsumMdt = 0;
 dsumXdto = 0;  dsumXdt = 0;
 dsumCdto = 0;  dsumCdt = 0;
 dsumTdto = 0;  dsumTdt = 0;
-
 
 % tracer switch 
 if tracer_sw == 1
@@ -500,7 +476,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal','FHST','cheb_rho');
+        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 

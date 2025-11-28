@@ -105,17 +105,15 @@ CFL       =  0.50;                % (physical) time stepping courant number (mul
 rtol      =  1e-2;                % outer its relative tolerance
 atol      =  1e-8;                % outer its absolute tolerance
 maxit     =  15;                  % maximum outer its
-itpar.cheb.alpha = 1.0;           % Chebychev first coefficient damping (0-1)
-itpar.cheb.beta  = 0.25;          % Chebychev second coefficient damping (0-1)
-itpar.cheb.gamma = 0.25;          % Chebychev third coefficient damping (0-1)
-itpar.anda.m     = 4;             % Anderson acceleration depth (2-5)
-itpar.anda.mix   = 0.3;           % Anderson acceleration mixing coefficient (0-1)
-itpar.anda.reg   = 0.01;          % Anderson acceleration regularisation coefficient (0-1)
 delta     =  0.20;                % relaxing parameter for viscosity update
 etacntr   =  1e6;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
+itpar.fp.damp = 1;                % fixed-point iterative damping (0-1)
+itpar.aa.m    = 4;                % Anderson acceleration depth (2-5)
+itpar.aa.damp = 0.5;              % Anderson acceleration damping (0-1)
+itpar.aa.reg  = 0.01;             % Anderson acceleration regularisation (0-1)
 
 %*****  RUN NAKHLA MODEL  *************************************************
 run('../src/main')

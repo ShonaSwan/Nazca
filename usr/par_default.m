@@ -122,9 +122,6 @@ maxcmp   =  0.01;                % maximum change in phase fraction due to compa
 rtol     =  1e-4;                % outer its relative tolerance
 atol     =  1e-8;                % outer its absolute tolerance
 maxit    =  15;                  % maximum outer its
-alpha    =  0.40;                % iterative step size parameter
-beta     =  0.00;                % iterative damping parameter
-gamma    =  0.20;                % iterative lagging of viscosities
 lambda1  =  0e-7;                % pressure regularisation parameter
 lambda2  =  0e-7;                % pressure regularisation parameter
 etacntr  =  1e5;                 % maximum viscosity contrast
@@ -137,6 +134,10 @@ kmin     =  1e-9;                % minimum diffusivity
 kmax     =  1e+9;                % maximum diffusivity
 Pcouple  =  0;                   % coupling phase equilibria and material properties to dynamic pressure
 Rcouple  =  0;                   % switch on for full reactive coupling
+itpar.fp.damp = 1;               % fixed-point iterative damping (0-1)
+itpar.aa.m    = 4;               % Anderson acceleration depth (2-5)
+itpar.aa.damp = 0.5;             % Anderson acceleration damping (0-1)
+itpar.aa.reg  = 0.01;            % Anderson acceleration regularisation (0-1)
 
 % set various options
 calibrt  =  0;                   % not in calibrate mode

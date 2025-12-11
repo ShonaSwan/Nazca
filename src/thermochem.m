@@ -8,7 +8,11 @@ tic;
 [advn_Sm,qz_advn_Sm,qx_advn_Sm] = advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % melt  advection
 [advn_Sx,qz_advn_Sx,qx_advn_Sx] = advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % solid advection
 
-[dffn_S,qz_dffn_S,qx_dffn_S] = diffus(T,kT./T,h,[1,2],BCD);
+[diff_S ,qz_diff_S ,qx_diff_S ] = diffus(T,kT./T,h,[1,2],BCD);
+[diff_Sd,qz_diff_Sd,qx_diff_Sd] = diffus(Tp,M./T.*cPm.*kd,h,[1,2],BCD);
+diff_S    = diff_S + diff_Sd;
+qz_diff_S = qz_diff_S + qz_diff_Sd;
+qx_diff_S = qx_diff_S + qx_diff_Sd;
 
 % heat dissipation
 diss_h = diss ./ T;
@@ -19,9 +23,8 @@ if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./(tau_T+dt) .* topsha
 if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./(tau_T+dt) .* botshape; end
 bnd_S = RHO.*cP.*bnd_T ./ T;
 
-
 % total rate of change
-dSdt  = - advn_Sm - advn_Sx + dffn_S + diss_h + bnd_S + Gems + Gexs + Gins;
+dSdt  = - advn_Sm - advn_Sx + diff_S + diss_h + bnd_S + Gems + Gexs + Gins;
 
 % residual of entropy evolution
 res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
@@ -41,8 +44,12 @@ sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 [advn_Cm,qz_advn_Cm,qx_advn_Cm] = advect(M.*cm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % melt  advection
 [advn_Cx,qz_advn_Cx,qx_advn_Cx] = advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
+% major component dispersion
+[diff_Cm,qz_diff_Cm,qx_diff_Cm] = diffus(cm,M.*kd  ,h,[1,2],BCD); 
+[diff_Cx,qz_diff_Cx,qx_diff_Cx] = diffus(cx,X.*kmin,h,[1,2],BCD);
+
 % total rate of change
-dCdt = - advn_Cm - advn_Cx + bnd_C + Gemc + Gexc + Ginc;                                      
+dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc;                                      
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -71,7 +78,7 @@ if Rcouple; phseql; end
 % total rates of change
 dXdt   = - advn_X + Gx + Gex;
 dMdt   = - advn_M + Gm + Gem + Gin;
-drhodt = - advn_X - advn_M + Gem + Gex + Gin;
+drhodt = dXdt + dMdt;
 
 % residual of phase density evolution
 res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);

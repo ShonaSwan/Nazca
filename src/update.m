@@ -20,7 +20,7 @@ cx_msy = reshape(reshape(cx_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
 % update mineral systems oxide compositions for solid assemblage
 cx_msy_oxd = zeros(Nz,Nx,cal.nmsy,cal.noxd);
 for j = 1:cal.nmsy
-    cx_msy_oxd(:,:,j,:) = reshape(reshape(cx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,sum(cal.msy_mem(j,:)==1))*cal.mem_oxd(cal.msy_mem(j,:)==1,:)./sum(reshape(cx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,sum(cal.msy_mem(j,:)==1))+1e-32,2),Nz,Nx,1,cal.noxd);
+    cx_msy_oxd(:,:,j,:) = reshape(reshape(cx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,nnz(cal.msy_mem(j,:)==1))*cal.mem_oxd(cal.msy_mem(j,:)==1,:)./sum(reshape(cx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,nnz(cal.msy_mem(j,:)==1))+1e-32,2),Nz,Nx,1,cal.noxd);
 end
 
 cm_oxd_all = zeros(size(c,1),size(c,2),9);
@@ -44,10 +44,14 @@ rho    = 1./(m./rhom  + x./rhox );
 
 if meansw == 0 % Geometric
    rhoxw  = (rhox(icz(1:end-1),:).*rhox(icz(2:end),:)).^0.5; 
+   rhoxu  = (rhox(:,icx(1:end-1)).*rhox(:,icx(2:end))).^0.5;
    rhomw  = (rhom(icz(1:end-1),:).*rhom(icz(2:end),:)).^0.5; 
+   rhomu  = (rhom(:,icx(1:end-1)).*rhom(:,icx(2:end))).^0.5;
 elseif meansw == 1 % Arithmetic
-   rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;      
-   rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2;      
+   rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;   
+   rhoxu  = (rhox(:,icx(1:end-1))+rhox(:,icx(2:end)))/2;
+   rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2; 
+   rhomu  = (rhom(:,icx(1:end-1))+rhom(:,icx(2:end)))/2;  
 end
 
 
@@ -61,11 +65,15 @@ end
 
 
 if meansw == 0 % Geometric
-   Mz     = (M(icz(1:end-1),:).*M(icz(2:end),:)).^0.5;       
-   Mx     = (M(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5;       
+   Mw     = (M(icz(1:end-1),:).*M(icz(2:end),:)).^0.5;       
+   Mu     = (M(:,icx(1:end-1)).*M(:,icx(2:end))).^0.5; 
+   Xw     = (X(icz(1:end-1),:).*X(icz(2:end),:)).^0.5;
+   Xu     = (X(:,icx(1:end-1)).*X(:,icx(2:end))).^0.5;
 elseif meansw == 1 % Arithmetic
-   Mz     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;             
-   Mx     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;              
+   Mw     = (M(icz(1:end-1),:)+M(icz(2:end),:))/2;             
+   Mu     = (M(:,icx(1:end-1))+M(:,icx(2:end)))/2;   
+   Xw     = (X(icz(1:end-1),:)+X(icz(2:end),:))/2;
+   Xu     = (X(:,icx(1:end-1))+X(:,icx(2:end)))/2;
 end
  
 
@@ -92,36 +100,38 @@ rhop  = 1./(m./rhomp + x./rhoxp);
 chi    = max(0,min(1, x.*rho./rhox ));
 mu     = max(0,min(1, m.*rho./rhom ));
 
-mucff  = (1./mu + 1./mumax).^-1 + mumin;
+mucff  = (1./mu.^4 + 1./mumax.^4).^-(1/4) + mumin;
 
 % interpolate to staggered stencil nodes
  
 if meansw == 0 % Geometric
-   muw  = (mu (icz(1:end-1),icx).*mu (icz(2:end),icx)).^0.5; 
-   muu  = (mu (icz,icx(1:end-1)).*mu (icz,icx(2:end))).^0.5;       
+   muw  = (mu (icz(1:end-1),:).*mu (icz(2:end),:)).^0.5; 
+   muu  = (mu (:,icx(1:end-1)).*mu (:,icx(2:end))).^0.5;     
+   chiw = (chi(icz(1:end-1),:).*chi(icz(2:end),:)).^0.5;
+   chiu = (chi(:,icx(1:end-1)).*chi(:,icx(2:end))).^0.5;    
 elseif meansw == 1 % Arithmetic
-   muw  = (mu (icz(1:end-1),icx)+mu (icz(2:end),icx))./2;    
-   muu  = (mu (icz,icx(1:end-1))+mu (icz,icx(2:end)))./2;                  
+   muw  = (mu (icz(1:end-1),:)+mu (icz(2:end),:))./2;    
+   muu  = (mu (:,icx(1:end-1))+mu (:,icx(2:end)))./2;  
+   chiw = (chi (icz(1:end-1),:)+chi (icz(2:end),:))./2;
+   chiu = (chi (:,icx(1:end-1))+chi (:,icx(2:end)))./2;
 end
 
 chi_mem = reshape(reshape(cx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
 chi_mem = chi_mem./sum(chi_mem,3);
 
 % update thermal parameters
-aT = mu.*aTm + chi.*aTx;
-bP = mu.*bPm + chi.*bPx;
-kT = mu.*kTm + chi.*kTx;
-cP = mu.*cPm + chi.*cPx;
+aT    = mu.*aTm + chi.*aTx;
+bP    = mu.*bPm + chi.*bPx;
+kT    = mu.*kTm + chi.*kTx;
+cP    = mu.*cPm + chi.*cPx;
 RhoCp = mu.*rhom.*cPm + chi.*rhox.*cPx;
 Adbt  = mu.*aTm./rhom./cPm + chi.*aTx./rhox./cPx;
 
 % Extracted bounday conditions
-if iter==1 % update two-phase masking once per time step 
-    % twophsw  = (twophs (icz(1:end-1),icx)+twophs (icz(2:end),icx))./2;
-    % twophsu  = (twophs (icz,icx(1:end-1))+twophs (icz,icx(2:end)))./2;
-    twophs  = double(mu (icz,icx)>=mumin);
-    twophsw = double(muw         >=mumin);
-    twophsu = double(muu         >=mumin);
+if iter<3 % update two-phase masking once per time step 
+    twophs  = double(mu (icz,icx)>mumin);
+    twophsw = double(muw(:  ,icx)>mumin);
+    twophsu = double(muu(icz,:  )>mumin);
 end 
 
 % update lithostatic pressure
@@ -132,89 +142,106 @@ if Nz==1; Pt    = max(Ptop,(1-delta).*Pt + delta.*(Ptop.*ones(size(Tp)) + Pcoupl
 end
 Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
 
-% update pure phase viscosities
+% update melt viscosity
 etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
-etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
+etamax = etacntr.*min(etam(:));
+etam   = 1./(1./etamax + 1./etam);
 
-% T-dependence of solid shear viscosity
+% update solid T,C-dependent viscosity
+etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
 etax0  = etax0 .* exp(cal.Eax./(8.3145.*T)-cal.Eax./(8.3145.*(T1+273.15)));
 
-% diffusion creep viscosity
+% diffusion creep viscosity (grain size dependence)
 dx_ref   = 0.001;  
 eta_diff = etax0 .* (dx0./dx_ref).^2;
 
-% dislocation creep viscosity 
+% dislocation creep viscosity (strain rate dependence)
 eps_ref  = 1e-15;  
 eta_disl = etax0 .* (max(eII, 1e-18) / eps_ref).^((1/n_disl)-1);
 
+% composite matrix rheology
 etax     = (1./eta_diff + 1./eta_disl).^-1;
 
-% % get coefficient contrasts
-% kv = permute(cat(3,etax,etam),[3,1,2]);
-% Mv = permute(repmat(kv,1,1,1,2),[4,1,2,3])./permute(repmat(kv,1,1,1,2),[1,4,2,3]);
-
-% % get permission weights
-% ff = permute(cat(3,1-mucff,mucff),[3,1,2]);
-% FF = permute(repmat(ff,1,1,1,2),[4,1,2,3]);
-% Sf = (FF./cal.BB).^(1./cal.CC);  Sf = Sf./sum(Sf,2);
-% Xf = sum(cal.AA.*Sf,2).*FF + (1-sum(cal.AA.*Sf,2)).*Sf;
-% 
-% % get momentum flux and transfer coefficients
-% thtv = squeeze(prod(Mv.^Xf,2));
-% Kv   = ff.*kv.*thtv;
-% Cv   = (1-ff).*Kv./dx0.^2;
-% 
-% 
-% % get effective viscosity
-% eta0   = squeeze(sum(Kv,1)); if Nx==1; eta0 = eta0.'; end
-
-% traditional two-phase coefficients
-% Cv     = squeeze(Cv(2,:,:));
-% Ks     = mucff   ./Cv;  % melt segregation coeff
-% KD     = mucff.^2./Cv;  % Darcy coeff
-
-% canonical two-phase coefficients
-eta0   = etax.*exp(-lmbd_melt.*mucff);   % matrix shear viscosity
-zeta0  = eta0./mucff;                    % matrix compaction viscosity
-kphi   = dx0^2./b_perm .* mucff.^3;      % matrix permeability
-KD     = kphi ./ etam;                   % Darcy coefficient
-Ks     = KD./mucff;                      % segregation drag coefficient
-
-% get yield shear viscosity
-etay   = tyield./(eII + eps^1.25) + etaymin;
-eta    = eta.*(1-delta) + ((1./etay + 1./eta0).^-1).*delta;
-
-% get yield compaction viscosity
-zetay  = (1-twophs(2:end-1,2:end-1)).*pyield/eps^1.25 + twophs(2:end-1,2:end-1).*pyield./(max(0,Div_V)+eps^1.25) + etaymin;
-zeta   = zeta.*(1-delta) + ((1./zetay + 1./zeta0).^-1).*delta;
+% effective two-phase coefficients
+eta0   = etax.*exp(-lmbd_melt.*mucff); % matrix shear viscosity
+zeta0  = eta0./mucff;                  % matrix compaction viscosity
+kphi   = dx0^2./b_perm .* mucff.^3;    % matrix permeability
+KD     = kphi./etam;                   % Darcy coefficient
+Ks     = KD./mucff;                    % segregation drag coefficient
 
 % apply min/max bounds to viscosities
-etamax  = etacntr.*max(min(eta(:)),etamin);
-eta     = 1./(1./etamax + 1./eta) + etamin;
+etamax  = etacntr.*max(min(eta0(:)),etamin);
+eta0    = 1./(1./etamax + 1./eta0) + etamin;
 zetamax = etamax./mucff;
 zetamin = etamin./mucff;
-zeta    = 1./(1./zetamax + 1./zeta) + zetamin;
+zeta0   = 1./(1./zetamax + 1./zeta0) + zetamin;
 
-for i = 1:cff_reg
-    eta = log10(eta);
-    eta = eta + diffus(eta,1/8*ones(size(eta)),1,[1,2],BCD);
-    eta = 10.^eta;
-end
-for i = 1:cff_reg
-    zeta = log10(zeta);
-    zeta = zeta + diffus(zeta,1/8*ones(size(zeta)),1,[1,2],BCD);
-    zeta = 10.^zeta;
-end
-for i = 1:cff_reg
+if cff_reg
+    eta0 = log10(eta0);
+    for i = 1:cff_reg
+        eta0 = eta0 + diffus(eta0,1/8*ones(size(eta0)),1,[1,2],BCD);
+    end
+    eta0 = 10.^eta0;
+
+    zeta0 = log10(zeta0);
+    for i = 1:cff_reg
+        zeta0 = zeta0 + diffus(zeta0,1/8*ones(size(zeta0)),1,[1,2],BCD);
+    end
+    zeta0 = 10.^zeta0;
+
     KD = log10(KD);
-    KD = KD + diffus(KD,1/8*ones(size(KD)),1,[1,2],BCD);
+    for i = 1:cff_reg
+        KD = KD + diffus(KD,1/8*ones(size(KD)),1,[1,2],BCD);
+    end
     KD = 10.^KD;
-end
-for i = 1:cff_reg
+    
     Ks = log10(Ks);
-    Ks = Ks + diffus(Ks,1/8*ones(size(Ks)),1,[1,2],BCD);
+    for i = 1:cff_reg
+        Ks = Ks + diffus(Ks,1/8*ones(size(Ks)),1,[1,2],BCD);
+    end
     Ks = 10.^Ks;
+else
+    % eta =  etai;
+    % zeta = zetai;
 end
+
+% get shear and compaction strain rates
+
+% update velocity divergences
+Div_V    = ddz(W   (:,2:end-1),h) + ddx(U   (2:end-1,:),h); % get matrix velocity divergence
+Div_DV   = ddz(wm  (:,2:end-1),h) + ddx(um  (2:end-1,:),h); % get segregation velocity divergence
+Div_Vmix = ddz(Wmix(:,2:end-1),h) + ddx(Umix(2:end-1,:),h); % get mixture velocity divergence
+rhoW     = rhow(:,icx).*W;
+rhoU     = rhou(icz,:).*U;
+Mwm      = Mw(:,icx).*wm;
+Mum      = Mu(icz,:).*um;
+Div_rhoV = ddz(rhoW(:,2:end-1),h) + ddx(rhoU(2:end-1,:),h) ...
+         + ddz(Mwm (:,2:end-1),h) + ddx(Mum (2:end-1,:),h);
+Div_MV   = ddz(Mwm (:,2:end-1),h) + ddx(Mum (2:end-1,:),h);
+
+% update compaction rate
+if step>0 && ~restart
+    ups = -1./chi.*((a1*chi-a2*chio-a3*chioo)/dt + advect(chi,U(2:end-1,:),W(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA) - Gx./rhox - Gex./rhox);
+end
+
+% update strain rates
+exx = diff(U(2:end-1,:),1,2)./h - Div_V./3;                                % x-normal strain rate
+ezz = diff(W(:,2:end-1),1,1)./h - Div_V./3;                                % z-normal strain rate
+exz = 1/2.*(diff(U,1,1)./h+diff(W,1,2)./h);                                % shear strain rate
+
+eII = (0.5.*(exx.^2 + ezz.^2 ...
+       + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
+       +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
+
+% get yield shear viscosity
+etay   = tyield./(eII + 1e-20) + etaymin;
+eta    = eta.*(1-delta) + ((1./etay.^2 + 1./eta0.^2).^-(1/2)).*delta;
+zeta0  = zeta0.*min(1,etay./eta0);
+
+% get yield compaction viscosity
+upsy   = twophs(2:end-1,2:end-1).*(max(0,ups)+max(0,-ups/4));
+zetay  = pyield./(upsy + 1e-20) + etaymin;
+zeta   = zeta.*(1-delta) + ((1./zetay.^2 + 1./zeta0.^2).^-(1/2)).*delta;
 
 % interpolate to staggered stencil nodes
 if     meansw == 0 % Geometric
@@ -241,26 +268,8 @@ Vm  = sqrt(((wm(1:end-1,2:end-1)+wm(2:end,2:end-1))/2).^2 ...
 qD  = sqrt(((qDz(1:end-1,2:end-1)+qDz(2:end,2:end-1))/2).^2 ...
          + ((qDx(2:end-1,1:end-1)+qDx(2:end-1,2:end))/2).^2);
 
-
-% update velocity divergences
-Div_V    = ddz(W   (:,2:end-1),h) + ddx(U   (2:end-1,:),h); % get matrix velocity divergence
-Div_DV   = ddz(wm  (:,2:end-1),h) + ddx(um  (2:end-1,:),h); % get segregation velocity divergence
-Div_Vmix = ddz(Wmix(:,2:end-1),h) + ddx(Umix(2:end-1,:),h); % get mixture velocity divergence
-rhoW     = rhow(:,icx).*W;
-rhoU     = rhou(icz,:).*U;
-Mwm      = Mz(:,icx).*wm;
-Mum      = Mx(icz,:).*um;
-Div_rhoV = ddz(rhoW(:,2:end-1),h) + ddx(rhoU(2:end-1,:),h) ...
-         + ddz(Mwm (:,2:end-1),h) + ddx(Mum (2:end-1,:),h); 
-
-% update strain rates
-exx = diff(U(2:end-1,:),1,2)./h - Div_V./3;                                % x-normal strain rate
-ezz = diff(W(:,2:end-1),1,1)./h - Div_V./3;                                % z-normal strain rate
-exz = 1/2.*(diff(U,1,1)./h+diff(W,1,2)./h);                                % shear strain rate
-
-eII = (0.5.*(exx.^2 + ezz.^2 ...
-       + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
-       +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
+% update melt dispersivity
+kd = Vm.*Delta + kmin;
 
 % update dimensionless numbers
 Ra     = Vx.*D/10./((kT)./rho./cP);

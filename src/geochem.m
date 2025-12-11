@@ -26,8 +26,12 @@ for i = 1:cal.ntrc
     if ~isnan(trcwall(3,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(3,i)-TRC(:,:,i)).*mu./tau_a .* sdsshape; end
 end
 
+% major component dispersion
+[diff_TRCm,qz_diff_TRCm,qx_diff_TRCm] = diffus(trcm,M.*kd  ,h,[1,2],BCD);
+[diff_TRCx,qz_diff_TRCx,qx_diff_TRCx] = diffus(trcx,X.*kmin,h,[1,2],BCD);
+
 % get total rate of change
-dTRCdt = - advn_TRCm - advn_TRCx + bnd_TRC + Gemt + Gext + Gint;
+dTRCdt = - advn_TRCm - advn_TRCx + diff_TRCm + diff_TRCx + bnd_TRC + Gemt + Gext + Gint;
 
 % residual of trace element evolution
 res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo)/dt - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo);

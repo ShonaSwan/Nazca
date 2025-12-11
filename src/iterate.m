@@ -31,7 +31,7 @@ f     = 0.*x;
 % Per-DOF spectral radius rho estimates from ratio of consecutive updates
 if count>2
     ratio   = abs(FHST(:,end))./abs(FHST(:,end-1) + eps);  % form ratio of two most recent updates
-    rho_new = min(0.99, max(0.01, ratio));                 % clamp values to desired range
+    rho_new = min(0.9, max(0.1, ratio));                   % clamp values to desired range
 else
     rho_new = rho.mean;
 end
@@ -43,8 +43,8 @@ rho.est  = max(rho.est, 0.5*rho.mean);           % avoid outliers
 rho.est  = max(rho.est, 0.3);                    % hard lower bound
 
 % Chebyshev-like coefficients
-alpha(:) =  4  ./(2 + rho.est).^2;
-beta (:) =  1  ./(2 + rho.est).^2;
+alpha(:) = 4./(2 + rho.est).^2;
+% beta (:) = alpha(:)./4;
 
 % New fixed-point update and iterate
 f(:) = itpar.fp.damp*(-alpha(:).*res(:) + beta(:).*FHST(:,end));
@@ -66,11 +66,11 @@ if count>2 && itpar.aa.damp>eps  % only if enough history and damp>0
     DG  = GHST(:,2+n:end) - GHST(:,1+n:end-1);   % history of fixed-point iterates
 
     % Solve min_delta || f - DF * delta + reg*I ||_2  (global regularised least squares)
-    reg = itpar.aa.reg.*rms(DF.'*DF,'all');      % get scaled regularisation level
-    delta = (DF.'*DF + reg*eye(itpar.aa.m-n)) \ (DF.'*f(:));  % solve least squares problem
+    reg   = itpar.aa.reg.*rms(DF.'*DF,'all');      % get scaled regularisation level
+    gamma = (DF.'*DF + reg*eye(itpar.aa.m-n)) \ (DF.'*f(:));  % solve least squares problem
 
     % Anderson update for fixed-point:
-    x_acc(:) = g(:) - DG * delta;
+    x_acc(:) = g(:) - DG * gamma;
 
     % Damped Anderson step
     x_new(:) = g(:) + itpar.aa.damp * (x_acc(:) - g(:));

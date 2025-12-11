@@ -242,7 +242,8 @@ p0    = Drho0*g0*h0;
 u0    = p0*h0./e0;
 K0    = h0^2/e0;
 t0    = h0/u0;
-MFD0  = Drho0*u0/h0;
+MFD0  = Drho0/t0;
+CMP0  = 1/t0;
 
 % initialise other parameters
 Re     = eps;
@@ -250,9 +251,12 @@ Div_V  = 0.*Tp;  advn_rho = 0.*Tp;  advn_X = 0.*Tp; advn_M = 0.*Tp;
 drhodt = 0.*Tp;  drhodto = drhodt; 
 exx    = 0.*Tp;  ezz = 0.*Tp;  exz = zeros(Nz-1,Nx-1);  eII = 0.*Tp;
 txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz-1,Nx-1);  tII = 0.*Tp;
-eta    = 1e21.*ones(Nz,Nx);
-zeta   = 100.*eta;
+eta    = 1e21.*ones(Nz,Nx);  etai = eta;
+zeta   = 100.*eta;  zetai = zeta;
 MFDSrc = 0.*Tp;
+CMPSrc = 0.*Tp;
+MFDCrr = 0.*Tp;
+CMPCrr = 0.*Tp;
 kW     = 0.*Tp;
 Tref   = min(cal.T0) + 273.15;
 Pref   = 1e5;
@@ -267,14 +271,18 @@ rhox   = rhox0.*(1+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1+bPm.*(Pt-Pref));
 rho    = rhox;
 M      = 0*rhox;
+X      = rhox;
 rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhow.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
 rhoUo  = rhou.*U(2:end-1,:); rhoUoo = rhoUo; advn_mx = 0.*rhoUo;
-mq = zeros(size(Tp));  xq = 1-mq;  
+mq     = zeros(size(Tp));  xq = 1-mq;
+ups    = zeros(size(Tp));
 cmq    = c; cxq = c;  
 cm_oxd = reshape(reshape(c,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
 cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
+trcm = zeros(Nz,Nx,cal.ntrc);
+trcx = zeros(Nz,Nx,cal.ntrc);
 aT   = aTm;
 kT   = kTm;
 cP   = cPm; RhoCp = rho.*cP;
@@ -284,6 +292,7 @@ T    = Tp.*exp(Adbt.*(Pt-Pref));
 diss = 0.*T;
 x    = xq;  m = mq; mu = m; chi = x;
 dto  = dt;
+step = 0;
 
 % get volume fractions and bulk density
 %step    = 0;
@@ -291,7 +300,7 @@ EQtime  = 0;
 FMtime  = 0;
 TCtime  = 0;
 UDtime  = 0;
-a1      = 1; a2 = 0; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
+a1      = 1; a2 = 1; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
 res  = 1;  tol = 1e-7;  it = 1; iter = 1;
 
@@ -313,7 +322,6 @@ while res > tol
 
         %[var,cal] = meltmodel(var,cal,'E');
         [var,cal] = leappart(var,cal,'E');
-
 
         Tsol   = reshape(cal.Tsol,Nz,Nx);
         Tliq   = reshape(cal.Tliq,Nz,Nx);
@@ -350,26 +358,22 @@ while res > tol
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             mi  = m;
-            m   = m - (max(0,m-minit)/20);
-            m   = m + diffus(m,1e-4*ones(size(rp)),1,[1,2],BCD);
+            m   = m - (max(0,m-minit.*(L-XX)./L.*(D-ZZ)./D)/20);
+            m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
+
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
-            c = x.*cx + m.*cm;
-            trc = x.*trcx + m.*trcm;
 
-            rho = 1./(m./rhom  + x./rhox);
-
-            Tp = Tp - (mi-m).*T.*Dsm./cP;
+            c    = x.*cx + m.*cm;
+            trc  = x.*trcx + m.*trcm;
+            Tp   = Tp  - (mi-m).*T.*Dsm./cP;
             sm   = cPm.*log(Tp./Tref) + Dsm;
             sx   = cPx.*log(Tp./Tref);
-            s = x.*sx + m.*sm;
+            s    = x.*sx + m.*sm;
+            rho  = 1./(m./rhom  + x./rhox);
         else
             s = x.*sx + m.*sm;
         end
-
-      % else
-      %     s = x.*sx + m.*sm;
-      % end
 
         X    = rho.*x;
         M    = rho.*m;  RHO = X+M;
@@ -395,7 +399,7 @@ Co   = C;
 TRCo = TRC;
 Xo   = X;
 rhoo = rho;
-sm   = cPm.*log(Tp./Tref) + Dsm;  sx = cPx.*log(Tp./Tref);  
+chio = chi;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
@@ -412,13 +416,18 @@ dXdt   = 0.*x;  dXdto  = dXdt;
 dMdt   = 0.*m;  dMdto  = dMdt;
 qz_advn_Sx = 0.*W; qx_advn_Sx = 0.*U;
 qz_advn_Sm = 0.*W; qx_advn_Sm = 0.*U;
-qz_dffn_S  = 0.*W; qx_dffn_S  = 0.*U;
+qz_diff_S  = 0.*W; qx_diff_S  = 0.*U;
 qz_advn_Cx = 0.*W; qx_advn_Cx = 0.*U;
 qz_advn_Cm = 0.*W; qx_advn_Cm = 0.*U;
+qz_diff_Cx = 0.*W; qx_diff_Cx = 0.*U;
+qz_diff_Cm = 0.*W; qx_diff_Cm = 0.*U;
 qz_advn_TRCx = 0.*W; qx_advn_TRCx = 0.*U;
 qz_advn_TRCm = 0.*W; qx_advn_TRCm = 0.*U;
+qz_diff_TRCx = 0.*W; qx_diff_TRCx = 0.*U;
+qz_diff_TRCm = 0.*W; qx_diff_TRCm = 0.*U;
 qz_advn_X  = 0.*W; qx_advn_X  = 0.*U;
 qz_advn_M  = 0.*W; qx_advn_M  = 0.*U;
+qz_diff_M  = 0.*W; qx_diff_M  = 0.*U;
 bnd_TRC = zeros(Nz,Nx,cal.ntrc);
 adv_TRC = zeros(Nz,Nx,cal.ntrc);
 dff_TRC = zeros(Nz,Nx,cal.ntrc);
@@ -426,16 +435,19 @@ K_trc   = zeros(Nz,Nx,cal.ntrc);
 dTRCdt  = 0.*trc; dTRCdto = dTRCdt;
 specrad.S.est   = 0.5.*ones(Nz*Nx,1);          specrad.S.mean   = 0.5;
 specrad.MFD.est = 0.5.*ones(Nz*Nx,1);          specrad.MFD.mean = 0.5;
+specrad.CMP.est = 0.5.*ones(Nz*Nx,1);          specrad.CMP.mean = 0.5;
 specrad.C.est   = 0.5.*ones(Nz*Nx*cal.ncmp,1); specrad.C.mean   = 0.5;
 specrad.TRC.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRC.mean = 0.5;
 specrad.PHS.est = 0.5.*ones(Nz*Nx*2       ,1); specrad.PHS.mean = 0.5;
 GHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
+GHST.CMP = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
 GHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 GHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
 FHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
+FHST.CMP = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
 FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 FHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);

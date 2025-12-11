@@ -63,21 +63,21 @@ dff = - (qxp - qxm)./h  ...
 
 if nargout>1
     % return diffusive fluxes on grid faces
-    qz = zeros(size(f,dim(1))+1,size(f,dim(2))+2);
-    qx = zeros(size(f,dim(1))+2,size(f,dim(2))+1);
-    qz(1:end-1,2:end-1) = qzm;
-    qz(end    ,2:end-1) = qzp(end,:);
+    qz = zeros(size(f,dim(1))+1,size(f,dim(2))+2,size(f,3));
+    qx = zeros(size(f,dim(1))+2,size(f,dim(2))+1,size(f,3));
+    qz(1:end-1,2:end-1,:) = qzm;
+    qz(end    ,2:end-1,:) = qzp(end,:,:);
     if strcmp(xBC,'periodic') && size(f,xdim)>1
-        qz(:      ,[1,end]) = qz(:,[end-1,2]);
+        qz(:      ,[1,end],:) = qz(:,[end-1,2],:);
     else
-        qz(:      ,[1,end]) = qz(:,[2,end-1]);
+        qz(:      ,[1,end],:) = qz(:,[2,end-1],:);
     end
-    qx(2:end-1,1:end-1) = qxm;
-    qx(2:end-1,end    ) = qxp(:,end);
+    qx(2:end-1,1:end-1,:) = qxm;
+    qx(2:end-1,end    ,:) = qxp(:,end,:);
     if strcmp(zBC,'periodic') && size(f,zdim)>1
-        qx([1,end],:      ) = qx([end-1,2],:);
+        qx([1,end],:      ,:) = qx([end-1,2],:,:);
     else
-        qx([1,end],:      ) = qx([2,end-1],:);
+        qx([1,end],:      ,:) = qx([2,end-1],:,:);
     end
 end
 

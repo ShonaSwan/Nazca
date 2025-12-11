@@ -382,8 +382,8 @@ else % create 2D plots
     imagesc(Xsc,Zsc,log10((m+mumin).*100)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$m$ [log$_{10}$ wt\%]',TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh3,'CurrentAxes',ax(32));
-    imagesc(Xsc,Zsc,Div_V); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$\nabla \cdot \mathbf{v}$ [1/s]',TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
+    imagesc(Xsc,Zsc,ups); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$\dot{\upsilon}$ [1/s]',TX{:},FS{:}); set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(-0.1,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh3,'CurrentAxes',ax(33));
     imagesc(Xsc,Zsc,max(-max(Gm(:)),Gm)./rho*TimeScale*100.*(m>eps^0.5)); axis ij equal tight; box on; cb = colorbar;

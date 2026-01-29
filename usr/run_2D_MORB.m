@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB';           % run identifier
+runID     =  '2D_MORB_N200';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -15,7 +15,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  100;                 % number of grid points in z-direction
+N         =  200;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -23,9 +23,9 @@ L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
-mumin     =  1e-6;                % Setting lower limit for melt fraction in coeff. 
+mumin     =  1e-5;                % Setting lower limit for melt fraction in coeff. 
 mumax     =  0.15;                % Setting upper limit for melt fraction in coeff.
-tracer_sw =  1;                   % Tracer point switch 
+tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
@@ -47,7 +47,7 @@ minage    =  7e5*yr;              % (20e6 / 7e5)
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.71 0.18 0.10 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.69 0.16 0.14 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,-1,0,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
@@ -68,7 +68,7 @@ trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [w
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/2;                 % boundary layer width [m]
-tau_T     =  5e4*yr;              % wall cooling/assimilation time [s]
+tau_T     =  1e5*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,nan,nan,nan];    % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 Ptop      =  4.0e7;               % top pressure [Pa]
@@ -77,7 +77,7 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 calID     =  'MORB_lo';           % phase diagram calibration
 tau_r     =  1e2*yr;              % phase change reaction time (set to 0 to tie to dt)
 tau_e     =  1e2*yr;              % extraction/eruption time (set to 0 to tie to dt)
-minit     =  0.001;                % maximum initial melt fraction
+minit     =  0.001;              % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]
@@ -89,25 +89,26 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  8e7;                 % yield stress for shear failure [Pa]
-pyield    =  4e7;                 % yield pressure for tensile failure [Pa]
+tyield    =  4e7;                 % yield stress for shear failure [Pa]
+pyield    =  2e7;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
 n_disl    =   1;                  % dislocation creep powerlaw 
 lmbd_melt =  25;                  % exponential melt weakening prefactor
 b_perm    = 100;                  % permeability geometric factor [50-1000]
-cff_reg   =   4;                  % rheological coefficient regularisation level
+cff_reg   =   2;                  % rheological coefficient regularisation level
 buoy      =   0;                  % switch between active and passive flow
 Delta     =  100;                 % dispersivity correlation length [m]
-kmin      =  1e-7;                % minimum diffusivity for regularisation [m2/s]
+km        =  1e-7;                % minimum diffusivity for regularisation [m2/s]
+kx        =  1e-9;                % minimum diffusivity for regularisation [m2/s]
 
 % set numerical model parameters
 TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn2si','bd2si')
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
-CFL       =  0.75;                % (physical) time stepping courant number (multiplies stable step) [0,1]
-rtol      =  1e-2;                % outer its relative tolerance
-atol      =  1e-8;                % outer its absolute tolerance
-maxit     =  12;                  % maximum outer its
-delta     =  0.75;                % relaxing parameter for viscosity update
+CFL       =  0.5;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
+rtol      =  1e-3;                % outer its relative tolerance
+atol      =  1e-7;                % outer its absolute tolerance
+maxit     =  10;                  % maximum outer its
+delta     =  0.25;                 % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling

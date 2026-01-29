@@ -21,14 +21,14 @@ for i = 1:cal.ntrc
     % dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);
 
     % get trace element assimilation
-    if ~isnan(trcwall(1,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(1,i)-TRC(:,:,i)).*mu./tau_a .* topshape; end
-    if ~isnan(trcwall(2,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(2,i)-TRC(:,:,i)).*mu./tau_a .* botshape; end
-    if ~isnan(trcwall(3,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(3,i)-TRC(:,:,i)).*mu./tau_a .* sdsshape; end
+    if ~isnan(trcwall(1,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (rho.*trcwall(1,i)-TRC(:,:,i)).*mu./tau_a .* topshape; end
+    if ~isnan(trcwall(2,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (rho.*trcwall(2,i)-TRC(:,:,i)).*mu./tau_a .* botshape; end
+    if ~isnan(trcwall(3,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (rho.*trcwall(3,i)-TRC(:,:,i)).*mu./tau_a .* sdsshape; end
 end
 
 % major component dispersion
-[diff_TRCm,qz_diff_TRCm,qx_diff_TRCm] = diffus(trcm,M.*kd  ,h,[1,2],BCD);
-[diff_TRCx,qz_diff_TRCx,qx_diff_TRCx] = diffus(trcx,X.*kmin,h,[1,2],BCD);
+[diff_TRCm,qz_diff_TRCm,qx_diff_TRCm] = diffus(trcm,M.*kd,h,[1,2],BCD);
+[diff_TRCx,qz_diff_TRCx,qx_diff_TRCx] = diffus(trcx,X.*kx,h,[1,2],BCD);
 
 % get total rate of change
 dTRCdt = - advn_TRCm - advn_TRCx + diff_TRCm + diff_TRCx + bnd_TRC + Gemt + Gext + Gint;

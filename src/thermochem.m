@@ -8,8 +8,8 @@ tic;
 [advn_Sm,qz_advn_Sm,qx_advn_Sm] = advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % melt  advection
 [advn_Sx,qz_advn_Sx,qx_advn_Sx] = advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % solid advection
 
-[diff_S ,qz_diff_S ,qx_diff_S ] = diffus(T,kT./T,h,[1,2],BCD);
-[diff_Sd,qz_diff_Sd,qx_diff_Sd] = diffus(Tp,M./T.*cPm.*kd,h,[1,2],BCD);
+[diff_S ,qz_diff_S ,qx_diff_S ] = diffus(T ,kT./T,h,[1,2],BCD);
+[diff_Sd,qz_diff_Sd,qx_diff_Sd] = diffus(Tp,M.*cPm.*kd./T,h,[1,2],BCD);
 diff_S    = diff_S + diff_Sd;
 qz_diff_S = qz_diff_S + qz_diff_Sd;
 qx_diff_S = qx_diff_S + qx_diff_Sd;
@@ -21,7 +21,7 @@ diss_h = diss ./ T;
 bnd_T = zeros(size(S));
 if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./(tau_T+dt) .* topshape; end
 if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./(tau_T+dt) .* botshape; end
-bnd_S = RHO.*cP.*bnd_T ./ T;
+bnd_S = rho.*cP.*bnd_T ./ T;
 
 % total rate of change
 dSdt  = - advn_Sm - advn_Sx + diff_S + diss_h + bnd_S + Gems + Gexs + Gins;
@@ -33,8 +33,9 @@ res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
 [S,GHST.S,FHST.S,specrad.S] = iterate(S,res_S*dt/a1,specrad.S,GHST.S,FHST.S,itpar,iter*~frst);
 
 % convert entropy S to natural temperature T and potential temperature Tp
-[Tp,~ ] = StoT(Tp,S./RHO,cat(3,Pt,Ptx)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
-[T ,si] = StoT(T ,S./RHO,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
+s = S./RHO;
+[Tp,~ ] = StoT(Tp,s,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
+[T ,si] = StoT(T ,s,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 
@@ -45,11 +46,11 @@ sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 [advn_Cx,qz_advn_Cx,qx_advn_Cx] = advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
 % major component dispersion
-[diff_Cm,qz_diff_Cm,qx_diff_Cm] = diffus(cm,M.*kd  ,h,[1,2],BCD); 
-[diff_Cx,qz_diff_Cx,qx_diff_Cx] = diffus(cx,X.*kmin,h,[1,2],BCD);
+[diff_Cm,qz_diff_Cm,qx_diff_Cm] = diffus(cm,M.*kd,h,[1,2],BCD); 
+[diff_Cx,qz_diff_Cx,qx_diff_Cx] = diffus(cx,X.*kx,h,[1,2],BCD);
 
 % total rate of change
-dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc;                                      
+dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc;                         
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -61,12 +62,13 @@ res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
 C = max(0,min(rho, C ));
 
 % convert component density to concentration
-c = C./sum(C,3);
+RHOC = sum(C,3);
+c = C./RHOC;
 
 
 %*** update phase equilibrium if full reactive coupling on
 
-if Rcouple; phseql; end
+if Rcouple || frst; phseql; end
 
 
 %***  update phase fraction densities

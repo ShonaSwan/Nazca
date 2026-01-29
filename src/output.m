@@ -353,7 +353,7 @@ else % create 2D plots
     imagesc(Xsc,Zsc, um./SpeedScale); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Delta u$ [',SpeedUnits,']'],TX{:},FS{:});  xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:}); set(gca,'YTickLabel',[]);
     set(fh1,'CurrentAxes',ax(16));
-    imagesc(Xsc,Zsc, max(-1e8,min(1e8,Pc))/1e6); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc, max(-5e7,min(5e7,Pc))/1e6); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$P_c$ [MPa]',TX{:},FS{:}); set(gca,'YTickLabel',[]);
 
     % plot temperature and composition in Fig. 2
@@ -816,9 +816,9 @@ if save_op && ~restart
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];
-    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
     name = [outdir,'/',runID,'/',runID,'_cont'];
-    save(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
+    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
     name = [outdir,'/',runID,'/',runID,'_hist'];
     save(name,'hist');
 

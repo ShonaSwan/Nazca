@@ -253,6 +253,7 @@ exx    = 0.*Tp;  ezz = 0.*Tp;  exz = zeros(Nz-1,Nx-1);  eII = 0.*Tp;
 txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz-1,Nx-1);  tII = 0.*Tp;
 eta    = 1e21.*ones(Nz,Nx);  etai = eta;
 zeta   = 100.*eta;  zetai = zeta;
+KD     = 1e-24.*ones(Nz,Nx); KDi = KD;
 MFDSrc = 0.*Tp;
 CMPSrc = 0.*Tp;
 MFDCrr = 0.*Tp;
@@ -304,7 +305,7 @@ a1      = 1; a2 = 1; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
 res  = 1;  tol = 1e-7;  it = 1; iter = 1;
 
-while res > tol
+while res > tol && ~restart
 
     Pti = Pt; Ti = T; xi = xq;          
 
@@ -359,7 +360,7 @@ while res > tol
         if it>10 && any(m(:)>minit)
             mi  = m;
             m   = m - (max(0,m-minit.*(L-XX)./L.*(D-ZZ)./D)/20);
-            m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
+            % m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
 
             SUM = x+m;
             x = x./SUM;  m = m./SUM;
@@ -381,7 +382,7 @@ while res > tol
         TRC  = rho.*trc;
         S    = rho.*s;
 
-        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Ptx)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
+        [T ,si] = StoT(T ,S./rho,cat(3,Pt,Pt),cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 
         res  = norm(Pt(:)-Pti(:),2)./norm(Pt(:),2) ...
              + norm( T(:)-Ti  (:),2)./norm( T(:),2);
@@ -399,7 +400,9 @@ Co   = C;
 TRCo = TRC;
 Xo   = X;
 rhoo = rho;
+rhoxo = rhox;
 chio = chi;
+muo = mu;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
@@ -488,7 +491,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','xq','mq','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','rho','eta','eII','tII','dt','time','step','MFDSrc','Div_V','qDz','qDx','wx','wm','cal');
+        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 

@@ -44,6 +44,10 @@ while time <= tend && step <= Nt
     %%%% Upsate phase equlibrium 
     phseql; 
 
+    % renormalise partial densities to bulk density
+    X = x.*rho;  M   = m.*rho;   S = s.*rho;
+    C = c.*rho;  TRC = trc.*rho; 
+
     % record model history
     history;
 

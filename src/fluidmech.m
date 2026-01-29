@@ -4,10 +4,10 @@ if ~bnchm && step>0 && ~restart
 
 % source and correction terms for mixture mass and matrix compaction equations
 MFDSrc = - (a1*rho-a2*rhoo-a3*rhooo)/dt + Gex + Gem + Gin;
-CMPSrc = - X.*ups;
+CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt;
 
 res_MFD = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
-res_CMP = X.*(Pc(2:end-1,2:end-1)./zeta + ups);
+res_CMP = rhox.*(Pc(2:end-1,2:end-1)./zeta + ups);
 
 [MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
 MFDCrr = MFDCrr*MFD0;
@@ -453,7 +453,7 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % Internal Points
 ii  = MapP(2:end-1,2:end-1);
-aa  = X./zeta./(Drho0./e0);
+aa  = rhox./zeta./(Drho0./e0);
 
 % Coefficients multiplying compaction pressure p
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
@@ -522,6 +522,32 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +M4(:)/(h/h0)];  % W one 
 DDm  = sparse(IIL,JJL,AAL,NP,NV);
 
 
+%% assemble coefficients for divergence of matrix mass flux (DDs)
+
+IIL = [];       % equation indeces into A
+JJL = [];       % variable indeces into A
+AAL = [];       % coefficients for A
+
+%internal points
+ii  = MapP(2:end-1,2:end-1);
+
+% coefficients multiplying velocities U, W
+%          left U          ||           right U       ||           top W           ||          bottom W
+jj1 = MapU(2:end-1,1:end-1); jj2 = MapU(2:end-1,2:end); jj3 = MapW(1:end-1,2:end-1); jj4 = MapW(2:end,2:end-1);
+rho1 = rhoxu(:,1:end-1)/Drho0;
+rho2 = rhoxu(:,2:end  )/Drho0;
+rho3 = rhoxw(1:end-1,:)/Drho0;
+rho4 = rhoxw(2:end  ,:)/Drho0;
+
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; -rho1(:)/(h/h0)];  % U one to the left
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; +rho2(:)/(h/h0)];  % U one to the right
+IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; -rho3(:)/(h/h0)];  % W one above
+IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +rho4(:)/(h/h0)];  % W one below
+
+% Assemble coefficient matrix
+DDx  = sparse(IIL,JJL,AAL,NP,NV);
+
+
 %% set pressure fix line
 
 if bnchm
@@ -554,15 +580,17 @@ end
 
 %% assemble and scale global coefficient matrix and right-hand side vector
 
-OV = sparse(NV,NV);
-OF = sparse(NV,NP);
-OP = sparse(NP,NP);
+if ~exist('OV','var')
+OV = sparse(NV,NV);  VO = OV.';
+OF = sparse(NV,NP);  FO = OF.';
+OP = sparse(NP,NP);  PO = OP.';
+end
 
 % Assign blocks
-LL = [KV    OV   GG   GG; ...
-      OV.'  KF   GG   OF; ...
-      DDs   DDm  KP   OP; ...
-      OF.' -DDm  OP.' KC];
+LL = [KV   OV   GG   GG; ...
+      VO   KF   GG   OF; ...
+      DDs  DDm  KP   OP; ...
+      DDx  FO   PO   KC];
 
 RR  = [RV; RF; RP; RC];
 
@@ -618,6 +646,7 @@ wm   = full(reshape(SOL(MapW(:)+(NV      )),Nz+1,Nx+2));  % segregation z-veloci
 um   = full(reshape(SOL(MapU(:)+(NV      )),Nz+2,Nx+1));  % segregation x-velocity
 Pf   = full(reshape(SOL(MapP(:)+(NV+NV   )),Nz+2,Nx+2));  % matrix dynamic pressure
 Pc   = full(reshape(SOL(MapP(:)+(NV+NV+NP)),Nz+2,Nx+2));  % matrix compaction pressure
+P    = Pf+Pc;
 
 % redimensionalise solution and parameters
 W      = W   * u0;
@@ -628,7 +657,7 @@ Pf     = Pf  * p0;
 Pc     = Pc  * p0;
 
 % phase diffusion rates (for regularisation)
-[~,wqm,uqm] = diffus(mu ,kmin+0.*mu ,h,[1,2],BCD);
+[~,wqm,uqm] = diffus(mu,km,h,[1,2],BCD);
 % [~,wqx,uqx] = diffus(chi,kmin+0.*chi,h,[1,2],BCD);
 
 if ~bnchm

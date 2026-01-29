@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB_N200';      % run identifier
+runID     =  '2D_MORB_N100';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -15,7 +15,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  200;                 % number of grid points in z-direction
+N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -108,7 +108,7 @@ CFL       =  0.5;                 % (physical) time stepping courant number (mul
 rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
 maxit     =  10;                  % maximum outer its
-delta     =  0.25;                 % relaxing parameter for viscosity update
+delta     =  0.25;                % relaxing parameter for viscosity update
 etacntr   =  1e5;                 % maximum viscosity contrast
 etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
@@ -116,7 +116,7 @@ Pcouple   =  0;                   % switch on for full pressure coupling
 itpar.fp.damp = 1.0;              % fixed-point iterative damping (0-1)
 itpar.aa.m    = 4;                % Anderson acceleration depth (2-7)
 itpar.aa.damp = 0.5;              % Anderson acceleration damping (0-1)
-itpar.aa.reg  = 0.01;             % Anderson acceleration regularisation (0-1)
+itpar.aa.reg  = 1e-4;             % Anderson acceleration regularisation (0-1)
 
 %*****  RUN NAKHLA MODEL  *************************************************
 run('../src/main')

@@ -225,30 +225,6 @@ if ~exist('GG','var') || bnchm
 end
 
 
-%% assemble coefficients for divergence operator (DD)
-
-if ~exist('DD','var') || bnchm
-    IIL = [];       % equation indeces into A
-    JJL = [];       % variable indeces into A
-    AAL = [];       % coefficients for A
-    
-    %internal points
-    ii  = MapP(2:end-1,2:end-1);
-    
-    % coefficients multiplying velocities U, W
-    %          left U          ||           right U       ||           top W           ||          bottom W
-    jj1 = MapU(2:end-1,1:end-1); jj2 = MapU(2:end-1,2:end); jj3 = MapW(1:end-1,2:end-1); jj4 = MapW(2:end,2:end-1);
-
-    aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)-1/(h/h0)];  % U one to the left
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+1/(h/h0)];  % U one to the right
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj3(:)];   AAL = [AAL; aa(:)-1/(h/h0)];  % W one above
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; aa(:)+1/(h/h0)];  % W one below
-
-    % Assemble coefficient matrix
-    DD  = sparse(IIL,JJL,AAL,NP,NV);
-end
-
 %% assemble coefficients for matrix Darcy flow diagonal and right hand side KF and RF
 
 % qDz  
@@ -564,7 +540,7 @@ if bnchm
 
     KC(ip0,:  ) = 0;
     KC(ip0,ip0) = speye(length(ip0));
-    DD(ip0,:  ) = 0;
+    DDx(ip0,: ) = 0;
     RC(ip0    ) = Pc_mms(ipz,ipx)/p0;
 
 else
@@ -658,7 +634,6 @@ Pc     = Pc  * p0;
 
 % phase diffusion rates (for regularisation)
 [~,wqm,uqm] = diffus(mu,km,h,[1,2],BCD);
-% [~,wqx,uqx] = diffus(chi,kmin+0.*chi,h,[1,2],BCD);
 
 if ~bnchm
 

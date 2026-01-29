@@ -35,9 +35,9 @@ Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 findmoho;
 
 Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+10e3,Nz,1));
-Gemc = cm.*Gem;
+Gemc = cm  .*Gem;
 Gemt = trcm.*Gem;
-Gems = sm.*Gem;
+Gems = sm  .*Gem;
 
 findmelt;
 
@@ -62,15 +62,23 @@ for i=1:4; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
 intr_shape = (1-path_ratio).*exp(-abs(ZZ - MOHO_depth) / bnd_w) + path_ratio.*(ZZ>=MOHO_depth & ZZ<=melt_depth);
 Gin = (1-erupt_ratio) * intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
 for i=1:4; Gin = Gin + diff(Gin(:,icx),2,2)./4; end
+Gex = Gex + Gin.*(T-273.15<=Tsol);
+Gin =       Gin.*(T-273.15> Tsol);
 
 Ginc = (1-erupt_ratio) * intr_shape.*(-sum(Gemc,1))./sum(intr_shape,1);
 for i=1:4; Ginc = Ginc + diff(Ginc(:,icx,:),2,2)./4; end
+Gexc = Gexc + Ginc.*(T-273.15<=Tsol);
+Ginc =        Ginc.*(T-273.15> Tsol);
 
 Gint = (1-erupt_ratio) * intr_shape.*(-sum(Gemt,1))./sum(intr_shape,1);
 for i=1:4; Gint = Gint + diff(Gint(:,icx,:),2,2)./4; end
+Gext = Gext + Gint.*(T-273.15<=Tsol);
+Gint =        Gint.*(T-273.15> Tsol);
 
 Gins = (1-erupt_ratio) * intr_shape.*(-sum(Gems,1))./sum(intr_shape,1);
 for i=1:4; Gins = Gins + diff(Gins(:,icx,:),2,2)./4; end
+Gexs = Gexs + Gins.*(T-273.15<=Tsol);
+Gins =        Gins.*(T-273.15> Tsol);
 
 eqtime = toc(eqtime);
 EQtime = EQtime + eqtime;

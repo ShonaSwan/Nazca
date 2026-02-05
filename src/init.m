@@ -402,8 +402,9 @@ rhoo = rho;
 rhoxo = rhox;
 chio = chi;
 muo  = mu;
-Twall(1) = mean(T(1  ,:))-273.15;
-Twall(2) = mean(T(end,:))-273.15;
+clear Twall;
+Twall(1,:) = T(1  ,:)-273.15;
+Twall(2,:) = T(end,:)-273.15;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
@@ -521,6 +522,8 @@ if restart
 else
     % complete, plot, and save initial condition
     store;
+    fluidmech;
+    update;
     fluidmech;
     update;
     phseql;

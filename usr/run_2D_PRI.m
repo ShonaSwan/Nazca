@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB_N120';      % run identifier
+runID     =  '2D_PRI_N80';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -15,7 +15,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  200e3;               % chamber depth [m]
-N         =  120;                 % number of grid points in z-direction
+N         =  80;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -28,7 +28,7 @@ mumax     =  0.15;                % Setting upper limit for melt fraction in coe
 tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
-init_mode =  'MOR';               % 'plume' or 'MOR'
+init_mode =  'PRI';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
@@ -59,11 +59,11 @@ c_crust   =  [0.01 0.13 0.80 0.06 0];    % components (maj comp, H2O) Crustal la
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
-dT_plume  = 0;                                % Temperature difference between the plume and the mantle 
-pl_width  = 50e3;                               % Width of the plume [m]
-pl_local  = 0; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.68 0.16 0.15 0.01 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
-trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+dT_plume  = 100;                      % Temperature difference between the plume and the mantle 
+pl_width  = 50e3;                     % Width of the plume [m]
+pl_local  = L; % L/2 + 100            % Location of the mantle plume along the bottom boundary [m]
+c_plume   = [0.60 0.18 0.20 0.02 0];  % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+trc_plume = [10,3,2,0.1,0.3,1];       % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/2;                 % boundary layer width [m]

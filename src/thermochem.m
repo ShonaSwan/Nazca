@@ -19,8 +19,8 @@ diss_h = diss ./ T;
 
 % boundary layers
 bnd_T = zeros(size(S));
-if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1)+273.15)-T)./(tau_T+dt) .* topshape; end
-if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2)+273.15)-T)./(tau_T+dt) .* botshape; end
+if ~isnan(Twall(1)); bnd_T = bnd_T + ((Twall(1,:)+273.15)-T)./(tau_T+dt) .* topshape; end
+if ~isnan(Twall(2)); bnd_T = bnd_T + ((Twall(2,:)+273.15)-T)./(tau_T+dt) .* botshape; end
 bnd_S = rho.*cP.*bnd_T ./ T;
 
 % total rate of change

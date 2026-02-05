@@ -8,7 +8,7 @@ tic;
 [advn_Sm,qz_advn_Sm,qx_advn_Sm] = advect(M.*sm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % melt  advection
 [advn_Sx,qz_advn_Sx,qx_advn_Sx] = advect(X.*sx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);  % solid advection
 
-[diff_S ,qz_diff_S ,qx_diff_S ] = diffus(T ,kT./T,h,[1,2],BCD);
+[diff_S ,qz_diff_S ,qx_diff_S ] = diffus(T ,        kT./T,h,[1,2],BCD);
 [diff_Sd,qz_diff_Sd,qx_diff_Sd] = diffus(Tp,M.*cPm.*kd./T,h,[1,2],BCD);
 diff_S    = diff_S + diff_Sd;
 qz_diff_S = qz_diff_S + qz_diff_Sd;

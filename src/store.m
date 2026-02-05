@@ -3,12 +3,11 @@
 [Moo    , Mo    ] = deal(Mo    , M    );
 [Xoo    , Xo    ] = deal(Xo    , X    );
 [rhooo  , rhoo  ] = deal(rhoo  , rho  );
-[rhoxoo  , rhoxo  ] = deal(rhoxo  , rhox  );
+[rhoxoo , rhoxo ] = deal(rhoxo  , rhox  );
 [TRCoo  , TRCo  ] = deal(TRCo  , TRC  );
 [Too    , To    ] = deal(To    , T    );
 [Tpoo   , Tpo   ] = deal(Tpo   , Tp   );
 [chioo  , chio  ] = deal(chio  , chi   );
-[muoo  , muo  ] = deal(muo  , mu   );
 
 [dSdtoo    , dSdto    ] = deal(dSdto    , dSdt    );
 [dCdtoo    , dCdto    ] = deal(dCdto    , dCdt    );

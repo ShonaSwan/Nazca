@@ -305,7 +305,7 @@ a1      = 1; a2 = 1; a3 = 0; b1 = 1; b2 = 0; b3 = 0;
 
 res  = 1;  tol = 1e-7;  it = 1; iter = 1;
 
-while res > tol && ~restart
+while res > tol
 
     Pti = Pt; Ti = T; xi = xq;          
 
@@ -388,7 +388,6 @@ while res > tol && ~restart
              + norm( T(:)-Ti  (:),2)./norm( T(:),2);
 
         it = it+1;
-
 end
 
 Pto  = Pt;
@@ -402,7 +401,9 @@ Xo   = X;
 rhoo = rho;
 rhoxo = rhox;
 chio = chi;
-muo = mu;
+muo  = mu;
+Twall(1) = mean(T(1  ,:))-273.15;
+Twall(2) = mean(T(end,:))-273.15;
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 
@@ -491,7 +492,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 

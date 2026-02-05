@@ -223,8 +223,12 @@ if ~strcmp(BC,'periodic') && size(f,dim)>1
             fpp(end-1:end,:,:) = repmat(f(end,:,:),2,1,1);
 
             if (sten7)
-                fmmm(    1:3  ,:,:) = repmat(f( 1 ,:,:),3,1,1);
-                fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
+                dfdz = f( 2 ,:,:) - f(  1  ,:,:);
+                fmmm(    1:3  ,:,:) = f( 1 ,:,:) - (3:-1:1).'.*dfdz;
+                dfdz = f(end,:,:) - f(end-1,:,:);
+                fppp(end-2:end,:,:) = f(end,:,:) + (1: 1:3).'.*dfdz;
+                % fmmm(    1:3  ,:,:) = repmat(f( 1 ,:,:),3,1,1);
+                % fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
             end
         elseif dim==2
             fmm(:,    1:2  ,:) = repmat(f(:, 1 ,:),1,2,1);

@@ -816,9 +816,9 @@ if save_op && ~restart
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];
-    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
     name = [outdir,'/',runID,'/',runID,'_cont'];
-    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
     name = [outdir,'/',runID,'/',runID,'_hist'];
     save(name,'hist');
 

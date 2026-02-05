@@ -50,11 +50,13 @@ rho    = 1./(m./rhom  + x./rhox );
 
 if meansw == 0 % Geometric
    rhoxw  = (rhox(icz(1:end-1),:).*rhox(icz(2:end),:)).^0.5; 
+   rhoxw(end,:) = rhoxw(end-1,:).^2 ./ rhoxw(end-2,:);
    rhoxu  = (rhox(:,icx(1:end-1)).*rhox(:,icx(2:end))).^0.5;
    rhomw  = (rhom(icz(1:end-1),:).*rhom(icz(2:end),:)).^0.5; 
    rhomu  = (rhom(:,icx(1:end-1)).*rhom(:,icx(2:end))).^0.5;
 elseif meansw == 1 % Arithmetic
    rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;   
+   rhoxw(end,:) = 2*rhoxw(end-1,:) - rhoxw(end-2,:);
    rhoxu  = (rhox(:,icx(1:end-1))+rhox(:,icx(2:end)))/2;
    rhomw  = (rhom(icz(1:end-1),:)+rhom(icz(2:end),:))/2; 
    rhomu  = (rhom(:,icx(1:end-1))+rhom(:,icx(2:end)))/2;  
@@ -62,10 +64,12 @@ end
 
 
 if meansw == 0 % Geometric
-   rhow   = (rho(icz(1:end-1),:).*rho(icz(2:end),:)).^0.5;    
+   rhow   = (rho(icz(1:end-1),:).*rho(icz(2:end),:)).^0.5; 
+   rhow(end,:) = rhow(end-1,:).^2 ./ rhow(end-2,:);
    rhou   = (rho(:,icx(1:end-1)).*rho(:,icx(2:end))).^0.5;   
 elseif meansw == 1 % Arithmetic
-   rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;      
+   rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;   
+   rhow(end,:) = 2*rhow(end-1,:) - rhow(end-2,:);
    rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;          
 end
 
@@ -201,7 +205,8 @@ DivRhoxV = ddz(rhoxw.*W(:,2:end-1),h) + ddx(rhoxu.*U(2:end-1,:),h);
 
 % update compaction rate
 if step>0 && ~restart
-    ups  = - 1./chi.*((a1*chi-a2*chio-a3*chioo)/dt - advect(chi,U(2:end-1,:),W(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA) - Gx./rhox);
+    % ups  = - 1./chi.*((a1*chi-a2*chio-a3*chioo)/dt - advect(chi,U(2:end-1,:),W(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA) - Gx./rhox);
+    ups = ((a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + DivRhoxV - Gex)./rhox;
 end
 
 % update strain rates

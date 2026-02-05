@@ -3,17 +3,17 @@ tic;
 if ~bnchm && step>0 && ~restart
 
 % source and correction terms for mixture mass and matrix compaction equations
-MFDSrc = - (a1*rho-a2*rhoo-a3*rhooo)/dt + Gex + Gem + Gin;
-CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt;
+MFDSrc = - (a1*rho -a2*rhoo -a3*rhooo )/dt + Gex + Gem + Gin;
+CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
 
 res_MFD = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 res_CMP = rhox.*(Pc(2:end-1,2:end-1)./zeta + ups);
 
-[MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
-MFDCrr = MFDCrr*MFD0;
+% [MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/2,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
+% MFDCrr = MFDCrr*MFD0;
 
-[CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter*~frst);
-CMPCrr = CMPCrr*MFD0;
+% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/2,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter*~frst);
+% CMPCrr = CMPCrr*MFD0;
 
 end
 
@@ -116,9 +116,10 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 % top boundary
 if bndmode == 0 % Mid ocean Ridge set up 
     ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
-    aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
+    aa  = zeros(size(ii));
     IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
     IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
+    aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 else
     ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
@@ -550,7 +551,9 @@ else
     ip0 = MapP(ipz,ipx);
     KP(ip0,:)   = 0;
     KP(ip0,ip0) = speye(length(ip0));
-
+    % DDs(ip0,: ) = 0;
+    % DDm(ip0,: ) = 0;
+    % RP(ip0    ) = 0;
 end
 
 

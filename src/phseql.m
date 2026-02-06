@@ -45,38 +45,38 @@ findmelt;
 
 extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w) + path_ratio.*(ZZ<=melt_depth);
 Gex = erupt_ratio * extr_shape.*(-sum(Gem,1))./sum(extr_shape,1);
-for i=1:4; Gex = Gex + diff(Gex(:,icx),2,2)./4; end
+for i=1:2; Gex = Gex + diff(Gex(:,icx),2,2)./4; end
 
 Gexc = erupt_ratio * extr_shape.*(-sum(Gemc,1))./sum(extr_shape,1);
-for i=1:4; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./4; end
+for i=1:2; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./4; end
 
 Gext = erupt_ratio * extr_shape.*(-sum(Gemt,1))./sum(extr_shape,1);
-for i=1:4; Gext = Gext + diff(Gext(:,icx,:),2,2)./4; end
+for i=1:2; Gext = Gext + diff(Gext(:,icx,:),2,2)./4; end
 
 Gexs = -sx.*Gem;
 Gexs = erupt_ratio * extr_shape.*( sum(Gexs,1))./sum(extr_shape,1);
-for i=1:4; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
+for i=1:2; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
 
 % Intrusion
 
 intr_shape = (1-path_ratio).*exp(-abs(ZZ - MOHO_depth) / bnd_w) + path_ratio.*(ZZ>=MOHO_depth & ZZ<=melt_depth);
 Gin = (1-erupt_ratio) * intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
-for i=1:4; Gin = Gin + diff(Gin(:,icx),2,2)./4; end
+for i=1:2; Gin = Gin + diff(Gin(:,icx),2,2)./4; end
 Gex = Gex + Gin.*(T-273.15<=Tsol);
 Gin =       Gin.*(T-273.15> Tsol);
 
 Ginc = (1-erupt_ratio) * intr_shape.*(-sum(Gemc,1))./sum(intr_shape,1);
-for i=1:4; Ginc = Ginc + diff(Ginc(:,icx,:),2,2)./4; end
+for i=1:2; Ginc = Ginc + diff(Ginc(:,icx,:),2,2)./4; end
 Gexc = Gexc + Ginc.*(T-273.15<=Tsol);
 Ginc =        Ginc.*(T-273.15> Tsol);
 
 Gint = (1-erupt_ratio) * intr_shape.*(-sum(Gemt,1))./sum(intr_shape,1);
-for i=1:4; Gint = Gint + diff(Gint(:,icx,:),2,2)./4; end
+for i=1:2; Gint = Gint + diff(Gint(:,icx,:),2,2)./4; end
 Gext = Gext + Gint.*(T-273.15<=Tsol);
 Gint =        Gint.*(T-273.15> Tsol);
 
 Gins = (1-erupt_ratio) * intr_shape.*(-sum(Gems,1))./sum(intr_shape,1);
-for i=1:4; Gins = Gins + diff(Gins(:,icx,:),2,2)./4; end
+for i=1:2; Gins = Gins + diff(Gins(:,icx,:),2,2)./4; end
 Gexs = Gexs + Gins.*(T-273.15<=Tsol);
 Gins =        Gins.*(T-273.15> Tsol);
 

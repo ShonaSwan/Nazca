@@ -22,6 +22,10 @@ end
 [diff_TRCm,qz_diff_TRCm,qx_diff_TRCm] = diffus(trcm,M.*kd,h,[1,2],BCD);
 [diff_TRCx,qz_diff_TRCx,qx_diff_TRCx] = diffus(trcx,X.*kx,h,[1,2],BCD);
 
+bnd_TRC = zeros(size(TRC));
+if ~isnan(trcwall(1)); bnd_TRC = bnd_TRC + ((trcwall(1,:,:).*rho)-TRC)./(tau_T+dt) .* topshape; end
+if ~isnan(trcwall(2)); bnd_TRC = bnd_TRC + ((trcwall(2,:,:).*rho)-TRC)./(tau_T+dt) .* botshape; end
+
 % get total rate of change
 dTRCdt = - advn_TRCm - advn_TRCx + diff_TRCm + diff_TRCx + bnd_TRC + Gemt + Gext + Gint;
 

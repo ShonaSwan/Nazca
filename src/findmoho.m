@@ -8,5 +8,5 @@ for ix = 1:Nx
     SiO2ByMgO(ceil(LAB_iz(ix)):end,ix) = 1;
 end
 
-indMOHO              = SiO2ByMgO > 2;
+indMOHO              = SiO2ByMgO > 3;
 [MOHO_depth,MOHO_iz] = max(ZZ.*indMOHO,[],1);

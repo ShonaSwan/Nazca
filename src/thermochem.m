@@ -49,8 +49,12 @@ sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 [diff_Cm,qz_diff_Cm,qx_diff_Cm] = diffus(cm,M.*kd,h,[1,2],BCD); 
 [diff_Cx,qz_diff_Cx,qx_diff_Cx] = diffus(cx,X.*kx,h,[1,2],BCD);
 
+bnd_C = zeros(size(C));
+if ~isnan(cwall(1)); bnd_C = bnd_C + ((cwall(1,:,:).*rho)-C)./(tau_T+dt) .* topshape; end
+if ~isnan(cwall(2)); bnd_C = bnd_C + ((cwall(2,:,:).*rho)-C)./(tau_T+dt) .* botshape; end
+
 % total rate of change
-dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc;                         
+dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc + bnd_C;                         
   
 % residual of major component evolution
 res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
@@ -139,8 +143,8 @@ if (it==mxit && rnorm>tol)
 end
 
 % fix subsolidus and superliquidus conditions
-cx(subsolc) = cxq(subsolc); x(subsol) = xq(subsol); m(subsol) = 0;
-cm(supliqc) = cmq(supliqc); m(supliq) = mq(supliq); x(supliq) = 0;
+cx(subsolc) = c(subsolc); x(subsol) = 1; m(subsol) = 0;
+cm(supliqc) = c(supliqc); m(supliq) = 1; x(supliq) = 0;
 
 % record timing
 TCtime = TCtime + toc - eqtime.*Rcouple;

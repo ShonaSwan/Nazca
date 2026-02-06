@@ -166,7 +166,7 @@ dx_ref   = 0.001;
 eta_diff = etax0 .* (dx0./dx_ref).^2;
 
 % dislocation creep viscosity (strain rate dependence)
-eps_ref  = 1e-15;  
+eps_ref  = 1e-14;  
 eta_disl = etax0 .* (max(eII, 1e-18) / eps_ref).^((1/n_disl)-1);
 
 % composite matrix rheology

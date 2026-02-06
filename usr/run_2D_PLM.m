@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_PRI_N100';      % run identifier
+runID     =  '2D_PLM_N100';       % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -17,7 +17,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 D         =  200e3;               % chamber depth [m]
 N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  2*D;               % domain width (equal to h for 1-D mode) [m]
+L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
@@ -28,21 +28,21 @@ mumax     =  0.15;                % Setting upper limit for melt fraction in coe
 tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
-init_mode =  'PRI';               % 'plume' or 'MOR'
+init_mode =  'plume';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.70;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.10;               % melt spread across the extraction path 
-mthr        = 0.20;               % threshold melt fraction for extraction/eruption
+mthr        = 0.15;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
-sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+sprate    =  0.00/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprw  =  7e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
-minage    =  0e5*yr;              % (20e6 / 7e5) 
+minage    =  25e6*yr;              % (20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
@@ -55,19 +55,19 @@ trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  0;                     % 0 = no crust, 1 = crust 
 Hcmin     =  0e3;                   % Minimum crustal thickness 
-c_crust   =  [0.10 0.10 0.80 0.10 0];    % components (maj comp, H2O) Crustal layer
+c_crust   =  [0.01 0.13 0.80 0.06 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 50;                      % Temperature difference between the plume and the mantle 
 pl_width  = 10e3;                     % Width of the plume [m]
-pl_local  = L; % L/2 + 100            % Location of the mantle plume along the bottom boundary [m]
+pl_local  = 0; % L/2 + 100            % Location of the mantle plume along the bottom boundary [m]
 c_plume   = [0.60 0.18 0.20 0.02 0];  % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
 trc_plume = [10,3,2,0.1,0.3,1];       % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/2;                 % boundary layer width [m]
-tau_T     =  5e3*yr;              % wall cooling/assimilation time [s]
+tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,1350,nan,nan];   % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 Ptop      =  4.0e7;               % top pressure [Pa]

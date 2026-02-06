@@ -402,9 +402,13 @@ rhoo = rho;
 rhoxo = rhox;
 chio = chi;
 muo  = mu;
-clear Twall;
+clear Twall cwall trcwall;
 Twall(1,:) = T(1  ,:)-273.15;
 Twall(2,:) = T(end,:)-273.15;
+cwall(1,:,:) = nan*c(1,:,:);
+cwall(2,:,:) = c(end,:,:);
+trcwall(1,:,:) = nan*trc(1,:,:);
+trcwall(2,:,:) = trc(end,:,:);
 
 % initialise phase change rates
 Gx  = 0.*x; Gm  = 0.*m; 

@@ -60,6 +60,8 @@ Dsm = cal.Dsx;
 c0(1:end-1) = c0(1:end-1)./sum(c0(1:end-1)).*(1-c0(end));
 c1(1:end-1) = c1(1:end-1)./sum(c1(1:end-1)).*(1-c1(end));
 cwall(:,1:end-1) = cwall(:,1:end-1)./sum(cwall(:,1:end-1),2).*(1-cwall(:,end));
+c_plume(:,1:end-1) = c_plume(:,1:end-1)./sum(c_plume(:,1:end-1),2).*(1-c_plume(:,end));
+c_crust(:,1:end-1) = c_crust(:,1:end-1)./sum(c_crust(:,1:end-1),2).*(1-c_crust(:,end));
 dcg   = dcg-round(mean(dcg),16);
 dcr   = dcr-round(mean(dcr),16);
 

@@ -225,13 +225,13 @@ yieldp = max(1e4,pyield - tII);
 
 % get yield shear viscosity
 etai   = (1-delta).*etai + delta.*(yieldt./(eII + 1e-32) + etaymin);
-eta    = ((1./etai.^2 + 1./eta0.^2).^-(1/2));
-zeta0  = zeta0.*min(1,etai./eta0);
+eta    = ((1./etai.^4 + 1./eta0.^4).^-(1/4));
+% zeta0  = zeta0.*min(1,etai./eta0);
 
 % get yield compaction viscosity
 upsy   = mufact.*(max(0,ups)+max(0,-ups/100));
 zetai  = (1-delta).*zetai + delta.*(yieldp./(upsy + 1e-32) + etaymin);
-zeta   = ((1./zetai.^2 + 1./zeta0.^2).^-(1/2));
+zeta   = ((1./zetai.^4 + 1./zeta0.^4).^-(1/4));
 
 if cff_reg
     eta = log10(eta);

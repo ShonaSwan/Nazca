@@ -35,7 +35,7 @@ meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.70;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.10;               % melt spread across the extraction path 
-mthr        = 0.15;               % threshold melt fraction for extraction/eruption
+mthr        = 0.20;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
 sprate    =  0.00/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -53,10 +53,10 @@ dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
-crust_sw  =  0;                     % 0 = no crust, 1 = crust 
-Hcmin     =  0e3;                   % Minimum crustal thickness 
-c_crust   =  [0.01 0.13 0.80 0.06 0];    % components (maj comp, H2O) Crustal layer
-trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
+crust_sw  =  1;                     % 0 = no crust, 1 = crust 
+Hcmin     =  10e3;                   % Minimum crustal thickness 
+c_crust   =  [0.01 0.07 0.80 0.12 0];    % components (maj comp, H2O) Crustal layer
+trc_crust =  [0.1,0.3,1,10,3,1]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 50;                      % Temperature difference between the plume and the mantle 

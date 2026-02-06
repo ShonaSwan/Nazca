@@ -5,7 +5,7 @@ indLAB    = (T-273.15) < 1200;
 [LAB_depth,LAB_iz] = max(ZZ.*indLAB,[],1);
 
 for ix = 1:Nx
-    SiO2ByMgO(ceil(LAB_iz(ix)):end,ix) = 1;
+    SiO2ByMgO(ceil(LAB_iz(ix)/2):end,ix) = 1;
 end
 
 indMOHO              = SiO2ByMgO > 3;

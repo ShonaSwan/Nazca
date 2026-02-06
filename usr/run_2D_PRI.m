@@ -55,8 +55,8 @@ trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  0;                     % 0 = no crust, 1 = crust 
 Hcmin     =  0e3;                   % Minimum crustal thickness 
-c_crust   =  [0.10 0.10 0.80 0.10 0];    % components (maj comp, H2O) Crustal layer
-trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
+c_crust   =  [0.01 0.07 0.80 0.12 0];    % components (maj comp, H2O) Crustal layer
+trc_crust =  [0.1,0.3,1,10,3,1]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 50;                      % Temperature difference between the plume and the mantle 

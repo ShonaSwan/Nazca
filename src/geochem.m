@@ -12,29 +12,29 @@ for i = 1:cal.ntrc
     % update trace element phase compositions
     trcm(:,:,i) = trc(:,:,i)./(m + x.*Ktrc(:,:,i));
     trcx(:,:,i) = trc(:,:,i)./(m./Ktrc(:,:,i) + x);
-
-    % get trace element advection
-    [advn_TRCm(:,:,i),qz_advn_TRCm(:,:,i),qx_advn_TRCm(:,:,i)] = advect(M.*trcm(:,:,i),Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-    [advn_TRCx(:,:,i),qz_advn_TRCx(:,:,i),qx_advn_TRCx(:,:,i)] = advect(X.*trcx(:,:,i),Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
-
-    % get trace element diffusion (regularisation)
-    % dff_TRC(:,:,i) = diffus(trcm(:,:,i),M.*kc,h,[1,2],BCD) + diffus(trcx(:,:,i),X.*kc,h,[1,2],BCD);
-
-    % get trace element assimilation
-    if ~isnan(trcwall(1,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(1,i)-TRC(:,:,i)).*mu./tau_a .* topshape; end
-    if ~isnan(trcwall(2,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(2,i)-TRC(:,:,i)).*mu./tau_a .* botshape; end
-    if ~isnan(trcwall(3,i)); bnd_TRC(:,:,i) = bnd_TRC(:,:,i) + (RHO.*trcwall(3,i)-TRC(:,:,i)).*mu./tau_a .* sdsshape; end
 end
 
+% get trace element advection
+[advn_TRCm,qz_advn_TRCm,qx_advn_TRCm] = advect(M.*trcm,Um(2:end-1,:),Wm(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+[advn_TRCx,qz_advn_TRCx,qx_advn_TRCx] = advect(X.*trcx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+
+% major component dispersion
+[diff_TRCm,qz_diff_TRCm,qx_diff_TRCm] = diffus(trcm,M.*kd,h,[1,2],BCD);
+[diff_TRCx,qz_diff_TRCx,qx_diff_TRCx] = diffus(trcx,X.*kx,h,[1,2],BCD);
+
+bnd_TRC = zeros(size(TRC));
+if ~isnan(trcwall(1)); bnd_TRC = bnd_TRC + ((trcwall(1,:,:).*rho)-TRC)./(tau_T+dt) .* topshape; end
+if ~isnan(trcwall(2)); bnd_TRC = bnd_TRC + ((trcwall(2,:,:).*rho)-TRC)./(tau_T+dt) .* botshape; end
+
 % get total rate of change
-dTRCdt = - advn_TRCm - advn_TRCx + bnd_TRC + Gemt + Gext + Gint;
+dTRCdt = - advn_TRCm - advn_TRCx + diff_TRCm + diff_TRCx + bnd_TRC + Gemt + Gext + Gint;
 
 % residual of trace element evolution
-res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo)/dt - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo);
+res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo) - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo)*dt;
 
 % semi-implicit update of trace element density
-upd_TRC = - alpha*res_TRC*dt/a1 + beta*upd_TRC;
-TRC     = TRC + upd_TRC;
+[TRC,GHST.TRC,FHST.TRC,specrad.TRC] = iterate(TRC,res_TRC,specrad.TRC,GHST.TRC,FHST.TRC,itpar,iter);
 
 % convert from densites to concentrations
-for i = 1:cal.ntrc; trc(:,:,i) = TRC(:,:,i)./RHO; end
+trc = TRC./RHO;
+

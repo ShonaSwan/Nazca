@@ -82,10 +82,10 @@ end
 cal.T0  = [1850 1250 1050  850];
 
 % set first coeff. for P-dependence of T_m^i [GPa]
-cal.A   = [7.5 5.5 2.8  2.0];
+cal.A   = [7.5 5.4 2.7 2.0];
 
 % set second coeff. for P-dependence of T_m^i [1]
-cal.B   = [7.5 5.5 2.8  2.0];
+cal.B   = [7.5 5.4 2.7 2.0];
 
 % set coeff. for T-dependence of partition coefficients K^i [1/K]
 cal.r  = [37.0  8.0  6.0  8.0];

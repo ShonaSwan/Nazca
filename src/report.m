@@ -1,8 +1,8 @@
 % get residual of thermochemical equations
-resnorm    = norm(upd_S  (:))./(norm(S  (:))+eps) ...
-           + norm(upd_C  (:))./(norm(C  (:))+eps) ...
-           + norm(upd_X  (:)+upd_M  (:))./(norm(rho(:))+eps) ...
-           + norm(upd_MFD(:))./(norm(MFDSrc(:))+eps);
+resnorm    = norm(res_S(:))./(norm(S  (:))+eps) ...
+           + norm(res_C(:))./(norm(rho(:))+eps) ...
+           + norm(res_M(:))./(norm(rho(:))+eps) ...
+           + norm(res_X(:))./(norm(rho(:))+eps);
 
 if iter==1 || resnorm>resnorm0; resnorm0 = resnorm + 1e-32; end  % reset reference residual
 
@@ -20,7 +20,7 @@ end
 
 % plot convergence of outer iterations
 if plot_cv
-    figure(100); if iter==1; clf; else; hold on; end
-    plot(iter,log10(resnorm),'k.','MarkerSize',15,'LineWidth',1.5); box on; axis tight;
+    figure(100); if iter==1; else; hold on; end
+    plot(iterglobal,log10(resnorm),'k.','MarkerSize',15,'LineWidth',1.5); box on; axis tight;
     drawnow;
 end

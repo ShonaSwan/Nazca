@@ -2,6 +2,7 @@
 init;
 
 %%%%  Physical Time Stepping Loop %%%%
+iterglobal = 1;
 while time <= tend && step <= Nt
     
     % Time step info
@@ -14,7 +15,6 @@ while time <= tend && step <= Nt
     resnorm  = 1;
     resnorm0 = resnorm;
     iter     = 1;
-    % if frst; alpha = alpha/2; beta = beta/2; end
 
     %%%%% Non-Linear Iteration Loop %%%%
     while resnorm/resnorm0 >= rtol/(1 + frst*100) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst) || iter <=3
@@ -36,12 +36,17 @@ while time <= tend && step <= Nt
 
         %%%% Increment iteration count 
         iter = iter+1; 
+        iterglobal = iterglobal+1;
    
     %%%% The end of the Non-Linear Iteration Loop %%%%
     end
     
     %%%% Upsate phase equlibrium 
     phseql; 
+
+    % renormalise partial densities to bulk density
+    X = x.*rho;  M   = m.*rho;   S = s.*rho;
+    C = c.*rho;  TRC = trc.*rho; 
 
     % record model history
     history;
@@ -63,7 +68,6 @@ while time <= tend && step <= Nt
     time = time+dt;
     step = step+1;
     frst = 0;
-    % if frst; alpha = alpha*2; beta = beta*2; frst=0; end
  
 %%%% The end of the Physical Time Stepping Loop %%%% 
 end

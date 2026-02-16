@@ -34,7 +34,7 @@ Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 
 findmoho;
 
-Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+10e3,Nz,1));
+Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+5e3,Nz,1));
 Gemc = cm  .*Gem;
 Gemt = trcm.*Gem;
 Gems = sm  .*Gem;
@@ -53,8 +53,9 @@ for i=1:2; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./4; end
 Gext = erupt_ratio * extr_shape.*(-sum(Gemt,1))./sum(extr_shape,1);
 for i=1:2; Gext = Gext + diff(Gext(:,icx,:),2,2)./4; end
 
-Gexs = -sx.*Gem;
-Gexs = erupt_ratio * extr_shape.*( sum(Gexs,1))./sum(extr_shape,1);
+% Gexs = sx.*Gem;
+Gexs = cPx.*log((T0+273.15)./Tref).*Gem;
+Gexs = erupt_ratio * extr_shape.*(-sum(Gexs,1))./sum(extr_shape,1);
 for i=1:2; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
 
 % Intrusion

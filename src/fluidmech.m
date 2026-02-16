@@ -118,8 +118,8 @@ if bndmode == 0 % Mid ocean Ridge set up
     ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
     aa  = zeros(size(ii));
     IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
-    aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
+    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
+    % aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 else
     ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
@@ -146,11 +146,11 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
-if iter==1; indm = U((2:end-1),end-1) < 0; end
+if iter==1; indm = U((2:end-1),end-1) < 0 | Zc.' < LAB_depth(end); end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uright];
-aa  = zeros(size(ii));
+aa  = zeros(size(ii)) + (Zc.' < LAB_depth(end)).*sprate/u0;
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % internal points

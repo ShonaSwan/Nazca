@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_PLM_N100';       % run identifier
+runID     =  '2D_PLM_N120';       % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -14,8 +14,8 @@ save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  200e3;               % chamber depth [m]
-N         =  100;                 % number of grid points in z-direction
+D         =  160e3;               % chamber depth [m]
+N         =  120;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -24,21 +24,22 @@ Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
 mumin     =  1e-6;                % Setting lower limit for melt fraction in coeff. 
-mumax     =  0.15;                % Setting upper limit for melt fraction in coeff.
+mumax     =  0.25;                % Setting upper limit for melt fraction in coeff.
 tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
 init_mode =  'plume';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
+smth      =  5;
 
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.70;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.10;               % melt spread across the extraction path 
-mthr        = 0.20;               % threshold melt fraction for extraction/eruption
+mthr        = 0.50;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
-sprate    =  0.00/yr;             % Half spreading rate [m/s] (modeling half the ridge)
+sprate    =  0.01/yr;             % Half spreading rate [m/s] (modeling half the ridge)
 bnd_sprw  =  7e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
@@ -48,8 +49,8 @@ T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
 c0        =  [0.65 0.16 0.18 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0,0,0]*0e-3;     % Random perturbation of the composition field
-dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
+dcr       =  [2,-1,-1,0,0]*1e-2;     % Random perturbation of the composition field
+dr_trc    =  [-3,-1,1,1,3,0]*0.1;     % trace elements random noise           
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
@@ -108,8 +109,8 @@ rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
 maxit     =  10;                  % maximum outer its
 delta     =  0.3;                 % relaxing parameter for viscosity update
-etacntr   =  1e6;                 % maximum viscosity contrast
-etamin    =  1e18;                % minimum viscosity
+etacntr   =  1e8;                 % maximum viscosity contrast
+etamin    =  1e17;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
 itpar.fp.damp = 1.0;              % fixed-point iterative damping (0-1)

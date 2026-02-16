@@ -46,7 +46,7 @@ minage    =  0e5*yr;              % (20e6 / 7e5)
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.65 0.16 0.18 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.65 0.14 0.20 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,-1,0,0,0]*0e-3;     % Random perturbation of the composition field
 dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
@@ -60,9 +60,9 @@ trc_crust =  [0.1,0.3,1,10,3,1]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 50;                      % Temperature difference between the plume and the mantle 
-pl_width  = 10e3;                     % Width of the plume [m]
+pl_width  = 5e3;                     % Width of the plume [m]
 pl_local  = L; % L/2 + 100            % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.60 0.18 0.20 0.02 0];  % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+c_plume   = [0.60 0.16 0.22 0.02 0];  % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
 trc_plume = [10,3,2,0.1,0.3,1];       % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters

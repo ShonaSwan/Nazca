@@ -24,7 +24,7 @@ Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  1e2*yr;              % initial time step [s]
 mumin     =  1e-6;                % Setting lower limit for melt fraction in coeff. 
-mumax     =  0.15;                % Setting upper limit for melt fraction in coeff.
+mumax     =  0.25;                % Setting upper limit for melt fraction in coeff.
 tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
@@ -35,7 +35,7 @@ meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.70;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.10;               % melt spread across the extraction path 
-mthr        = 0.20;               % threshold melt fraction for extraction/eruption
+mthr        = 0.50;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -48,8 +48,8 @@ T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
 c0        =  [0.65 0.16 0.18 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0,0,0]*0e-3;     % Random perturbation of the composition field
-dr_trc    =  [0,0,0,0,0,0];       % trace elements random noise           
+dcr       =  [2,-1,-1,0,0]*0e-2;     % Random perturbation of the composition field
+dr_trc    =  [1,1,1,-1,-1,0]*0e-2;       % trace elements random noise           
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
@@ -66,7 +66,7 @@ c_plume   = [0.68 0.16 0.15 0.01 0];                 % components of plume (maj 
 trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
-bnd_w     =  h/2;                 % boundary layer width [m]
+bnd_w     =  h/4;                 % boundary layer width [m]
 tau_T     =  1e4*yr;              % wall cooling/assimilation time [s]
 Twall     =  [T0,1350,nan,nan];   % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
@@ -76,7 +76,7 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 calID     =  'MORB_lo';           % phase diagram calibration
 tau_r     =  1e2*yr;              % phase change reaction time (set to 0 to tie to dt)
 tau_e     =  1e2*yr;              % extraction/eruption time (set to 0 to tie to dt)
-minit     =  0.003;               % maximum initial melt fraction
+minit     =  0.005;               % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]
@@ -91,13 +91,13 @@ cPx       =  1000;                % xtal  heat capacity [J/kg/K]
 tyield    =  4e7;                 % yield stress for shear failure [Pa]
 pyield    =  2e7;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
-n_disl    =   3.5;                % dislocation creep powerlaw 
+n_disl    =   3.0;                % dislocation creep powerlaw 
 lmbd_melt =  27;                  % exponential melt weakening prefactor
 b_perm    = 100;                  % permeability geometric factor [50-1000]
 cff_reg   =   0;                  % rheological coefficient regularisation level
 buoy      =   1;                  % switch between active and passive flow
 Delta     =  100;                 % dispersivity correlation length [m]
-km        =  1e-7;                % minimum diffusivity for regularisation [m2/s]
+km        =  1e-9;                % minimum diffusivity for regularisation [m2/s]
 kx        =  1e-9;                % minimum diffusivity for regularisation [m2/s]
 
 % set numerical model parameters
@@ -107,9 +107,9 @@ CFL       =  0.8;                 % (physical) time stepping courant number (mul
 rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-7;                % outer its absolute tolerance
 maxit     =  10;                  % maximum outer its
-delta     =  0.3;                 % relaxing parameter for viscosity update
-etacntr   =  1e6;                 % maximum viscosity contrast
-etamin    =  1e18;                % minimum viscosity
+delta     =  0.25;                % relaxing parameter for viscosity update
+etacntr   =  1e8;                 % maximum viscosity contrast
+etamin    =  1e17;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
 itpar.fp.damp = 1.0;              % fixed-point iterative damping (0-1)

@@ -16,15 +16,13 @@
 %      .aa.reg   : regularisation coefficient for Anderson acceleration
 % count    : iteration count to track history of run
 
-function [x,GHST,FHST,rho] = iterate(x,res,rho,GHST,FHST,itpar,count)
+function [x,GHST,FHST,rho] = iterate(x,r,rho,GHST,FHST,itpar,count)
 
 % allocate arrays of correct shape
 alpha = 0.*x;
-beta  = 0.*x;
 x_new = 0.*x;
 x_acc = 0.*x;
 f     = 0.*x;
-
 
 % 1) Inertial fixed-point iterative update
 
@@ -46,15 +44,15 @@ rho.est  = (rho.est.^4 + (rho.mean/2).^4).^(1/4); % avoid outliers
 alpha(:) = 4./(2 + rho.est).^2;
 
 % New fixed-point update and iterate
-f(:) = itpar.fp.damp*(-alpha(:).*res(:) + beta(:).*FHST(:,end));
+f(:) = itpar.fp.damp * -alpha(:).*r(:);
 g    = x + f;
 
 
 % 2) Anderson acceleration (Walker & Ni, 2011)
 
 % Shift histories and store current g, f
-FHST = [FHST(:,2:end) f(:)];   % previous solution updates
-GHST = [GHST(:,2:end) g(:)];   % previous solution updates
+FHST = [FHST(:,2:end) f(:)];   % previous fixed-point updates
+GHST = [GHST(:,2:end) g(:)];   % previous fixed-point iterates
 
 if count>2 && itpar.aa.damp>eps  % only if enough history and damp>0
 

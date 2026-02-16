@@ -110,7 +110,7 @@ rhop  = 1./(m./rhomp + x./rhoxp);
 chi    = max(0,min(1, x.*rho./rhox ));
 mu     = max(0,min(1, m.*rho./rhom ));
 
-mucff  = (1./mu.^4 + 1./mumax.^4).^-(1/4) + mumin;
+mucff  = min(mumax,max(mumin,mu)); %(1./mu.^4 + 1./mumax.^4).^-(1/4) + mumin;
 
 % interpolate to staggered stencil nodes
  
@@ -176,16 +176,8 @@ etax     = (1./eta_diff + 1./eta_disl).^-1;
 eta0   = etax.*exp(-lmbd_melt.*mucff); % matrix shear viscosity
 zeta0  = eta0./mucff;                  % matrix compaction viscosity
 kphi   = dx0^2./b_perm .* mucff.^3;    % matrix permeability
-KD     = kphi./etam;% + (h/100)^2./zeta; % Darcy coefficient
-% KDi    = (1-delta).*KDi + delta.*KD0;%./(1 + max(0,(wm(1:end-1,2:end-1)+wm(2:end,2:end-1))/2)./rms(wm(:)+eps));
+KD     = kphi./etam;                   % Darcy coefficient
 Ks     = KD./mucff;                    % segregation drag coefficient
-
-% apply min/max bounds to viscosities
-etamax  = etacntr.*max(min(eta0(:)),etamin);
-eta0    = 1./(1./etamax + 1./eta0) + etamin;
-zetamax = etamax./mucff;
-zetamin = etamin./mucff;
-zeta0   = 1./(1./zetamax + 1./zeta0) + zetamin;
 
 % get shear and compaction strain rates
 
@@ -205,7 +197,6 @@ DivRhoxV = ddz(rhoxw.*W(:,2:end-1),h) + ddx(rhoxu.*U(2:end-1,:),h);
 
 % update compaction rate
 if step>0 && ~restart
-    % ups  = - 1./chi.*((a1*chi-a2*chio-a3*chioo)/dt - advect(chi,U(2:end-1,:),W(:,2:end-1),h,{ADVN,'vdf'},[1,2],BCA) - Gx./rhox);
     ups = ((a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + DivRhoxV - Gex)./rhox;
 end
 
@@ -218,20 +209,30 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
        + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
        +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
 
-mufact = (1-exp(-mu./mumin));
+mufact = (1-exp(-mu./1e-4));
+weak   = exp(-(XX.^2+ZZ.^2)/(2*h)^2);
 Peff   = Pt - mufact.*(Pl + Pf(2:end-1,2:end-1));
-yieldt = max(1e4,mufact.*min(pyield + Pc(2:end-1,2:end-1), 100*pyield - Pc(2:end-1,2:end-1)) + (1-mufact).*(tyield + 0.5*Pt));
+yieldt = max(1e4,mufact.*min(pyield + Pc(2:end-1,2:end-1), 10*pyield - Pc(2:end-1,2:end-1)) + (1-mufact).*(tyield + (0.5.*(1-weak)).*Pt));
 yieldp = max(1e4,pyield - tII);
 
 % get yield shear viscosity
 etai   = (1-delta).*etai + delta.*(yieldt./(eII + 1e-32) + etaymin);
-eta    = ((1./etai.^4 + 1./eta0.^4).^-(1/4));
+% eta    = ((1./etai.^4 + 1./eta0.^4).^-(1/4));
+eta    = min(eta0,etai);
 % zeta0  = zeta0.*min(1,etai./eta0);
 
 % get yield compaction viscosity
-upsy   = mufact.*(max(0,ups)+max(0,-ups/100));
+upsy   = mufact.*(max(0,ups)+max(0,-ups/10));
 zetai  = (1-delta).*zetai + delta.*(yieldp./(upsy + 1e-32) + etaymin);
-zeta   = ((1./zetai.^4 + 1./zeta0.^4).^-(1/4));
+% zeta   = ((1./zetai.^4 + 1./zeta0.^4).^-(1/4));
+zeta   = min(zeta0,zetai);
+
+% apply min/max bounds to viscosities
+etamax  = etacntr.*max(min(eta(:)),etamin);
+eta     = 1./(1./etamax + 1./eta) + etamin;
+zetamax = etamax./mucff;
+zetamin = etamin./mucff;
+zeta    = 1./(1./zetamax + 1./zeta) + zetamin;
 
 if cff_reg
     eta = log10(eta);
@@ -257,11 +258,6 @@ if cff_reg
         Ks = Ks + diffus(Ks,1/8*ones(size(Ks)),1,[1,2],BCD);
     end
     Ks = 10.^Ks;
-% else
-%      eta =  etai;
-%     zeta = zetai;
-%     KD   = KDi;
-%     Ks   = Ksi;
 end
 
 % interpolate to staggered stencil nodes

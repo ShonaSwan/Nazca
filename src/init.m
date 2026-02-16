@@ -499,16 +499,16 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 
         SOL = [W(:);U(:);wm(:);um(:);Pf(:);Pc(:)];
         RHO = X+M; 
      
-        update;
-        phseql;
         store;
+        phseql;
+        update;
         fluidmech;
         update;
         output;
@@ -519,20 +519,22 @@ if restart
     else % continuation file does not exist, start from scratch
         fprintf('\n   !!! restart file does not exist !!! \n   => starting run from scratch %s \n\n',runID);
         store;
+        phseql;
         fluidmech;
         update;
-        phseql;
+        fluidmech;
+        update;
         history;
         output;
     end
 else
     % complete, plot, and save initial condition
     store;
-    fluidmech;
-    update;
-    fluidmech;
-    update;
     phseql;
+    fluidmech;
+    update;
+    fluidmech;
+    update;
     history;
     output;
     step = step+1;

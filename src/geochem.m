@@ -30,10 +30,10 @@ if ~isnan(trcwall(2)); bnd_TRC = bnd_TRC + ((trcwall(2,:,:).*rho)-TRC)./(tau_T+d
 dTRCdt = - advn_TRCm - advn_TRCx + diff_TRCm + diff_TRCx + bnd_TRC + Gemt + Gext + Gint;
 
 % residual of trace element evolution
-res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo)/dt - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo);
+res_TRC = (a1*TRC-a2*TRCo-a3*TRCoo) - (b1*dTRCdt + b2*dTRCdto + b3*dTRCdtoo)*dt;
 
 % semi-implicit update of trace element density
-[TRC,GHST.TRC,FHST.TRC,specrad.TRC] = iterate(TRC,res_TRC*dt/a1,specrad.TRC,GHST.TRC,FHST.TRC,itpar,iter*~frst);
+[TRC,GHST.TRC,FHST.TRC,specrad.TRC] = iterate(TRC,res_TRC,specrad.TRC,GHST.TRC,FHST.TRC,itpar,iter);
 
 % convert from densites to concentrations
 trc = TRC./RHO;

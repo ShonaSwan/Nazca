@@ -27,10 +27,10 @@ bnd_S = rho.*cP.*bnd_T ./ T;
 dSdt  = - advn_Sm - advn_Sx + diff_S + diss_h + bnd_S + Gems + Gexs + Gins;
 
 % residual of entropy evolution
-res_S = (a1*S-a2*So-a3*Soo)/dt - (b1*dSdt + b2*dSdto + b3*dSdtoo);
+res_S = (a1*S-a2*So-a3*Soo) - (b1*dSdt + b2*dSdto + b3*dSdtoo)*dt;
 
 % semi-implicit update of bulk entropy density
-[S,GHST.S,FHST.S,specrad.S] = iterate(S,res_S*dt/a1,specrad.S,GHST.S,FHST.S,itpar,iter*~frst);
+[S,GHST.S,FHST.S,specrad.S] = iterate(S,res_S,specrad.S,GHST.S,FHST.S,itpar,iter);
 
 % convert entropy S to natural temperature T and potential temperature Tp
 s = S./RHO;
@@ -57,10 +57,10 @@ if ~isnan(cwall(2)); bnd_C = bnd_C + ((cwall(2,:,:).*rho)-C)./(tau_T+dt) .* bots
 dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc + bnd_C;                         
   
 % residual of major component evolution
-res_C = (a1*C-a2*Co-a3*Coo)/dt - (b1*dCdt + b2*dCdto + b3*dCdtoo);
+res_C = (a1*C-a2*Co-a3*Coo) - (b1*dCdt + b2*dCdto + b3*dCdtoo)*dt;
 
 % semi-implicit update of major component density
-[C,GHST.C,FHST.C,specrad.C] = iterate(C,res_C*dt/a1,specrad.C,GHST.C,FHST.C,itpar,iter*~frst);
+[C,GHST.C,FHST.C,specrad.C] = iterate(C,res_C,specrad.C,GHST.C,FHST.C,itpar,iter);
 
 % impose min/max limits on component densities
 C = max(0,min(rho, C ));
@@ -87,13 +87,13 @@ dMdt   = - advn_M + Gm + Gem + Gin;
 drhodt = dXdt + dMdt;
 
 % residual of phase density evolution
-res_X = (a1*X-a2*Xo-a3*Xoo)/dt - (b1*dXdt + b2*dXdto + b3*dXdtoo);
-res_M = (a1*M-a2*Mo-a3*Moo)/dt - (b1*dMdt + b2*dMdto + b3*dMdtoo);
+res_X = (a1*X-a2*Xo-a3*Xoo) - (b1*dXdt + b2*dXdto + b3*dXdtoo)*dt;
+res_M = (a1*M-a2*Mo-a3*Moo) - (b1*dMdt + b2*dMdto + b3*dMdtoo)*dt;
 
 % semi-implicit update of phase fraction densities
 res_PHS = cat(3,res_X,res_M);
 PHS     = cat(3,X,M);
-[PHS,GHST.PHS,FHST.PHS,specrad.PHS] = iterate(PHS,res_PHS*dt/a1,specrad.PHS,GHST.PHS,FHST.PHS,itpar,iter*~frst);
+[PHS,GHST.PHS,FHST.PHS,specrad.PHS] = iterate(PHS,res_PHS,specrad.PHS,GHST.PHS,FHST.PHS,itpar,iter);
 
 % impose min/max limits on phase densities
 X     = max(0,min(rho, PHS(:,:,1) ));

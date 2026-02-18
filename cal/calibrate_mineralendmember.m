@@ -13,8 +13,6 @@ addpath('../../src')
 addpath('../../../unmix')
 addpath('../../../unmix/src')
 
-
-
 load ocean
 Fs = {'FontSize',12};
 FS = {'FontSize',15};
@@ -42,6 +40,7 @@ cal_MORB;  % read cal.oxdStr from calibration file
 % prep auxiliary parameters
 DATA.PRJCT  = 'cal';
 figno = 100;
+%% 
 
 % %***PARAMETER FROM ABOVE SECTION 
 hasoxd = logical(squeeze(sum(PHS_oxd,1)));

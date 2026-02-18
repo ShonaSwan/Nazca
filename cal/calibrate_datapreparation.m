@@ -39,7 +39,7 @@ uiopen(filename,1)
 DAT = C_3_T3_ig;       % residual fraction = 10%        % table name must correspond to table header above
 DAT.Properties.VariableNames{'point___'} = 'point'; DAT.Properties.VariableNames{'T__C_'}    = 'TC';DAT.Properties.VariableNames{'P_kbar_'} = 'Pkbar';DAT.Properties.VariableNames{'mode_wt__'} = 'modewt'; DAT.Properties.VariableNames{'density_kg_m3_'} = 'densitykgm3';
 
-DAT.Properties.VariableNames{'SiO2_wt__'}  = 'SiO2wt';DAT.Properties.VariableNames{'TiO2_wt__'}  = 'TiO2wt';DAT.Properties.VariableNames{'Al2O3_wt__'} = 'Al2O3wt';DAT.Properties.VariableNames{'FeO_wt__'}   = 'FeOwt'; DAT.Properties.VariableNames{'MgO_wt__'}   = 'MgOwt'; DAT.Properties.VariableNames{'CaO_wt__'}   = 'CaOwt'; DAT.Properties.VariableNames{'Na2O_wt__'}  = 'Na2Owt'; DAT.Properties.VariableNames{'K2O_wt__'}   = 'K2Owt'; DAT.Properties.VariableNames{'H2O_wt__'}   = 'H2Owt';
+DAT.Properties.VariableNames{'SiO2_wt__'}  = 'SiO2wt';DAT.Properties.VariableNames{'TiO2_wt__'}  = 'TiO2wt';DAT.Properties.VariableNames{'Al2O3_wt__'} = 'Al2O3wt';DAT.Properties.VariableNames{'Cr2O3_wt__'} = 'Cr2O3wt';DAT.Properties.VariableNames{'FeO_wt__'}   = 'FeOwt'; DAT.Properties.VariableNames{'MgO_wt__'}   = 'MgOwt'; DAT.Properties.VariableNames{'CaO_wt__'}   = 'CaOwt'; DAT.Properties.VariableNames{'Na2O_wt__'}  = 'Na2Owt'; DAT.Properties.VariableNames{'K2O_wt__'}   = 'K2Owt'; DAT.Properties.VariableNames{'H2O_wt__'}   = 'H2Owt';
 
 % load phase names in order of appearance, liq first
 phs = unique(string(DAT.phase),'stable');                                  % load phase list
@@ -55,7 +55,7 @@ liq = 1; cm = 2; olv = 3; opx = 4; spl = 5; cpx = 6; g = 7;              % set s
 
 
 % set oxide list in preferred sequence   Reorder the oxides
-oxd  = ["SiO2";"TiO2";"Al2O3";"FeO";"MgO";"CaO";"Na2O";"K2O";"H2O"];       % set major oxides
+oxd  = ["SiO2";"TiO2";"Al2O3";"Cr2O3";"FeO";"MgO";"CaO";"Na2O";"K2O";"H2O"];       % set major oxides
 noxd = length(oxd);                                                        % record number of oxides
 
 % extract calculation points
@@ -64,7 +64,7 @@ Tmp  = unique(DAT.TC,'stable');                                            % poi
 Prs  = unique(DAT.Pkbar,'stable');                                         % point pressures
 npts = length(pts);                                                        % number of points
 
-Si = 1; Ti = 2; Al = 3; Fe = 4; Mg = 5; Ca = 6; Na = 7; K = 8; H = 9;      % set shortcut oxide indices
+Si = 1; Ti = 2; Al = 3; Cr = 4; Fe = 5; Mg = 6; Ca = 7; Na = 8; K = 9; H = 10;      % set shortcut oxide indices
 
 % detect which phases are stable on which points
 % Use 0/1 to indicate whether a given mineral phase is present at each point, as not all phases occur at every point. For example, plagioclase and spinel crystallise first, followed by pyroxene.
@@ -91,7 +91,7 @@ end
 % extract phase oxide compositions in [wt%]
 PHS_oxd  = zeros(npts,nphs,noxd);
 for iph = 1:nphs
-    PHS_oxd(hasphs(:,iph)==1,iph,:) = table2array(DAT(DAT.phase==phs(iph),{'SiO2wt','TiO2wt','Al2O3wt','FeOwt','MgOwt','CaOwt','Na2Owt','K2Owt','H2Owt'}));
+    PHS_oxd(hasphs(:,iph)==1,iph,:) = table2array(DAT(DAT.phase==phs(iph),{'SiO2wt','TiO2wt','Al2O3wt','Cr2O3wt','FeOwt','MgOwt','CaOwt','Na2Owt','K2Owt','H2Owt'}));
     PHS_oxd(hasphs(:,iph)==1,iph,:) = PHS_oxd(hasphs(:,iph)==1,iph,:)./(sum(PHS_oxd(hasphs(:,iph)==1,iph,:),3)+eps)*100;
 end
 
@@ -118,7 +118,7 @@ hasoxd = logical(squeeze(sum(PHS_oxd,1)));
 
 % remove minor oxides from phases (mean<0.60; max<1.0)
 for iph = 1:nphs
-    ilim = find(mean(squeeze(PHS_oxd(hasphs(:,iph)==1,iph,:)),1)<0.60 & max(squeeze(PHS_oxd(hasphs(:,iph)==1,iph,:)),[],1)<1.00);
+    ilim = find(mean(squeeze(PHS_oxd(hasphs(:,iph)==1,iph,:)),1)<0.50 & max(squeeze(PHS_oxd(hasphs(:,iph)==1,iph,:)),[],1)<1.00);
     hasoxd(iph,ilim) = false;
     PHS_oxd(:,iph,~hasoxd(iph,:)) = 0;
     PHS_oxd(hasphs(:,iph)==1,iph,:) = PHS_oxd(hasphs(:,iph)==1,iph,:)./(sum(PHS_oxd(hasphs(:,iph)==1,iph,:),3)+eps)*100;

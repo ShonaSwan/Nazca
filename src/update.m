@@ -24,11 +24,17 @@ for j = 1:cal.nmsy
 end
 
 cm_oxd_all = zeros(size(c,1),size(c,2),9);
-cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
 cx_oxd_all = zeros(size(c,1),size(c,2),9);
-cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
  c_oxd_all = zeros(size(c,1),size(c,2),9);
- c_oxd_all(:,:,cal.ioxd) = c_oxd;
+if cal.noxd>9
+    cm_oxd_all = cm_oxd(:,:,cal.ioxd);
+    cx_oxd_all = cx_oxd(:,:,cal.ioxd);
+     c_oxd_all =  c_oxd(:,:,cal.ioxd);
+else
+    cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
+    cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
+     c_oxd_all(:,:,cal.ioxd) = c_oxd;
+end
 
 % update phase densities
 rhom0  = reshape(DensityX(reshape(cm_oxd_all,Nz*Nx,9),293,Pref./1e8)    ,Nz,Nx);

@@ -15,8 +15,8 @@ Tsol   = reshape(cal.Tsol,Nz,Nx);
 Tliq   = reshape(cal.Tliq,Nz,Nx);
 H2Osat = reshape(cal.H2Osat,Nz,Nx);
 
-mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);
-xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);
+mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);  mq(end,:) = 0;
+xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);  xq(end,:) = 1;
 mq = mq./(mq+xq);
 xq = xq./(mq+xq);
 
@@ -34,7 +34,7 @@ Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 
 findmoho;
 
-Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+5e3,Nz,1));
+Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+2e3,Nz,1));
 Gemc = cm  .*Gem;
 Gemt = trcm.*Gem;
 Gems = sm  .*Gem;
@@ -43,7 +43,7 @@ findmelt;
 
 %Extrusion
 
-extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w) + path_ratio.*(ZZ<=melt_depth);
+extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w) + path_ratio.*(ZZ<melt_depth);
 Gex = erupt_ratio * extr_shape.*(-sum(Gem,1))./sum(extr_shape,1);
 for i=1:2; Gex = Gex + diff(Gex(:,icx),2,2)./4; end
 
@@ -60,7 +60,7 @@ for i=1:2; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
 
 % Intrusion
 
-intr_shape = (1-path_ratio).*exp(-abs(ZZ - MOHO_depth) / bnd_w) + path_ratio.*(ZZ>=MOHO_depth & ZZ<=melt_depth);
+intr_shape = (1-path_ratio).*exp(-abs(ZZ - MOHO_depth) / bnd_w) + path_ratio.*(ZZ>MOHO_depth & ZZ<melt_depth);
 Gin = (1-erupt_ratio) * intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
 for i=1:2; Gin = Gin + diff(Gin(:,icx),2,2)./4; end
 Gex = Gex + Gin.*(T-273.15<=Tsol);

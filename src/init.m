@@ -57,11 +57,14 @@ lncls = colmap([5,135],:);
 Dsm = cal.Dsx;
 
 % normalise major components to anhydrous unit sum, rescale to hydrous
-c0(1:end-1) = c0(1:end-1)./sum(c0(1:end-1)).*(1-c0(end));
-c1(1:end-1) = c1(1:end-1)./sum(c1(1:end-1)).*(1-c1(end));
-cwall(:,1:end-1) = cwall(:,1:end-1)./sum(cwall(:,1:end-1),2).*(1-cwall(:,end));
-c_plume(:,1:end-1) = c_plume(:,1:end-1)./sum(c_plume(:,1:end-1),2).*(1-c_plume(:,end));
-c_crust(:,1:end-1) = c_crust(:,1:end-1)./sum(c_crust(:,1:end-1),2).*(1-c_crust(:,end));
+% c0(1:end-1) = c0(1:end-1)./sum(c0(1:end-1)).*(1-c0(end));
+% c1(1:end-1) = c1(1:end-1)./sum(c1(1:end-1)).*(1-c1(end));
+% c_plume(:,1:end-1) = c_plume(:,1:end-1)./sum(c_plume(:,1:end-1),2).*(1-c_plume(:,end));
+% c_crust(:,1:end-1) = c_crust(:,1:end-1)./sum(c_crust(:,1:end-1),2).*(1-c_crust(:,end));
+c0 = c0./sum(c0);
+c1 = c1./sum(c1);
+c_plume = c_plume./sum(c_plume,2);
+c_crust = c_crust./sum(c_crust,2);
 dcg   = dcg-round(mean(dcg),16);
 dcr   = dcr-round(mean(dcr),16);
 
@@ -265,8 +268,12 @@ Tref   = min(cal.T0) + 273.15;
 Pref   = 1e5;
 sref   = 0e3; % reference entropy 
 c0_oxd = c0*cal.cmp_oxd;
-c0_oxd_all = zeros(size(c0,1),9);
-c0_oxd_all(:,cal.ioxd) = c0_oxd;
+c0_oxd_all = zeros(size(c,1),size(c,2),9);
+if cal.noxd>9
+    c0_oxd_all =  c0_oxd(:,cal.ioxd);
+else
+    c0_oxd_all(:,cal.ioxd) = c0_oxd;
+end
 rhom0  = mean(cal.rhox0-500).*ones(size(Tp));
 rhox0  = mean(cal.rhox0).*ones(size(Tp)); 
 Pt     = Ptop + mean(rhox0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt = 0*Pt; dPtdto = dPtdt; dPtdtoo = dPtdto;
@@ -281,9 +288,14 @@ rhoWo  = rhow.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
 rhoUo  = rhou.*U(2:end-1,:); rhoUoo = rhoUo; advn_mx = 0.*rhoUo;
 mq     = zeros(size(Tp));  xq = 1-mq;
 ups    = zeros(size(Tp));
-cmq    = c; cxq = c;  
+cmq    = c; cxq = c;  cm = cmq; cx = cxq;
 cm_oxd = reshape(reshape(c,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
-cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
+cm_oxd_all = zeros(size(c,1),size(c,2),9);
+if cal.noxd>9
+    cm_oxd_all =  cm_oxd(:,:,cal.ioxd);
+else
+    cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
+end
 trcm = zeros(Nz,Nx,cal.ntrc);
 trcx = zeros(Nz,Nx,cal.ntrc);
 aT   = aTm;
@@ -316,6 +328,7 @@ while res > tol
         eqtime = tic;
 
         var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
+        var.cm     = reshape(cm,Nx*Nz,cal.ncmp);  % component fractions [wt]
         var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
         var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
         var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt](melt model 
@@ -330,8 +343,8 @@ while res > tol
         Tliq   = reshape(cal.Tliq,Nz,Nx);
         H2Osat = reshape(cal.H2Osat,Nz,Nx);
 
-        mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);
-        xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);
+        mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);  mq(end,:) = 0;
+        xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);  xq(end,:) = 1;
         mq = mq./(mq+xq);
         xq = xq./(mq+xq);
         x  = xq;  m = mq;
@@ -361,7 +374,7 @@ while res > tol
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             mi  = m;
-            m   = m - (max(0,m-minit.*(L-XX)./L.*(D-ZZ)./D)/20);
+            m   = m - max(0,m-minit.*(1-ZZ./D).^2.*(1-XX/L).^2)/25;
             % m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
 
             SUM = x+m;

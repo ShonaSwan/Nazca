@@ -4,14 +4,14 @@
 clear cal;
 
 % number of oxides, mineral end-members, mineral systems, model components
-cal.noxd   = 9;
+cal.noxd   = 10;
 cal.nmem   = 12;
 cal.nmsy   = 5;
 cal.ncmp   = 7;
 
 % label strings for all compositional representations
-cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','FeO','MgO','CaO','Na$_2$O','K$_2$O','H$_2$O'};
-     elStr = {'Si','Ti','Al','Fe','Mg','Ca','Na','K','H'};
+cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','Cr$_2$O$_3$','FeO','MgO','CaO','Na$_2$O','K$_2$O','H$_2$O'};
+     elStr = {'Si','Ti','Al','Cr','Fe','Mg','Ca','Na','K','H'};
 cal.memStr = {'for','fay','ant','alb','san','dps','aug','ulv','mgt','ilm','qtz','wat'};
 cal.msyStr = {'olv','cpx','opx','spl','gar'};
 cal.cmpStr = {'dun','tro','gbr','fbs','tra','rhy','vol'};
@@ -25,23 +25,19 @@ for i = 1:cal.noxd; cal.(elStr{i}) = i; end
 cal.ioxd = [   1    2     3   4   5   6    7   8   9]; % oxdie indices for viscosity, density functions
 
 % oxide composition of mineral end-members
-%                SiO2    TiO2   Al2O3     FeO     MgO     CaO    Na2O     K2O     H2O
-cal.mem_oxd = [ 41.3700         0         0    7.5700   51.0600         0         0         0         0
-                29.7900         0         0   69.0900    1.1200         0         0         0         0
-
-                44.4200         0   35.7200         0         0   19.1000    0.7600         0         0
-                68.7800         0   19.3300         0         0         0   11.8300    0.0600         0
-                68.6400         0   18.3100         0         0         0    6.3800    6.6700         0
-
-                53.2900    0.0400    2.7500    5.5100   19.4900   18.9200         0         0         0
-                50.3000    1.1300    0.4500   29.7900    0.7300   14.2800    3.3200         0         0
-
-                      0   38.0000    2.6000   34.4800   24.9200         0         0         0         0
-                      0   10.0100    1.4700   88.5200         0         0         0         0         0
-                      0   52.3700         0   47.5500    0.0800         0         0         0         0
-
-               100.0000         0         0         0         0         0         0         0         0
-                      0         0         0         0         0         0         0         0  100.0000]; % water (wat)
+%                SiO2       TiO2      Al2O3     Cr2O3      FeO         MgO       CaO      Na2O      K2O     H2O
+cal.mem_oxd = [ 41.3700         0            0       0      7.5700   51.0600         0         0         0         0
+                29.7900         0            0       0     69.0900    1.1200         0         0         0         0
+                44.4200         0      35.7200       0           0         0   19.1000    0.7600         0         0
+                68.7800         0      19.3300       0           0         0         0   11.8300    0.0600         0
+                68.6400         0      18.3100       0           0         0         0    6.3800    6.6700         0
+                53.2900    0.0400       2.7500       0      5.5100   19.4900   18.9200         0         0         0
+                50.3000    1.1300       0.4500       0     29.7900    0.7300   14.2800    3.3200         0         0
+                      0   38.0000       2.6000       0     34.4800   24.9200         0         0         0         0
+                      0   10.0100       1.4700       0     88.5200         0         0         0         0         0
+                      0   52.3700            0       0     47.5500    0.0800         0         0         0         0
+               100.0000         0            0       0           0         0         0         0         0         0
+                      0         0            0       0           0         0         0         0         0  100.0000]; % water (wat)
 cal.mem_oxd = cal.mem_oxd./sum(cal.mem_oxd,2)*100; 
 
 % mineral end-members in mineral systems

@@ -72,8 +72,6 @@ end
 
 
 
-
-
 %              ant          alb       san   |    mmt	    tmt	      mgt|      chy       fhy       hyp|      mau       fau      aug  |     ilm	    qtz      wat
 % cmp_mem = [ 90.0000    9.0000         0     1.0000         0         0         0         0         0         0         0         0         0         0         0
 %             30.1000   15.3000         0    12.0000    0.1000    5.8000   28.1000         0         0    8.5000         0         0         0         0         0

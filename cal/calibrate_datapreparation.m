@@ -12,6 +12,7 @@ addpath('../../cal')
 addpath('../../src')
 addpath('../../../unmix')
 addpath('../../../unmix/src')
+
 load ocean
 Fs = {'FontSize',12};
 FS = {'FontSize',15};
@@ -116,7 +117,7 @@ liq = 1; olv = 2; opx = 3; spl = 4; cpx = 5; g = 6;                   % update p
 % detect which oxides are present in which phases
 hasoxd = logical(squeeze(sum(PHS_oxd,1)));
 
-% remove minor oxides from phases (mean<0.60; max<1.0)
+% remove minor oxides from phases (mean<0.50; max<1.0)
 for iph = 1:nphs
     ilim = find(mean(squeeze(PHS_oxd(hasphs(:,iph)==1,iph,:)),1)<0.50 & max(squeeze(PHS_oxd(hasphs(:,iph)==1,iph,:)),[],1)<1.00);
     hasoxd(iph,ilim) = false;

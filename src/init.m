@@ -112,15 +112,15 @@ if ~any(bnd_h)
     switch bndmode
         case 0  % Mid ocean ridge set up
             topshape = exp( ( -ZZ+h/2)/bnd_w);
-            botshape = exp(-(D-ZZ+h/2)/bnd_w);
+            botshape = exp(-(D-ZZ-h/2)/bnd_w);
    
         case 1  % Plume 
-           topshape = exp( ( -ZZ)/bnd_w);
-           botshape = exp(-(D-ZZ)/bnd_w);
+           topshape = exp( ( -ZZ+h/2)/bnd_w);
+           botshape = exp(-(D-ZZ-h/2)/bnd_w);
 
         case 2  % Plume-Ridge set up
            topshape = exp( ( -ZZ+h/2)/bnd_w);
-           botshape = exp(-(D-ZZ+h/2)/bnd_w);
+           botshape = exp(-(D-ZZ-h/2)/bnd_w);
     end
 end 
 
@@ -172,7 +172,7 @@ switch init_mode
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * minage)));
 
         %Defining the Gaussian inflow profile of the plume 
-        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / (2*pl_width)^2); % Peaks at z=D, x=pl_local
 
         Tp = Tp + dT_plume .* pl_profile + dTr.*rp + dTg.*gp;
         
@@ -200,7 +200,7 @@ switch init_mode
         Tp_MOR = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
 
         pl_sigma = pl_width / (2 * sqrt(2 * log(2)));
-        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / pl_width^2); % Peaks at z=D, x=pl_local
+        pl_profile = exp(-((XX - pl_local).^2) / pl_width^2 - ((ZZ - D).^2) / (2*pl_width)^2); % Peaks at z=D, x=pl_local
         Tp_plume = dT_plume .* pl_profile;
         
         Tp = Tp_MOR + Tp_plume + dTr.*rp + dTg.*gp;
@@ -232,7 +232,7 @@ tein = trc;
 U   =  zeros(Nz+2,Nx+1);  UBG = U; Ui = U; upd_U = 0*U;  um = 0.*U; qDx = 0.*U; Umix = 0.*U;
 W   =  zeros(Nz+1,Nx+2);  WBG = W; Wi = W; wx = 0.*W; wm = 0.*W; upd_W = 0*W;  qDz = 0.*W; Wmix = 0.*W;
 Pf  =  zeros(Nz+2,Nx+2);  Vx = 0.*Tp; Vm = 0.*Tp; upd_Pf= 0*Pf; %Div_rhoV = 0.*P;  DD = sparse(length(P(:)),length([W(:);U(:)]));
-Pc   =  zeros(Nz+2,Nx+2);
+Pc  =  zeros(Nz+2,Nx+2);  P = Pf + Pc;
 SOL = [W(:);U(:);wm(:);um(:);Pf(:);Pc(:)]; 
 
 % initialise auxiliary fields
@@ -258,6 +258,7 @@ exx    = 0.*Tp;  ezz = 0.*Tp;  exz = zeros(Nz-1,Nx-1);  eII = 0.*Tp;
 txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz-1,Nx-1);  tII = 0.*Tp;
 eta    = 1e21.*ones(Nz,Nx);  etai = eta;
 zeta   = 100.*eta;  zetai = zeta;
+etamax = etacntr.*etamin;
 KD     = 1e-24.*ones(Nz,Nx); KDi = KD;
 MFDSrc = 0.*Tp;
 CMPSrc = 0.*Tp;
@@ -286,6 +287,7 @@ rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
 rhou   = (rho(:,icx(1:end-1))+rho(:,icx(2:end)))/2;
 rhoWo  = rhow.*W(:,2:end-1); rhoWoo = rhoWo; advn_mz = 0.*rhoWo(2:end-1,:);
 rhoUo  = rhou.*U(2:end-1,:); rhoUoo = rhoUo; advn_mx = 0.*rhoUo;
+deltac = ones(Nz,Nx);
 mq     = zeros(size(Tp));  xq = 1-mq;
 ups    = zeros(size(Tp));
 cmq    = c; cxq = c;  cm = cmq; cx = cxq;
@@ -343,8 +345,8 @@ while res > tol
         Tliq   = reshape(cal.Tliq,Nz,Nx);
         H2Osat = reshape(cal.H2Osat,Nz,Nx);
 
-        mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);  mq(end,:) = 0;
-        xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);  xq(end,:) = 1;
+        mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);
+        xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);  
         mq = mq./(mq+xq);
         xq = xq./(mq+xq);
         x  = xq;  m = mq;
@@ -354,8 +356,6 @@ while res > tol
         cm  = cmq; cx = cxq;
 
         update;
-        Pf(2:end-1,2:end-1) = Pt;
-        Px = Pt;
 
         Ktrc = zeros(Nz,Nx,cal.ntrc);
         for i = 1:cal.ntrc
@@ -374,7 +374,10 @@ while res > tol
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             mi  = m;
-            m   = m - max(0,m-minit.*(1-ZZ./D).^2.*(1-XX/L).^2)/25;
+            % msc = m.*minit./max(m(:));%.*(1-ZZ./D).^2.*(1-XX/L).^2;
+            msc = (minit.^-1+(m+eps).^-1).^(-1/1).*(1-XX/L).^1;
+            m   = m .* min(1,msc./(m+eps)).^0.1;
+            % m(end-1:end,:) = 0;
             % m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
 
             SUM = x+m;

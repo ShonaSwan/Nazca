@@ -577,15 +577,15 @@ end
 if Nz>1 || step==0 || frst; clf;
 TAS; axis tight; box on; hold on;
 end
-cxSi = cx_oxd_all(:,:,1)./sum(cx_oxd_all(:,:,1:end-2),3).*100;
-cmSi = cm_oxd_all(:,:,1)./sum(cm_oxd_all(:,:,1:end-2),3).*100;
- cSi =  c_oxd_all(:,:,1)./sum( c_oxd_all(:,:,1:end-2),3).*100;
-cxNK = sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,1:end-2),3).*100;
-cmNK = sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,1:end-2),3).*100;
- cNK = sum( c_oxd_all(:,:,[7,8]),3)./sum( c_oxd_all(:,:,1:end-2),3).*100;
-scatter(cxSi(:),cxNK(:),50,T(:)-273.15,'filled','^'); colormap(colmap); cb = colorbar;
-scatter(cmSi(:),cmNK(:),50,T(:)-273.15,'filled','o');
-scatter( cSi(:), cNK(:),80,T(:)-273.15,'filled','s');
+cxSi = cx_oxd_all(:,:,1)./sum(cx_oxd_all(:,:,1:end-1),3).*100;
+cmSi = cm_oxd_all(:,:,1)./sum(cm_oxd_all(:,:,1:end-1),3).*100;
+ cSi =  c_oxd_all(:,:,1)./sum( c_oxd_all(:,:,1:end-1),3).*100;
+cxNK = sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,1:end-1),3).*100;
+cmNK = sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,1:end-1),3).*100;
+ cNK = sum( c_oxd_all(:,:,[7,8]),3)./sum( c_oxd_all(:,:,1:end-1),3).*100;
+scatter(cxSi(:),cxNK(:),50,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4}); colormap(colmap); cb = colorbar;
+scatter(cmSi(:),cmNK(:),50,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3});
+scatter( cSi(:), cNK(:),80,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2});
 set(cb,TL{:},'FontSize',12); set(gca,TL{:},'FontSize',15); xlabel('SiO$_2$ [wt \%]',TX{:},'FontSize',15); ylabel('Na$_2$O + K$_2$O [wt \%]',TX{:},'FontSize',15);
 
 
@@ -598,15 +598,15 @@ end
 [A,B] = terncoords(cx_oxd_all(:,:, 5      )./sum(cx_oxd_all(:,:,[5,4,7,8]),3), ...
                    cx_oxd_all(:,:, 4      )./sum(cx_oxd_all(:,:,[5,4,7,8]),3), ...
                sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,[5,4,7,8]),3));
-scatter(A(:),B(:),50,T(:)-273.15,'filled','^'); colormap(colmap); cb = colorbar;
+scatter(A(:),B(:),50,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4}); colormap(colmap); cb = colorbar;
 [A,B] = terncoords(cm_oxd_all(:,:, 5      )./sum(cm_oxd_all(:,:,[5,4,7,8]),3), ...
                    cm_oxd_all(:,:, 4      )./sum(cm_oxd_all(:,:,[5,4,7,8]),3), ...
                sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,[5,4,7,8]),3));
-scatter(A(:),B(:),50,T(:)-273.15,'filled','o'); colormap(colmap);
+scatter(A(:),B(:),50,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3}); colormap(colmap);
 [A,B] = terncoords(c_oxd_all(:,:, 5      )./(sum(c_oxd_all(:,:,[5,4,7,8]),3)), ...
                    c_oxd_all(:,:, 4      )./(sum(c_oxd_all(:,:,[5,4,7,8]),3)), ...
                sum(c_oxd_all(:,:,[7,8]),3)./(sum(c_oxd_all(:,:,[5,4,7,8]),3)));
-scatter(A(:),B(:),80,T(:)-273.15,'filled','s'); colormap(colmap);
+scatter(A(:),B(:),80,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2}); colormap(colmap);
 set(cb,TL{:},'FontSize',12); set(gca,TL{:},'FontSize',15); xlabel('SiO$_2$ [wt \%]',TX{:},'FontSize',15); ylabel('Na$_2$O + K$_2$O [wt \%]',TX{:},'FontSize',15);
 
 % plot model history
@@ -675,20 +675,36 @@ end
     ax(99) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
     set(0,'CurrentFigure',fh15)
-    sumanh = sum(c_oxd(:,:,1:end-2),3);
-    SiO2_vals = c_oxd(:,:,1); 
-    for i = 2:min(9,cal.noxd)
-        oxide_vals = c_oxd(:,:,i);
+    sumanh_b = sum(c_oxd(:,:,1:end-1),3);
+    sumanh_x = sum(cx_oxd(:,:,1:end-1),3);
+    sumanh_m = sum(cm_oxd(:,:,1:end-1),3);
+
+    SiO2_vals_b = c_oxd(:,:,1); 
+    SiO2_vals_x = cx_oxd(:,:,1);
+    SiO2_vals_m = cm_oxd(:,:,1); 
+
+    for i = 2:cal.noxd-1
+        oxide_valsb = c_oxd(:,:,i);
+        oxide_valsx = cx_oxd(:,:,i);
+        oxide_valsm = cm_oxd(:,:,i);
+
         set(fh15,'CurrentAxes',ax(90+i-1));
-        scatter(SiO2_vals(:), oxide_vals(:)./sumanh(:).*100, 30, T(:)-273.15, 'filled'), grid on; colorbar; box on; axis xy normal;
+         hold on;
+        scatter(SiO2_vals_b(:), oxide_valsb(:)./sumanh_b(:).*100, 30, T(:)-273.15, 'filled','MarkerEdgeColor',CL{2},'LineWidth', 0.8);
+        scatter(SiO2_vals_x(:), oxide_valsx(:)./sumanh_x(:).*100, 30, T(:)-273.15, 'filled','MarkerEdgeColor',CL{4},LW{1},1.5);
+        scatter(SiO2_vals_m(:), oxide_valsm(:)./sumanh_m(:).*100, 30, T(:)-273.15, 'filled','MarkerEdgeColor',CL{3},LW{1},1.5);
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); xlabel([cal.oxdStr{1}, '[wt \%]'], TX{:}, FS{:});ylabel([cal.oxdStr{i}, '[wt \%]'], TX{:}, FS{:});
+    
+        grid on; colorbar; box on; axis xy normal;
+        hold off;
     end
 
     set(fh15,'CurrentAxes',ax(92));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
 
-%Basalt plot 
+    % upper ternary (plg cpx qtz)
+    % Basalt plot 
 
 if ~exist('fh16','var'); fh16 = figure(VIS{:});
     colormap(colmap);

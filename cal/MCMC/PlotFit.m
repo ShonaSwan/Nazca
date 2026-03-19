@@ -4,27 +4,27 @@ if ~exist('level','var'); level = 0; end
 if level>0
 
     % plot fitted melting points
-    figure(102); clf;
+ %   figure(102); clf;
 
-    plot(Tm,PP/10,'LineWidth',1); axis ij tight; hold on
-    plot(Tsol,Psl/10,'kd','LineWidth',1.5);
-    plot(Tliq,Psl/10,'ko','LineWidth',1.5);
-    plot(Tsolfit,Psl/10,'bd','LineWidth',2);
-    plot(Tliqfit,Psl/10,'ro','LineWidth',2);
+ %   plot(Tm,PP/10,'LineWidth',1); axis ij tight; hold on
+ %   plot(Tsol,Psl/10,'kd','LineWidth',1.5);
+ %   plot(Tliq,Psl/10,'ko','LineWidth',1.5);
+ %   plot(Tsolfit,Psl/10,'bd','LineWidth',2);
+ %   plot(Tliqfit,Psl/10,'ro','LineWidth',2);
 
-    legend([cal.cmpStr(1:end-1),'Tsol','Tliq','Tsol fit','Tliq fit'],Fs{:},TX{:},LB{:})
-    xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
-    ylabel('Pressure [GPa]',TX{:},FS{:})
-    title('Melting points MCMC fit',FL{:},TX{:})
-    set(gca,Fs{:},TL{:});
-    drawnow
+    % legend([cal.cmpStr(1:end-1),'Tsol','Tliq','Tsol fit','Tliq fit'],Fs{:},TX{:},LB{:})
+    % xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
+    % ylabel('Pressure [GPa]',TX{:},FS{:})
+    % title('Melting points MCMC fit',FL{:},TX{:})
+    % set(gca,Fs{:},TL{:});
+    %drawnow
 
     % plot fitted phase fractions
     figure(103); clf; 
     cmap = [colororder;[0 0 0]];
 
     for iph=1:cal.nmsy+1
-        plot(Tmp,PHS_frc   (:,iph),'-'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
+        plot(Tmp,PHS_frc   (:,iph),'.'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
     end
     for iph=1:cal.nmsy+1
         plot(Tmp,PHS_frcfit(:,iph),'--','Color',cmap(iph,:),'LineWidth',1.5); axis tight;
@@ -40,17 +40,17 @@ if level>0
     figure(104); clf;
 
     subplot(3,1,1)
-    plot(Tmp,MLT_cmpfit*100,'LineWidth',1.5); axis tight
+    plot(Tmp,MLT_cmpfit*100,'.','LineWidth',1.5); axis tight
     ylabel('Melt comp. [wt\%]',TX{:},FS{:})
     set(gca,Fs{:},TL{:});
 
     subplot(3,1,2)
-    plot(Tmp,SOL_cmpfit*100,'LineWidth',1.5); axis tight
+    plot(Tmp,SOL_cmpfit*100,'.','LineWidth',1.5); axis tight
     ylabel('Solid comp. [wt\%]',TX{:},FS{:})
     set(gca,Fs{:},TL{:});
 
     subplot(3,1,3)
-    plot(Tmp,SYS_cmpfit*100,'LineWidth',1.5); axis tight
+    plot(Tmp,SYS_cmpfit*100,'.','LineWidth',1.5); axis tight   % change line type
     legend(cal.cmpStr,Fs{:},TX{:},LB{:})
     xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
     ylabel('System comp. [wt\%]',TX{:},FS{:})
@@ -73,7 +73,7 @@ if level>0
             if kk<=cal.nmsy
                 subplot(spz,spx,kk);
                 for iem = kmem:kmem+sum(cal.msy_mem(kk,:))-1
-                    p(iem) = plot(Tmp, SOL_mem   (:,iem),'-' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
+                    p(iem) = plot(Tmp, SOL_mem   (:,iem),'.' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
                              plot(Tmp, SOL_memfit(:,iem),'--','Color',cmap(iem-kmem+1,:),'LineWidth',1.5);
                 end
                 if kk==cal.nmsy; legend([{'proj.'},{'fit'}],Fs{:},TX{:},LB{:}); 
@@ -89,7 +89,7 @@ if level>0
             end
         end
     end
-    sgtitle(['Mineral endm. MCMC fit'],FL{:},TX{:});
+    sgtitle('Mineral endm. MCMC fit',FL{:},TX{:});
     drawnow
     
 end

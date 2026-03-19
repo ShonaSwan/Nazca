@@ -24,7 +24,6 @@ function [x_keep,P_keep,count,xbest] = mcmc(dhatFunc,PriorFunc,LikeFunc,ConstrFu
 % P_keep = posterior distribution
 % count  = number of accepted.  Acceptance ratio is count/Niter
 
-
 %Analyze inputs
 Nvar  = length(x0);          % find number of model parameters
 x1    = x0;                  % set initial guess as first candidate
@@ -76,6 +75,7 @@ for i=1:Niter
 
     flag = 0;
     
+%
     while flag == 0
         %Random walk chain to find the proposed model x2
 %         x2 = anneal.temp.*x1 + (1-anneal.temp).*xbest + xstep.*(2*rand(Nvar,1)-1);

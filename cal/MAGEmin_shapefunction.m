@@ -1,6 +1,6 @@
 
 %Load In CSV file and save it as a table 
-Data = readtable('/Users/sas1n24/Documents/Calibration/C_fc_1_ig.csv');
+Data = readtable('/Users/sas1n24/Documents/Calibration/MORB_eq_melt.csv');
 
 %Find the correct data (relative degree of melting along a vertical)
 melts = Data(Data.phase == "liq", :);
@@ -79,24 +79,24 @@ gale_min = min(oxd_Fe_data,[],1);
 gale_max = max(oxd_Fe_data,[],1);
 gale_median = median(oxd_Fe_data,1);
 
-% Plot
-% figure; hold on;
-% 
-% % Patch for range
-% x_patch = [1:length(oxd_Fe_nor), fliplr(1:length(oxd_Fe_nor))];
-% y_patch = [gale_min, fliplr(gale_max)];
-% patch(x_patch, y_patch, 'b', 'FaceAlpha',0.2, 'EdgeColor','none');
-% 
-% % Median line
-% plot(1:length(oxd_Fe_nor), gale_median, 'b-', 'LineWidth',1.5);
-% 
-% % Your data
-% scatter(1:length(oxd_Fe_nor), pooled_n, 100, 'r', 'filled');
-% 
-% % Formatting
-% set(gca, 'XTick', 1:length(oxd_Fe_nor), 'XTickLabel', oxd_Fe_nor);
-% ylabel('Oxide wt%');
-% title('Comparison of Fe-normalized Oxides');
-% grid on;
-% legend({'Gale data range','Gale median','Your data'}, 'Location','best');
-% 
+%Plot
+figure; hold on;
+
+% Patch for range
+x_patch = [1:length(oxd_Fe_nor), fliplr(1:length(oxd_Fe_nor))];
+y_patch = [gale_min, fliplr(gale_max)];
+patch(x_patch, y_patch, 'b', 'FaceAlpha',0.2, 'EdgeColor','none');
+
+% Median line
+plot(1:length(oxd_Fe_nor), gale_median, 'b-', 'LineWidth',1.5);
+
+% Your data
+scatter(1:length(oxd_Fe_nor), pooled_n, 100, 'r', 'filled');
+
+% Formatting
+set(gca, 'XTick', 1:length(oxd_Fe_nor), 'XTickLabel', oxd_Fe_nor);
+ylabel('Oxide wt%');
+title('Comparison of Fe-normalized Oxides');
+grid on;
+legend({'Gale data range','Gale median','Your data'}, 'Location','best');
+

@@ -13,6 +13,7 @@ addpath('../../src')
 addpath('../../../unmix')
 addpath('../../../unmix/src')
 
+
 load ocean
 Fs = {'FontSize',12};
 FS = {'FontSize',15};
@@ -31,11 +32,14 @@ LO = {'Location','bestoutside'};
 
 
 % Load combined data
-load C_3_T3.mat
-liq = 1; olv = 2; opx = 3; spl = 4; cpx = 5; g = 6;  
+%load MeltandCryst.mat %MORB_fr_cryst.mat
+load MeltandCryst.mat
+liq = 1; g = 2; cpx = 3; ol = 4; opx = 5; spl = 6; pl = 7; 
+%liq = 1; g = 2; cpx = 3; ol = 4; opx = 5; spl = 6;  
+
 
 % !!!  Run Section as is, follow unmix prompts on command line  !!!
-cal_MORB;  % read cal.oxdStr from calibration file
+cal_FR_combo;  % read cal.oxdStr from calibration file
 
 % prep auxiliary parameters
 DATA.PRJCT  = 'cal';
@@ -45,7 +49,7 @@ figno = 100;
 % %***PARAMETER FROM ABOVE SECTION 
 hasoxd = logical(squeeze(sum(PHS_oxd,1)));
 noxd = 10;
-Si = 1; Ti = 2; Al = 3; Cr = 4; Fe = 5; Mg = 6; Ca = 7; Na = 8; K = 9; H = 10;      % set shortcut oxide indices
+Si = 1; Ti = 2; Al = 3; Cr = 4; Fe = 5; Mg = 6; Ca = 7; Na = 8; K = 9;H = 10;      % set shortcut oxide indices
 
 % initialise lists
 PHS_nmem = zeros(nphs,1);
@@ -93,6 +97,13 @@ for iph=2:nphs
     MEM_oxd       = [MEM_oxd;EMExt];
     PHS_nmem(iph) = DGN.p;
 end
+      
+amph1 = [46  1.7  15.2  0   13   10  11.5  4  0.2  0]
+amph2 = [50  0.25  15   0    9   10  14.5  0.5  0  0]
+MEM_oxd = [MEM_oxd; amph1];
+MEM_oxd = [MEM_oxd; amph2];
+n_amph = 2;   
+PHS_nmem(end+1) = n_amph;   % append a new "phase" slot for amphibole
 
 
 % add water as last end-member
@@ -112,22 +123,31 @@ formattedDisplayText(MEM_oxd,'NumericFormat','short')
 % !!! update calibration file name on following line, then Run Section  !!!
 % cal_MORB;  % read cal.mem_oxd from calibration file
 
-%                SiO2       TiO2      Al2O3     Cr2O3      FeO         MgO       CaO      Na2O      K2O     H2O
-cal.mem_oxd = [ 41.3700         0            0       0      7.5700   51.0600         0         0         0         0
-                29.7900         0            0       0     69.0900    1.1200         0         0         0         0
-                44.4200         0      35.7200       0           0         0   19.1000    0.7600         0         0
-                68.7800         0      19.3300       0           0         0         0   11.8300    0.0600         0
-                68.6400         0      18.3100       0           0         0         0    6.3800    6.6700         0
-                53.2900    0.0400       2.7500       0      5.5100   19.4900   18.9200         0         0         0
-                50.3000    1.1300       0.4500       0     29.7900    0.7300   14.2800    3.3200         0         0
-                      0   38.0000       2.6000       0     34.4800   24.9200         0         0         0         0
-                      0   10.0100       1.4700       0     88.5200         0         0         0         0         0
-                      0   52.3700            0       0     47.5500    0.0800         0         0         0         0
-               100.0000         0            0       0           0         0         0         0         0         0
-                      0         0            0       0           0         0         0         0         0  100.0000]; 
+% %                SiO2       TiO2      Al2O3     Cr2O3      FeO         MgO       CaO      Na2O     K2O        H2O
+cal.mem_oxd = [ 42.3700    0.6300   21.3900    2.1000    6.3500   21.0900    6.0700         0         0         0
+                42.2400    0.6700   20.8100    2.7100    6.5200   20.9900    6.0600         0         0         0
+                42.1500    1.0300   20.1800    2.1400    7.6500   21.0400    5.8100         0         0         0
+                52.1200         0    7.7400         0    4.9900   21.5600   12.8100    0.7800         0         0
+                53.3300         0    3.5900    0.0200    3.4400   20.3100   19.3100         0         0         0
+                60.7300         0         0         0    5.4300   31.3100    0.1400    2.3900         0         0
+                49.8700    2.0100         0    0.9600    7.4700    3.6000   36.0600         0    0.0300         0
+                41.1000         0         0         0    8.9500   49.9500         0         0         0         0
+                38.5500         0         0         0   21.4500   39.3300    0.6700         0         0         0
+                53.0600         0    7.3700    0.5500    6.2000   30.7300    2.0900         0         0         0
+                54.2100         0    4.1900    1.4600    5.8200   31.4400    2.8800         0         0         0
+                57.7900         0    1.2700    0.1400    5.2100   34.0800    1.5100         0         0         0
+                      0         0   51.4400   18.0100    9.1200   21.4300         0         0         0         0
+                      0         0   26.2500   44.6900   11.9600   17.1000         0         0         0         0
+                      0    0.1800   33.7900   34.3300   22.9700    8.7300         0         0         0         0
+                46.6800         0   34.3000         0         0         0   17.4000    1.6200         0         0
+                48.3300         0   33.1900         0         0         0   16.1100    2.3700         0         0
+                46.0000    1.7000   15.2000         0   13.0000   10.0000   11.5000    4.0000    0.2000         0
+                50.0000    0.2500   15.0000         0    9.0000   10.0000   14.5000    0.5000         0         0
+                      0         0         0         0         0         0         0         0         0  100.0000]; % water (wat)
 
-nmem = 14;
-PHS_nmem = [14 2 3 2 3 3 1];
+ nmem = 20;
+ PHS_nmem = [20 3 4 2 3 3 2 2 1];
+
 
 % extract melt phase end-member composition and project back to 
 % reduced oxide composition
@@ -140,7 +160,9 @@ for iph = 1:nphs
     A     = MEM_oxd(imem,1:end).';
     b     = squeeze(PHS_oxd(:,iph,1:end));
     PHS_mem (:,iph,imem) = lsqregcmp(A,b,[0.01 0 1])*100;
+
     PHS_oxdp(:,iph,:   ) = squeeze(PHS_mem (:,iph,imem))*MEM_oxd(imem,:)/100 .* max(hasoxd);
+    
     if iph==1
         MLT_mem  = squeeze(PHS_mem (:,1,:));
         MLT_oxdp = squeeze(PHS_oxdp(:,1,:));
@@ -149,6 +171,7 @@ for iph = 1:nphs
         SOL_mem(:,imem) = SOL_mem(:,imem) .* PHS_frc(:,iph)./(100-PHS_frc(:,1)+eps);
         kmem = kmem+PHS_nmem(iph); 
     end
+
 end
 SOL_oxdp = SOL_mem*MEM_oxd/100;           % ‘p’ composition that is projected
 
@@ -163,8 +186,8 @@ SYS_oxdp = SYS_oxdp./wt;  % projected system oxide composition
 
 %% *****  reduce dimensionality by selecting number of pseudo-components **  
 
-% load phase compositions into data array for analysis
-X = [MLT_oxdp(:,1:end-1);SOL_oxdp(:,1:end-1)]; %%%%!!!! error here 
+
+X = [MLT_oxdp(:,1:end-1);SOL_oxdp(:,1:end-1)]; 
 X = X./sum(X,2);
 
 % if more than 2 oxides,
@@ -246,23 +269,24 @@ spz = ceil(sqrt(noxd-1));
 spx = ceil((noxd-1)/spz);
 
 kk = 2;
+
 ioxd = [1 2 3 4 5 6 7 8 9];
 for ix = 1:spx
     for iz = 1:spz
-        if kk<=noxd
+        if kk<= noxd-1
             subplot(spz,spx,kk-1);
             scatter(MLT_oxd (:,ioxd(1)),MLT_oxd (:,ioxd(kk)),25,Tmp,'o'); colormap('copper'); axis tight; hold on
-            scatter(SOL_oxd (:,ioxd(1)),SOL_oxd (:,ioxd(kk)),25,Tmp,'s');
+            scatter(SOL_oxd (:,ioxd(1)),SOL_oxd (:,ioxd(kk)),25,Tmp,'s');colormap('copper'); axis tight; hold on
             scatter(SYS_oxd (:,ioxd(1)),SYS_oxd (:,ioxd(kk)),25,Tmp,'d');
             scatter(MLT_oxdp(:,ioxd(1)),MLT_oxdp(:,ioxd(kk)),25,Tmp,'o','filled');
             scatter(SOL_oxdp(:,ioxd(1)),SOL_oxdp(:,ioxd(kk)),25,Tmp,'s','filled');
             scatter(SYS_oxdp(:,ioxd(1)),SYS_oxdp(:,ioxd(kk)),25,Tmp,'d','filled');
-            for icp = 1:ncmp-1
-                if kk<noxd
-                    scatter(EMInt(icp,ioxd(1)),EMInt(icp,ioxd(kk)),200,'kh','filled');
-                    % scatter(EMExt(icp,ioxd(1)),EMExt(icp,ioxd(kk)),200,'kh');
-                end
-            end
+             for icp = 1:ncmp-1
+                 if kk<noxd
+                     scatter(EMInt(icp,ioxd(1)),EMInt(icp,ioxd(kk)),200,'kh','filled');
+                     %scatter(EMExt(icp,ioxd(1)),EMExt(icp,ioxd(kk)),200,'kh');
+                 end
+             end
             if kk==noxd; legend([{'orig. mlt'},{'orig. sol'},{'orig. sys'},{'proj. sol'},{'proj. mlt'},{'proj. sys'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
             xlabel(cal.oxdStr(ioxd( 1)),FS{:},TX{:})
             ylabel(cal.oxdStr(ioxd(kk)),FS{:},TX{:})
@@ -276,10 +300,12 @@ end
 sgtitle('MLT \& SOL projected',FL{:},TX{:})
 drawnow
 
+
+
 %% *****  save progress for later use  ************************************
 
 % !!!  Run Section to save calibrated end-members and reduced compositions  !!!
 close all;
-save('C_3_T3');
+save('MORB_Comb');
 
 

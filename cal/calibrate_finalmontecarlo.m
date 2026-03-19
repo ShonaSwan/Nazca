@@ -1,5 +1,4 @@
-%    The final monte carlo  10% without AMP,BI  with qtz  15.10.2025
-%% prepare workspace
+% prepare workspace
 clear all; close all;
 
 addpath(genpath('../'));
@@ -22,9 +21,9 @@ LO = {'Location','bestoutside'};
 % A parameter fitting algorithm is used to optimise the result, so that one endmember better represents the differentiation end point, while the other endmember better represents the starting point.
 
 % !!!  Run Section to load end-member calibration and prepare for pseudo-component calibration  !!!
-load('MtAp_frac_noampbi10_750_0.mat');
+load('MORB_FR_melt_2');
 
-cal_MtAp_750;  % read calibration file
+cal_FR_Melt;  % read calibration file
 
 % !!!  Edit end-member appearances in pseudo-components  !!!
 % - number and sequence of end-members must correspond to list in cal file
@@ -35,18 +34,16 @@ cal_MtAp_750;  % read calibration file
 % - phase out mineral systems and their end-members in accordance with
 %   their fading or disappearance in PHS_frc
 
+%                 |  Gar|  Cpx   |  Ol  |  Opx |  Sp  | Wat |
+indmem  = logical([ 1  1   1 1 1   1 1    1 1 1    1 1  0;  
+                    1  1   1 1 1   1 1    1 1 1    1 1  0; 
+                    0  0   1 1 1   1 1    1 1 0    1 1  0 ;  
+                    0  0   0 1 1   1 0    0 0 0    1 1  0;  
+                    0  0   0 0 0   0 0    0 0 0    0 1  0;
+                    0  0   0 0 0   0 0    0 0 0    0 0  1]);  
+ 
+                    
 
-
-%                  ant alb san| mmt	tmt	mgt| mhy fhy hyp | mau fau aug |	ilm	|  qtz |  wat
-indmem  = logical([ 1	0	0	 0	 0	 0	  0	  0	  0	    0	0	0		 0	   0	  0
-                    1   1   0	 1	 0	 0	  1	  0	  0	    0	0	0		 0	   0      0
-                    1	1	1	 1	 1	 1	  1	  1	  0	    1	0	0		 0	   0	  0
-                    1	1	1	 0	 1	 1	  0	  0	  1	    0	1	0		 1	   0 	  0
-                    0	1	1	 0	 0	 0	  0	  0	  1	    0	0	1		 1	   1	  0
-                    0	0	0	 0	 0	 0	  0	  0	  0	    0	0	0		 0	   0 	  1]);
-
-
-%Diagonal layout: top-left = primitive, bottom-right = highly differentiated material.
 
 cmp_oxd = 1.0*EMInt + 0.0*EMExt; %*cal.mem_oxd(1:end-1,1:end-1)/100; EM_Int: internal endmembers obtained earlier via PCA and endmember extraction.
 cmp_oxd = [cmp_oxd,zeros(cal.ncmp-1,1)];
@@ -62,36 +59,11 @@ for ic = 1:ncmp
 end
 
 
-%             ant          alb       san   |    mmt	     tmt	    mgt|      chy       fhy       hyp|      mau       fau      aug  |     ilm	    qtz      wat
- cmp_mem = [  94.0000    5.0000         0         1         0         0         0         0         0         0         0         0         0         0         0
-              32.6000   16.6000         0    8.7000       0.5       5.8   25.5000         0         0    10.400         0         0         0         0         0
-              29.0000   14.4000    0.4000       0.5    6.6000    1.0000    1.0000   17.0000         0    4.5000   25.6000         0         0         0         0
-              10.2000   55.5000    6.4000         0         0    2.2000         0         0    6.4000         0         0   13.0000    6.3000         0         0
-                    0   23.5000   43.8000         0         0         0         0         0    1.4000         0         0         0    1.3000   30.0000         0
-                    0         0         0         0         0         0         0         0         0         0         0         0         0         0  100.0000];
-
-
-
-%              ant          alb       san   |    mmt	    tmt	      mgt|      chy       fhy       hyp|      mau       fau      aug  |     ilm	    qtz      wat
-% cmp_mem = [ 90.0000    9.0000         0     1.0000         0         0         0         0         0         0         0         0         0         0         0
-%             30.1000   15.3000         0    12.0000    0.1000    5.8000   28.1000         0         0    8.5000         0         0         0         0         0
-%             29.5000   14.6000    0.1000          0    6.6000    0.7000    0.9000   16.9000         0    4.2000   26.5000         0         0         0         0
-%             10.4000   53.8000    7.0000          0    0.1000    2.1000         0    0.1000    6.3000         0         0   13.1000    7.1000         0         0
-%                   0   28.0000   39.3000          0         0    0.1000         0         0    1.9000         0         0         0    1.2000   29.4000         0
-%                   0         0         0          0         0         0         0         0         0         0         0         0         0         0  100.0000];
-
-
-
-% This is now best
-%            ant      alb       san      |   mmt	    tmt	     mgt|      chy      fhy       hyp|       mau       fau        aug  |    mil	     ilm	    fil|      wat
-% cmp_mem =[ 86.0000   14.0000         0         0         0         0         0         0         0         0         0         0         0         0         0         0
-%            74.1000   18.2000    0.2000    5.5000         0         0    3.4000         0         0         4         0         0       0.5         0         0         0
-%             3.0000    6.2000    0.1000   11.6000    2.8000   10.4000   34.9000    1.9000         0   29.0000         0         0         0         0         0         0
-%            10.0000   41.9000    0.2000    0.1000    4.6000    0.9000         0    1.1000   13.9000    1.6000   22.3000    2.1000         0         0       0.4         0
-%                  0   20.2000   49.0000         0         0    3.3000         0    6.9000    0.1000         0    0.2000   13.4000         0    3.4000    0.5000         0
-%                  0    4.8000   77.8000         0         0    0.8000         0         0   12.3000         0         0    4.0000         0    0.9000    0.1000         0
-%                  0         0         0         0         0         0         0         0         0         0         0         0         0         0         0  100.0000];
-
+%           |  Gar                      |  Cpx                      |  Ol                   |  Opx                       |  Sp                    | Wat |       
+ cmp_mem = [  0.1970    0.1970    0.1970    0.1970    0.1970   10.0177   38.0911   37.1951   10.4373    1.6994    0.9988    0.1970    0.3784         0
+              4.0135    4.0778         0    3.4689    4.1875   11.5113   27.6931   30.7522   12.3174    1.1981    0.2000    0.3802    0.2000         0
+                   0         0         0   51.4746   33.7861    0.1955    0.1955    0.1955    0.1955    0.1955         0   13.5664    0.1955         0
+                   0         0         0         0   20.0000   20.0000   20.0000         0         0         0         0   20.0000   20.0000         0];
 
 PHS_frc(:,end+1) = 0;
 
@@ -106,10 +78,10 @@ cmp_oxd_best = cmp_oxd_init;
 
 
 %Set initial component–endmember conditions for fitting melting point parameters.
-T0_init = [ 1650   1105   1057  1005   880];  T0_best = T0_init; % initial: T0_init = [ 1650   1150   1100  1000   850]; 
-A_init  = [ 1e16  1e16   1e16   1e16   1e16];  A_best =  A_init;  %1e16
-B_init  = [ 1  1   1   1   1];   B_best =  B_init;
-r_init  = [ 35  3.4  3.2  5.8  5.5];   r_best =  r_init;%r_init  = [40.00   3.50   3.50   8.90  3.00   3.00];  
+T0_init = [ 1850 1250 1025 825 ];  T0_best = T0_init; % initial: T0_init = [ 1650   1150   1100  1000   850]; 
+A_init  = [6.7  5.4  5.1  2.8  ];  A_best =  A_init;  %1e16
+B_init  = [6.5  5.1  4.3  2.7 ];   B_best =  B_init;
+r_init  = [37.0  8.0  6.0  8.0  ];   r_best =  r_init; %r_init  = [40.00   3.50   3.50   8.90  3.00   3.00];  
 dT_init = 1400 * 1200./T0_init;  dT_best = dT_init;
 
 
@@ -147,7 +119,7 @@ PHS_frc(:,2:end) = PHS_frc(:,2:end)./(100-PHS_frc(:,1)+eps)*100;
 
 % plot basic information for initial fit
 level = 3;
-run('../MCMC/PlotFitFrac.m')
+run('MCMC/PlotFitFrac.m')
 
 % Fitting algorithm determines the fraction of each mineral endmember in every pseudo component.
 
@@ -305,7 +277,7 @@ cmp_oxd_best  = cmp_mem_best*cal.mem_oxd/100;
 %     level = 3     add mineral systems and display best fit parameters
 
 level = 3;
-run('../MCMC/PlotFitFrac.m')
+run('../MCMC/PlotFit.m')
 
 %% save and display calibration
 save('MtAp_noamp10_calibration_2');

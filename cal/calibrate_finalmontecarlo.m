@@ -21,9 +21,9 @@ LO = {'Location','bestoutside'};
 % A parameter fitting algorithm is used to optimise the result, so that one endmember better represents the differentiation end point, while the other endmember better represents the starting point.
 
 % !!!  Run Section to load end-member calibration and prepare for pseudo-component calibration  !!!
-load('MORB_FR_melt_2');
+load('MORB_Comb');
 
-cal_FR_Melt;  % read calibration file
+cal_FR_combo;  % read calibration file
 
 % !!!  Edit end-member appearances in pseudo-components  !!!
 % - number and sequence of end-members must correspond to list in cal file
@@ -34,13 +34,13 @@ cal_FR_Melt;  % read calibration file
 % - phase out mineral systems and their end-members in accordance with
 %   their fading or disappearance in PHS_frc
 
-%                 |  Gar|  Cpx   |  Ol  |  Opx |  Sp  | Wat |
-indmem  = logical([ 1  1   1 1 1   1 1    1 1 1    1 1  0;  
-                    1  1   1 1 1   1 1    1 1 1    1 1  0; 
-                    0  0   1 1 1   1 1    1 1 0    1 1  0 ;  
-                    0  0   0 1 1   1 0    0 0 0    1 1  0;  
-                    0  0   0 0 0   0 0    0 0 0    0 1  0;
-                    0  0   0 0 0   0 0    0 0 0    0 0  1]);  
+%                 |  Gar|    Cpx   |  Ol  |  Opx  |  Sp  |  Pl  | Wat |
+indmem  = logical([ 1  1   1 1 1 1   1 1    1 1 1    1 1   0 0   0;  
+                    1  1   1 1 1 1   1 1    1 1 1    1 1   0 0   0; 
+                    0  0   1 1 1 1   1 1    1 1 0    1 1   0 0   0;  
+                    0  0   0 1 1 1   1 0    0 0 0    1 1   1 1   0;  
+                    0  0   0 0 0 0   0 0    0 0 0    0 1   1 1   0;
+                    0  0   0 0 0 0   0 0    0 0 0    0 0   1 1   1]);  
  
                     
 
@@ -59,13 +59,14 @@ for ic = 1:ncmp
 end
 
 
-%           |  Gar                      |  Cpx                      |  Ol                   |  Opx                       |  Sp                    | Wat |       
- cmp_mem = [  0.1970    0.1970    0.1970    0.1970    0.1970   10.0177   38.0911   37.1951   10.4373    1.6994    0.9988    0.1970    0.3784         0
-              4.0135    4.0778         0    3.4689    4.1875   11.5113   27.6931   30.7522   12.3174    1.1981    0.2000    0.3802    0.2000         0
-                   0         0         0   51.4746   33.7861    0.1955    0.1955    0.1955    0.1955    0.1955         0   13.5664    0.1955         0
-                   0         0         0         0   20.0000   20.0000   20.0000         0         0         0         0   20.0000   20.0000         0];
-
-PHS_frc(:,end+1) = 0;
+%           |  Gar                      |  Cpx                      |  Ol                   |  Opx                       |  Sp        |  Pl                   | Wat |       
+ cmp_mem = [ 0.1958    0.1958    0.1958    0.1958    0.1958    0.1958    0.1958   87.3500   10.2676    0.1958    0.1958    0.1958    0.4244         0         0         0       0       0
+             0.1982    0.1982    0.1982    0.1982    0.1982    0.1982    3.5560   51.9401   42.1902    0.1982    0.1982    0.1982    0.5302         0         0         0       0       0
+                  0         0   48.9688    0.1884    0.1884    0.1884   46.5929    0.1884    0.1884    0.1884         0    0.1884    3.1198         0         0         0       0       0 
+                  0         0         0   11.9832    0.1958    0.1958   67.1774         0         0         0         0    0.1958   14.0523    0.1958    6.0039         0       0       0
+                  0         0         0         0         0         0         0         0         0         0         0         0   33.3333   33.3333   33.3333         0       0       0];
+         
+PHS_frc(:,end+1) = 0; 
 
 cmp_mem_init = round(cmp_mem,1);
 cmp_mem_init = cmp_mem_init./sum(cmp_mem_init,2)*100;

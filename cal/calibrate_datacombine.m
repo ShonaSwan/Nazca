@@ -3,7 +3,7 @@ clear all; close all;
 
 %% Load the two processed .mat files (no paper)
 %load('MORB_fr_melt.mat');
-load('MORB_fr_melt_minor.mat');
+load('MORB_fr_melt_new.mat');
 melt_PHS_frc = PHS_frc;
 melt_PHS_oxd = PHS_oxd;
 melt_RHO     = RHO;
@@ -16,7 +16,7 @@ melt_npts    = npts;
 melt_noxd    = size(PHS_oxd,3);
 
 %load('MORB_fr_cryst.mat');
-load('MORB_fr_cryst_minor.mat');
+load('MORB_fr_cryst_new.mat');
 cryst_PHS_frc = PHS_frc;
 cryst_PHS_oxd = PHS_oxd;
 cryst_RHO     = RHO;
@@ -90,7 +90,7 @@ end
 SYS_oxd = SYS_oxd ./ wt;
 
 %% 6. Save
-save('MeltandCryst_minor.mat', 'PHS_frc','PHS_oxd','PHS_oxdp','MLT_oxd','SOL_oxd','SYS_oxd',...
+save('MeltandCryst_new.mat', 'PHS_frc','PHS_oxd','PHS_oxdp','MLT_oxd','SOL_oxd','SYS_oxd',...
      'RHO','phs','hasphs','pts','Tmp','Prs','npts','nphs');
 
 fprintf('COMBINED DATASET SAVED (melting + crystallisation )\n');

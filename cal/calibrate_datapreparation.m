@@ -29,7 +29,7 @@ LO = {'Location','bestoutside'};
 %% *****  load calibration data  ******************************************
 %load in the MAGEMin data and opens it.(window with table opens, using
 %default selection click Import Selection => Import Data) then opens file 
-filename = './MORB_fr_melt.csv';  
+filename = './MOR_Cryst_new_ig.csv';  
 uiopen(filename,1)
 % *** we do not select liq=100 or liq < 10 wt% ? need to decide limits for fractional melting ? 
 
@@ -37,7 +37,7 @@ uiopen(filename,1)
 %% *****  unpack calibration data  ****************************************
 
 % !!!  update table name on following line, then Run Section  !!!
-DAT = MORB_fr_melt;       % residual fraction = 10%        % table name must correspond to table header above
+DAT = MOR_Cryst_new_ig;       % residual fraction = 10%        % table name must correspond to table header above
 DAT.Properties.VariableNames{'point___'} = 'point'; DAT.Properties.VariableNames{'T__C_'}    = 'TC';DAT.Properties.VariableNames{'P_kbar_'} = 'Pkbar';DAT.Properties.VariableNames{'mode_wt__'} = 'modewt'; DAT.Properties.VariableNames{'density_kg_m3_'} = 'densitykgm3';
 
 DAT.Properties.VariableNames{'SiO2_wt__'}  = 'SiO2wt';DAT.Properties.VariableNames{'TiO2_wt__'}  = 'TiO2wt';DAT.Properties.VariableNames{'Al2O3_wt__'} = 'Al2O3wt';DAT.Properties.VariableNames{'Cr2O3_wt__'} = 'Cr2O3wt';DAT.Properties.VariableNames{'FeO_wt__'}   = 'FeOwt'; DAT.Properties.VariableNames{'MgO_wt__'}   = 'MgOwt'; DAT.Properties.VariableNames{'CaO_wt__'}   = 'CaOwt'; DAT.Properties.VariableNames{'Na2O_wt__'}  = 'Na2Owt'; DAT.Properties.VariableNames{'K2O_wt__'}   = 'K2Owt'; DAT.Properties.VariableNames{'H2O_wt__'}   = 'H2Owt';
@@ -52,8 +52,8 @@ iliq = find(strcmp(phs,'liq'));                                            % ens
 iphs = 1:nphs; iphs(iliq) = []; iphs = [iliq,iphs];
 phs  = phs(iphs);
   
-%liq = 1; ol = 2; spl = 3; pl = 4; cpx = 5;
-liq = 1; g = 2 ;cpx = 3; ol = 4; opx = 5; spl = 6; cm = 7; 
+liq = 1; ol = 2; pl = 3; spl = 4; cpx = 5;
+%liq = 1; g = 2 ; ol = 3; cpx = 4; opx = 5; spl = 6; pl = 7; 
 
 % set oxide list in preferred sequence   Reorder the oxides
 oxd  = ["SiO2";"TiO2";"Al2O3";"Cr2O3";"FeO";"MgO";"CaO";"Na2O";"K2O";"H2O"];       % set major oxides
@@ -96,25 +96,18 @@ for iph = 1:nphs
     PHS_oxd(hasphs(:,iph)==1,iph,:) = PHS_oxd(hasphs(:,iph)==1,iph,:)./(sum(PHS_oxd(hasphs(:,iph)==1,iph,:),3)+eps)*100;
 end
 
-
-% lump in spl with cm 
-PHS_oxd(:,spl,:) = (PHS_frc(:,spl).*PHS_oxd(:,spl,:) + PHS_frc(:,cm ).*PHS_oxd(:,cm ,:)) ./ (PHS_frc(:,spl) + PHS_frc(:,cm ) + eps);
-PHS_oxd(:,cm ,:) = [];
-RHO(:,spl)       = (PHS_frc(:,spl)+PHS_frc(:,cm))./(PHS_frc(:,spl)./(RHO(:,spl)+eps) + PHS_frc(:,cm)./(RHO(:,cm)+eps) + eps);
-RHO(:,cm)        = [];
-PHS_frc(:,spl)   =  PHS_frc(:,spl) + PHS_frc(:,cm); 
-PHS_frc(:,cm)    = [];
-phs(cm)         = [];
-hasphs(:,spl)    = max(hasphs(:,spl),hasphs(:,cm));
-hasphs(:,cm )    = [];
-nphs             = nphs-1;
-
-% % merge K2O and Na2O
-% PHS_oxd(:,:,Na) = PHS_oxd(:,:,Na) + PHS_oxd(:,:,K);
-% PHS_oxd(:,:,K) = [];
-% noxd = noxd - 1;
-
-liq = 1; g = 2 ;cpx = 3; ol = 4; opx = 5; spl = 6; 
+% 
+% % lump in spl with cm 
+% PHS_oxd(:,spl,:) = (PHS_frc(:,spl).*PHS_oxd(:,spl,:) + PHS_frc(:,cm ).*PHS_oxd(:,cm ,:)) ./ (PHS_frc(:,spl) + PHS_frc(:,cm ) + eps);
+% PHS_oxd(:,cm ,:) = [];
+% RHO(:,spl)       = (PHS_frc(:,spl)+PHS_frc(:,cm))./(PHS_frc(:,spl)./(RHO(:,spl)+eps) + PHS_frc(:,cm)./(RHO(:,cm)+eps) + eps);
+% RHO(:,cm)        = [];
+% PHS_frc(:,spl)   =  PHS_frc(:,spl) + PHS_frc(:,cm); 
+% PHS_frc(:,cm)    = [];
+% phs(cm)         = [];
+% hasphs(:,spl)    = max(hasphs(:,spl),hasphs(:,cm));
+% hasphs(:,cm )    = [];
+% nphs             = nphs-1;
 
 % detect which oxides are present in which phases
 hasoxd = logical(squeeze(sum(PHS_oxd,1)));
@@ -150,7 +143,7 @@ for iph = 1:nphs
 end
 SYS_oxd = SYS_oxd./wt;  % system oxide composition
 
- %% Take the Melt phase and run it through the shape function 
+  %% Take the Melt phase and run it through the shape function 
 % Melt_fractions = PHS_frc(:,1);                    % melt mode wt% at each point
 % Melt_oxd       = squeeze(PHS_oxd(:,liq,:));       % all oxide compositions of the melt at each point
 % 
@@ -180,6 +173,6 @@ SYS_oxd = SYS_oxd./wt;  % system oxide composition
 
 %%  Rename and Save.mat
 
-save('MORB_fr_melt_minor.mat', 'PHS_frc', 'PHS_oxd', 'PHS_oxdp', 'MLT_oxd','SOL_oxd','SYS_oxd','RHO','phs','hasphs','pts','Tmp','Prs','npts','nphs');
+save('MORB_fr_cryst_new.mat', 'PHS_frc', 'PHS_oxd', 'PHS_oxdp', 'MLT_oxd','SOL_oxd','SYS_oxd','RHO','phs','hasphs','pts','Tmp','Prs','npts','nphs');
 
 fprintf('Done')

@@ -34,21 +34,18 @@ cal_FR_combo;  % read calibration file
 % - phase out mineral systems and their end-members in accordance with
 %   their fading or disappearance in PHS_frc
 
-%                 |  Gar|    Cpx   |  Ol  |  Opx  |  Sp  |  Pl  | Wat |
-indmem  = logical([ 1  1   1 1 1 1   1 1    1 1 1    1 1   0 0   0;  
-                    1  1   1 1 1 1   1 1    1 1 1    1 1   0 0   0; 
-                    0  0   1 1 1 1   1 1    1 1 0    1 1   0 0   0;  
-                    0  0   0 1 1 1   1 0    0 0 0    1 1   1 1   0;  
-                    0  0   0 0 0 0   0 0    0 0 0    0 1   1 1   0;
-                    0  0   0 0 0 0   0 0    0 0 0    0 0   1 1   1]);  
+%                 |  Ol|    Opx   |  Cpx    |  G    |  Spl  |  Pl    | ilm | Qrt | 
+indmem  = logical([ 0 0   0 0 0    1 1 0 0   0 0 0    0 0 0   0 0 0   0 0 0   0   ;  
+                    1 1   1 1 1    1 1 0 0   1 1 1    0 0 0   0 0 0   0 0 0   0   ; 
+                    0 0   1 1 1    1 1 0 0   1 1 0    0 0 0   0 0 0   0 0 0   0   ;  
+                    0 0   0 1 1    1 1 0 0   0 0 0    0 0 0   0 0 0   0 0 0   0   ;  
+                    0 0   0 0 0    1 1 0 0   0 0 0    0 0 0   0 0 0   0 0 0   0   ;
+                    0 0   0 0 0    1 1 0 0   0 0 0    0 0 0   0 0 0   0 0 0   0  ]);  
  
                     
-
-
 cmp_oxd = 1.0*EMInt + 0.0*EMExt; %*cal.mem_oxd(1:end-1,1:end-1)/100; EM_Int: internal endmembers obtained earlier via PCA and endmember extraction.
 cmp_oxd = [cmp_oxd,zeros(cal.ncmp-1,1)];
 cmp_oxd = [cmp_oxd;zeros(1,cal.noxd)];
-cmp_oxd(end,end) =100;
 
 cmp_mem = zeros(ncmp-1,cal.nmem);
 for ic = 1:ncmp

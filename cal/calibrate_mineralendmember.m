@@ -33,9 +33,10 @@ LO = {'Location','bestoutside'};
 
 % Load combined data
 %load MeltandCryst.mat %MORB_fr_cryst.mat
-load MeltandCryst_new.mat
-liq = 1; g = 2; cpx = 3; ol = 4; opx = 5; spl = 6; pl = 7; 
-%liq = 1; g = 2; cpx = 3; ol = 4; opx = 5; spl = 6;  
+load MeltandCryst.mat
+
+liq = 1; ol = 2; opx = 3; cpx = 4; g = 5; spl = 6; pl = 7; ilm = 8; 
+
 
 
 % !!!  Run Section as is, follow unmix prompts on command line  !!!
@@ -49,7 +50,7 @@ figno = 100;
 % %***PARAMETER FROM ABOVE SECTION 
 hasoxd = logical(squeeze(sum(PHS_oxd,1)));
 noxd = 10;
-Si = 1; Ti = 2; Al = 3; Cr = 4; Fe = 5; Mg = 6; Ca = 7; Na = 8; K = 9;H = 10;      % set shortcut oxide indices
+Si = 1; Ti = 2; Al = 3; Cr = 4; Fe = 5; Mg = 6; Ca = 7; Na = 8; K = 9; H = 10;      % set shortcut oxide indices
 
 % initialise lists
 PHS_nmem = zeros(nphs,1);
@@ -99,20 +100,15 @@ for iph=2:nphs
     PHS_nmem(iph) = DGN.p;
 end
       
-% amph1 = [46  1.7  15.2  0   13   10  11.5  4  0.2  0]
-% amph2 = [50  0.25  15   0    9   10  14.5  0.5  0  0]
-% MEM_oxd = [MEM_oxd; amph1];
-% MEM_oxd = [MEM_oxd; amph2];
-% n_amph = 2;   
-% PHS_nmem(end+1) = n_amph;   % append a new "phase" slot for amphibole
-
-
-% add water as last end-member
+% add quartz as second last end-member 
 nmem    = sum(PHS_nmem);
+MEM_oxd = [MEM_oxd; 100.0, zeros(1,noxd-1)];
+% add water as last end-member
 MEM_oxd = [MEM_oxd;zeros(1,noxd-1),100.0];
 
+
 % record final end-member count and display results
-nmem    = sum(PHS_nmem)+1;
+nmem    = sum(PHS_nmem)+2;
 PHS_nmem(1) = nmem;
 formattedDisplayText(MEM_oxd,'NumericFormat','short')
 
@@ -125,27 +121,31 @@ formattedDisplayText(MEM_oxd,'NumericFormat','short')
 % cal_MORB;  % read cal.mem_oxd from calibration file
 
 % %                SiO2       TiO2      Al2O3     Cr2O3      FeO         MgO       CaO      Na2O     K2O        H2O
-cal.mem_oxd = [ 42.3500    0.4100   21.4600    2.8100    5.8000   20.9600    6.2100         0         0         0
-                42.2200    0.8900   20.6500    2.0700    7.2600   21.0600    5.8500         0         0         0
-                42.1500    1.0000   20.3100    2.1300    7.6500   20.9800    5.7800         0         0         0
-                41.1900         0         0         0    7.9600   50.6400    0.2100         0         0         0
-                36.4500         0         0         0   32.9500   29.9700    0.6300         0         0         0
-                51.9700    0.7000    7.7300    0.2100    4.9700   21.8500   11.5600    0.9800    0.0300         0
-                56.8900    0.0600    2.1700    0.0900    4.6100   25.2100    9.4400    1.4100    0.1200         0
-                52.7600    0.1400    2.8100    0.4000    3.2600   18.4800   22.1500         0         0         0
-                51.9600    1.3200    2.7800    0.2100    7.9300   13.0600   21.8800    0.8200    0.0400         0
-                52.3400    0.0700    8.1600    0.6200    6.3400   30.3400    2.0200    0.1100         0         0
-                54.7000    0.0400    3.4600    1.2400    5.9600   31.6500    2.9500         0         0         0
-                57.5100         0    1.4800    0.0800    5.1800   33.9100    1.4300    0.4100         0         0
-                      0    0.0700   51.6800   17.6100    8.7900   21.8400         0         0         0         0
-                      0         0   29.5900   40.9600   13.6400   15.8100         0         0         0         0
-                      0    1.3600   31.5400   31.3000   33.0800    2.7300         0         0         0         0
-                47.2900         0   33.8900         0         0         0   16.9300    1.8900         0         0
-                50.5900         0   31.6600         0         0         0   14.3200    3.4200    0.0100         0
+cal.mem_oxd = [ 41.1800         0         0         0    8.5000   50.3200         0         0         0         0
+                30.4600         0         0         0   65.6500    3.8900         0         0         0         0
+                52.4200         0    8.0800    0.6900    6.5800   30.2300    2.0000         0         0         0
+                55.0500         0    3.0100    1.1600    6.0100   31.7100    3.0600         0         0         0
+                58.0200         0    0.9600    0.0300    5.2700   34.3300    1.3900         0         0         0
+                52.0600         0    5.0900         0    4.4800   19.0600   19.2500    0.0600         0         0
+                56.6200         0    3.6000         0    2.0100   26.0000   10.5000    1.2700         0         0
+                51.3300         0    0.0300         0   26.8300    3.7000   16.1000    2.0100         0         0
+                42.2000    0.6700   21.0300    2.5400    6.6600   20.6200    6.2800         0         0         0
+                42.1400    1.0100   20.5500    2.0900    7.4000   20.7200    6.0900         0         0         0
+                42.0400    1.0600   20.3600    1.9400    8.0600   20.4700    6.0700         0         0         0
+                      0         0   48.4300   22.2100    7.6900   21.6800         0         0         0         0
+                      0         0   20.6600   39.9300   34.1900    5.2100         0         0         0         0
+                42.9300         0   36.7600         0         0         0   20.3100         0         0         0
+                66.2800         0   21.0700         0         0         0    1.9200   10.7300         0         0
+                66.6000         0   19.5100         0         0         0    0.5500    7.2200    6.1200         0
+                      0   16.3900    2.2700         0   79.1600    2.1800         0         0         0         0
+                      0   54.8100    0.0700         0   41.3700    3.7500         0         0         0         0
+                      0   37.0600    0.2600         0   62.6800         0         0         0         0         0
+                100.000         0         0         0         0         0         0         0         0         0
                       0         0         0         0         0         0         0         0         0  100.0000]; % water (wat)
 
- nmem = 18;
- PHS_nmem = [18 3 2 4 3 3 2 1];
+ nmem = 21;
+ PHS_nmem = [21 2 3 3 3 2 3 3 1 1];
+ 
 
 
 % extract melt phase end-member composition and project back to 
@@ -153,6 +153,7 @@ cal.mem_oxd = [ 42.3500    0.4100   21.4600    2.8100    5.8000   20.9600    6.2
 PHS_mem = zeros(npts,nphs,nmem);
 MLT_mem = zeros(npts,nmem);
 SOL_mem = zeros(npts,nmem);
+MEM_oxd = cal.mem_oxd
 kmem = 1;
 for iph = 1:nphs
     imem  = kmem:kmem+min(nmem,PHS_nmem(iph))-1;

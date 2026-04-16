@@ -24,11 +24,17 @@ for j = 1:cal.nmsy
 end
 
 cm_oxd_all = zeros(size(c,1),size(c,2),9);
-cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
 cx_oxd_all = zeros(size(c,1),size(c,2),9);
-cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
  c_oxd_all = zeros(size(c,1),size(c,2),9);
- c_oxd_all(:,:,cal.ioxd) = c_oxd;
+if cal.noxd>9
+    cm_oxd_all = cm_oxd(:,:,cal.ioxd);
+    cx_oxd_all = cx_oxd(:,:,cal.ioxd);
+     c_oxd_all =  c_oxd(:,:,cal.ioxd);
+else
+    cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
+    cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
+     c_oxd_all(:,:,cal.ioxd) = c_oxd;
+end
 
 % update phase densities
 rhom0  = reshape(DensityX(reshape(cm_oxd_all,Nz*Nx,9),293,Pref./1e8)    ,Nz,Nx);
@@ -150,12 +156,11 @@ if Nz==1; Pt    = max(Ptop,(1-delta).*Pt + delta.*(Ptop.*ones(size(Tp)) + Pcoupl
     Pl(2:end,:) = Pl(1,:) + repmat(cumsum(mean(rhow(2:end-1,:),2).*g0.*h),1,Nx);
     Pt          = max(Ptop,(1-delta).*Pt + delta.*(Pl + Pcouple*Pf(2:end-1,2:end-1)));   
 end
-Ptx = Pt + Pcouple.*Pc(2:end-1,2:end-1)./(1-mucff);
 
 % update melt viscosity
-etam   = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
-etamax = etacntr.*min(etam(:));
-etam   = 1./(1./etamax + 1./etam);
+etam    = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
+etammax = etacntr.*min(etam(:));
+etam    = 1./(1./etammax + 1./etam);
 
 % update solid T,C-dependent viscosity
 etax0  = reshape(prod(cal.etax0(1:end-1).^reshape(chi_mem(:,:,1:end-1)+eps,Nz*Nx,cal.nmem-1),2),Nz,Nx);
@@ -209,56 +214,28 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
        + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
        +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
 
-mufact = (1-exp(-mu./1e-4));
-weak   = exp(-(XX.^2+ZZ.^2)/(2*h)^2);
+mufact = (1-exp(-mu./1e-4));%(1-exp(-deltac./100)).*(mu>mumin);
 Peff   = Pt - mufact.*(Pl + Pf(2:end-1,2:end-1));
-yieldt = max(1e4,mufact.*min(pyield + Pc(2:end-1,2:end-1), 10*pyield - Pc(2:end-1,2:end-1)) + (1-mufact).*(tyield + (0.5.*(1-weak)).*Pt));
+yieldt = max(1e4,mufact.*min(pyield + Pc(2:end-1,2:end-1), 10*pyield - Pc(2:end-1,2:end-1)) + (1-mufact).*(tyield + 0.5.*Pt));
 yieldp = max(1e4,pyield - tII);
 
 % get yield shear viscosity
-etai   = (1-delta).*etai + delta.*(yieldt./(eII + 1e-32) + etaymin);
-% eta    = ((1./etai.^4 + 1./eta0.^4).^-(1/4));
-eta    = min(eta0,etai);
-% zeta0  = zeta0.*min(1,etai./eta0);
+etay   = (yieldt./(eII + 1e-32) + etaymin);
+etai   = min(eta0,etay);
 
 % get yield compaction viscosity
 upsy   = mufact.*(max(0,ups)+max(0,-ups/10));
-zetai  = (1-delta).*zetai + delta.*(yieldp./(upsy + 1e-32) + etaymin);
-% zeta   = ((1./zetai.^4 + 1./zeta0.^4).^-(1/4));
-zeta   = min(zeta0,zetai);
+zetay  = (yieldp./(upsy + 1e-32) + etaymin);
+zetai  = min(zeta0,zetay);
 
 % apply min/max bounds to viscosities
-etamax  = etacntr.*max(min(eta(:)),etamin);
-eta     = 1./(1./etamax + 1./eta) + etamin;
+etai    = 1./(1./etamax + 1./etai) + etamin;
 zetamax = etamax./mucff;
 zetamin = etamin./mucff;
-zeta    = 1./(1./zetamax + 1./zeta) + zetamin;
+zetai   = 1./(1./zetamax + 1./zetai) + zetamin;
 
-if cff_reg
-    eta = log10(eta);
-    for i = 1:cff_reg
-        eta = eta + diffus(eta,1/8*ones(size(eta)),1,[1,2],BCD);
-    end
-    eta = 10.^eta;
-
-    zeta = log10(zeta);
-    for i = 1:cff_reg
-        zeta = zeta + diffus(zeta,1/8*ones(size(zeta)),1,[1,2],BCD);
-    end
-    zeta = 10.^zeta;
-
-    KD = log10(KD);
-    for i = 1:cff_reg
-        KD = KD + diffus(KD,1/8*ones(size(KD)),1,[1,2],BCD);
-    end
-    KD = 10.^KD;
-    
-    Ks = log10(Ks);
-    for i = 1:cff_reg
-        Ks = Ks + diffus(Ks,1/8*ones(size(Ks)),1,[1,2],BCD);
-    end
-    Ks = 10.^Ks;
-end
+eta     =  eta.^(1-delta) .*  etai.^delta;
+zeta    = zeta.^(1-delta) .* zetai.^delta;
 
 % interpolate to staggered stencil nodes
 if     meansw == 0 % Geometric

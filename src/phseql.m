@@ -34,7 +34,7 @@ Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
 
 findmoho;
 
-Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+5e3,Nz,1));
+Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+2e3,Nz,1));%(etax>1e20);
 Gemc = cm  .*Gem;
 Gemt = trcm.*Gem;
 Gems = sm  .*Gem;
@@ -43,24 +43,26 @@ findmelt;
 
 %Extrusion
 
-extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w) + path_ratio.*(ZZ<=melt_depth);
-Gex = erupt_ratio * extr_shape.*(-sum(Gem,1))./sum(extr_shape,1);
+extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w);
+path_shape = path_ratio.*(ZZ<max(h,melt_depth));
+Gex = erupt_ratio * (extr_shape+path_shape).*(-sum(Gem,1))./sum((extr_shape+path_shape),1);
 for i=1:2; Gex = Gex + diff(Gex(:,icx),2,2)./4; end
 
-Gexc = erupt_ratio * extr_shape.*(-sum(Gemc,1))./sum(extr_shape,1);
+Gexc = erupt_ratio * (extr_shape+path_shape).*(-sum(Gemc,1))./sum((extr_shape+path_shape),1);
 for i=1:2; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./4; end
 
-Gext = erupt_ratio * extr_shape.*(-sum(Gemt,1))./sum(extr_shape,1);
+Gext = erupt_ratio * (extr_shape+path_shape).*(-sum(Gemt,1))./sum((extr_shape+path_shape),1);
 for i=1:2; Gext = Gext + diff(Gext(:,icx,:),2,2)./4; end
 
-% Gexs = sx.*Gem;
-Gexs = cPx.*log((T0+273.15)./Tref).*Gem;
-Gexs = erupt_ratio * extr_shape.*(-sum(Gexs,1))./sum(extr_shape,1);
+sx0   = cPx.*log((T0+273.15)./Tref);
+Gems0 = sx0 .* Gem;
+Gexs  = erupt_ratio * extr_shape.*(-sum(Gems0,1))./sum(extr_shape,1) ...
+      + erupt_ratio * path_shape.*(-sum(Gems ,1))./sum(path_shape,1);
 for i=1:2; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
 
 % Intrusion
 
-intr_shape = (1-path_ratio).*exp(-abs(ZZ - MOHO_depth) / bnd_w) + path_ratio.*(ZZ>=MOHO_depth & ZZ<=melt_depth);
+intr_shape = (1-path_ratio).*exp(-abs(ZZ - min(MOHO_depth,melt_depth-h)) / bnd_w) + path_ratio.*(ZZ>min(MOHO_depth,melt_depth-h) & ZZ<melt_depth);
 Gin = (1-erupt_ratio) * intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
 for i=1:2; Gin = Gin + diff(Gin(:,icx),2,2)./4; end
 Gex = Gex + Gin.*(T-273.15<=Tsol);

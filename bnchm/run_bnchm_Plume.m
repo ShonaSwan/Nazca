@@ -19,6 +19,19 @@ for nn = NN
     N        =  nn;                  % number of grid points in z-direction (incl. 2 ghosts)
     h        =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 
+    % define dimensional scales
+    h0    = D/10;
+    e0    = 1e18;
+    Drho0 = 500;
+    p0    = Drho0*g0*h0;
+    u0    = p0*h0./e0;
+    K0    = h0^2/e0;
+    t0    = h0/u0;
+    MFD0  = Drho0/t0;
+    CMP0  = 1/t0;
+    g0    =  10;  
+
+
     % update inner indeces
     inz = 2:N+1;
     inx = 2:N+1;

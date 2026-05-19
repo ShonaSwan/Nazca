@@ -1,5 +1,8 @@
 % create manufactured solution
-load ocean;  
+
+load ./colmap/ocean.mat
+colmap = ocean;   
+
 clear x z SOL W U wm um Pf Pc
 TINY = 1e-16;
 mumin = 1e-3;
@@ -33,7 +36,7 @@ DivV_mms(x,z) = (diff(W_mms,z) + diff(U_mms,x));
 Pf_mms(x,z) = -1e6 .*(cos(4*(x)*pi/L).*sin(4*(z)*pi/L)) + zeta_mms(x,z) * DivV_mms(x,z);
 wm_mms(x,z) = - Ks_mms(x,z) * (diff(Pf_mms, z) - ( rhom_mms(x,z) - rhoref ) * g0); %3e-10.*(sin(4*(x)*pi/L).*cos(  4*(z)*pi/L)); 
 um_mms(x,z) = - Ks_mms(x,z) *  diff(Pf_mms, x); %1e-9.*(cos(4*(x)*pi/L).*sin(4.5*(z)*pi/L)); 
-Pc_mms(x,z) = - DivV_mms(x,z) * zeta_mms(x,z); %5e8 .*(sin(  4*(z)*pi/L))* mu_mms(x,z);
+Pc_mms(x,z) = 1e6 .* sin(4*pi*x/L).*cos(4*pi*z/L); %- zeta_mms(x,z) * DivV_mms(x,z);
 
 fprintf(1,'       W    = %s \n',char(W_mms));
 fprintf(1,'       U    = %s \n',char(U_mms));
@@ -68,15 +71,16 @@ fprintf(1,' . ');
 % manufactured solution residuals
 res_W_mms = -(diff(tzz_mms(x,z),z) + diff(txz_mms(x,z),x)) + diff(Pf_mms(x,z),z) + diff(Pc_mms(x,z),z) - (rho_mms(x,z)-rhoref)*g0;
 res_U_mms = -(diff(txx_mms(x,z),x) + diff(txz_mms(x,z),z)) + diff(Pf_mms(x,z),x) + diff(Pc_mms(x,z),x);
+res_Pf_mms = DivrhoV_mms(x,z) + DivMv_mms(x,z) + src_mms(x,z); 
+% Diagnostic residuals (not checking)
 res_wm_mms =  wm_mms(x,z) + Ks_mms(x,z) * (diff(Pf_mms(x,z), z) - ( rhom_mms(x,z) - rhoref) * g0);
 res_um_mms =  um_mms(x,z) + Ks_mms(x,z) *  diff(Pf_mms(x,z), x); 
-res_Pf_mms =  DivrhoV_mms(x,z) + DivMv_mms(x,z) + src_mms(x,z);
 res_Pc_mms =  DivV_mms(x,z)  + Pc_mms(x,z) / zeta_mms(x,z);
 fprintf(1,' . ');
 
 % plot manufactured solution
 figure(15);
-colormap(ocean);
+colormap(colmap);
 subplot(2,3,1); fcontour( -W_mms*yr   ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $W$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,2); fcontour(  U_mms*yr   ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $U$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,3); fcontour( -wm_mms*yr  ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufcat. $wm$ [m/yr]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
@@ -87,7 +91,7 @@ drawnow;
 fprintf(1,' . ');
 
 figure(16);
-colormap(ocean);
+colormap(colmap);
 subplot(2,3,1); fcontour(       rho_mms ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\rho$ [kg/m$^3$]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,2); fcontour(log10(eta_mms) ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\eta$ [log$_{10}$ Pas]','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
 subplot(2,3,3); fcontour(       src_mms ,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar('TicklabelInterpreter','latex'); box on; title('manufact. $\dot{Volsrc} [1/s]$','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]); set(gca,'TicklabelInterpreter','latex')
@@ -121,21 +125,21 @@ src_U_mms = double(subs(res_U_mms)); fprintf(1,' . ');
 % Cell Centers 
 [x,z] = meshgrid(x_mms,z_mms);
 src_Pf_mms = double(subs(res_Pf_mms)); fprintf(1,' . ');
-% src_Pc_mms = double(subs(res_Pc_mms)); fprintf(1,' . ');
+src_Pc_mms = double(subs(res_Pc_mms)); fprintf(1,' . ');
 
 % plot manufactured residuals and evaluated source terms
 figure(17);
-colormap(ocean);
+colormap(colmap);
 subplot(2,3,1); fcontour(-res_W_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $W$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
 subplot(2,3,2); fcontour(-res_U_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $U$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
-subplot(2,3,3); fcontour(-res_Pf_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $P_f$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
+subplot(2,3,3); fcontour(res_Pf_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $P_f$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
 subplot(2,3,4); imagesc(x_mms,zw_mms,-src_W_mms); axis ij equal tight; colorbar; box on; title('evaluated $W$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
 subplot(2,3,5); imagesc(xu_mms,z_mms,-src_U_mms); axis ij equal tight; colorbar; box on; title('evaluated $U$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
 subplot(2,3,6); imagesc(x_mms,z_mms,src_Pf_mms); axis ij equal tight; colorbar; box on; title('evaluated $P_f$-res','Interpreter','latex','Units','normalized','Position',[0.5,1.09,0]);
 drawnow;
 
 % figure(18);
-% colormap(ocean);
+% colormap(colmap);
 % subplot(2,3,1);fcontour(-res_um_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $um$-res','Interpreter','latex');
 % subplot(2,3,2); fcontour(-res_Pf_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $Pf$-res','Interpreter','latex');
 % subplot(2,3,3); fcontour(-res_Pc_mms,[0,L],'LineWidth',1.5); axis ij equal tight; colorbar; box on; title('manufactured $Pc$-res','Interpreter','latex');
@@ -159,18 +163,30 @@ muw_mms = double(subs(mu_mms));
 muw_mms = muw_mms(:,2:end-1);  
 Ksw     = double(subs(Ks_mms)); fprintf(1,' . ');
 Ksw     = Ksw(:,2:end-1);
+
+rhoxw   = double(subs(rho_mms));
+rhoxw   = rhoxw(:, 2:end-1);
+Mw      = double(subs(mu_mms)); fprintf(1,' . ');
+Mw      = Mw(:,2:end-1);
+
 %U grid 
 [x,z] = meshgrid(xu_mms,z_mms);
 U_mms   = double(subs(U_mms)); fprintf(1,' . ');
 um_mms  = double(subs(um_mms)); fprintf(1,' . ');
 Mx      = double(subs(M_mms)); fprintf(1,' . ');
-Mx      = Mx(2:end-1,:);
+Mx      = Mx(2:end-1,2:end-1);
 rhou    = double(subs(rho_mms)); fprintf(1,' . ');
 rhou    = rhou(2:end-1,:);
 muu_mms = double(subs(mu_mms)); 
 muu_mms = muu_mms(2:end-1,:);
 Ksu     = double(subs(Ks_mms)); fprintf(1,' . ');
 Ksu     = Ksu(2:end-1,:);
+
+rhoxu  = double(subs(rho_mms));
+rhoxu  = rhoxu(2:end-1, :);  
+Mu      = double(subs(um_mms)); fprintf(1,' . ');
+Mu      = Mu(2:end-1,:);
+
 %Center
 [x,z] = meshgrid(x_mms,z_mms);
 Pf_mms  = double(subs(Pf_mms)); fprintf(1,' . ');
@@ -185,6 +201,10 @@ rho     = double(subs(rho_mms)); fprintf(1,' . ');
 rho     = rho(2:end-1,2:end-1);
 VolSrc  = double(subs(src_mms)); fprintf(1,' . ');
 VolSrc  = VolSrc(2:end-1,2:end-1);
+
+rhox     = double(subs(rho_mms)); fprintf(1,' . ');
+rhox     = rhox(2:end-1,2:end-1);
+
 %Corner 
 [x,z]   = meshgrid(xu_mms,zw_mms);
 etaco   = double(subs(eta_mms)); fprintf(1,' . ');

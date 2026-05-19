@@ -47,10 +47,12 @@ T0        =  5;                   % temperature top layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
 dTr       =  0;                   % amplitude of random noise [deg C]
 dTg       =  0;                   % amplitude of centred gaussian [deg C]
-c0        =  [0.73 0.16 0.10 0.01 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.64 0.15 0.20 0.01 0.004 0.002];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+
 c1        =  c0;                  % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,-1,0,0,0]*0e-3;     % amplitude of random noise [wt SiO2]
+dcr       =  [1,1,1,-1,-1,-1]*0e-4;    % amplitude of random noise [wt SiO2]
 dcg       =  [0,0,0,0,0,0,0];     % amplitude of centred gaussian [wt SiO2]
+delta     =  0.2;                 % relaxing parameter for viscosity update
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
 trc0     =  [1,1,1,1,1,1];       % trace elements top layer [wt ppm]
@@ -61,31 +63,22 @@ dg_trc   =  [0,0,0,0,0,0];       % trace elements centred gaussian [wt ppm]
 % set initial thermo-chemical state (Crust)
 crust_sw  =  1;                     % 0 = no crust, 1 = crust 
 Hcmin     =  6e3;                   % Minimum crustal thickness 
-c_crust   =  [0.01 0.13 0.80 0.06 0];    % components (maj comp, H2O) Crustal layer
+c_crust   =  [0.01 0.13 0.80 0.06 0 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state (Plume)
 dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
 pl_width  = 50e3;                               % Width of the plume [m]
 pl_local  = L/2;                                % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.70 0.18 0.11 0.01 0];            % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
-trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+c_plume   = [0.68 0.16 0.15 0.01 0 0];           % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];    % trace elements system plume [wt ppm]
+tracer_sw =  0;                   
 
-% Plastic Deformation 
-tyield    =  5e7;                 % yield stress for shear failure [Pa]
-pyield    =  1e7;                 % yield pressure for tensile failure [Pa]
-etaymin   =  1e20;                % minimum yield viscosity
 
-% Melt Extraction Algorythm 
-erupt_ratio = 0.5;                % 1 = all eruption (surface), 0 = all 
-tau_e     =  1e4*yr;              % extraction/eruption time (set to 0 to tie to dt)
-mthr      =  0.10;                % threshold melt fraction for extraction/eruption
-
-% set thermo-chemical boundary parameters
-% fractxtl =  0;                   % fractional crystallisation mode for 0-D (Nz=Nx=1)
-% fractmlt =  0;                   % fractional melting mode for 0-D (Nz=Nx=1)
-% fractres =  0.25;                % residual fraction for fractionation mode
-% dPdT     =  0e5;                 % decompression rate for 0D models
+%Extract, Extrude, and Intrude melt
+erupt_ratio = 0.50;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
+path_ratio  = 0.10;               % melt spread across the extraction path 
+mthr        = 0.25;               % threshold melt fraction for extraction/eruption
 
 Ptop     =  4.0e7;                 % top pressure [Pa]
 
@@ -99,19 +92,32 @@ trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elemen
 
 % set thermo-chemical material parameters
 calID    =  'MORB_lo';           % phase diagram calibration
-aTm      =  5e-5;                % melt  thermal expansivity [1/K]
-aTx      =  1e-5;                % xtal  thermal expansivity [1/K]
-kTm      =  1;                   % melt  thermal conductivity [W/m/K]
-kTx      =  5;                   % xtal  thermal conductivity [W/m/K]
-cPm      =  1300;                % melt  heat capacity [J/kg/K]
-cPx      =  1000;                % xtal  heat capacity [J/kg/K]
 tau_r    =  1e3*yr;              % reaction time scale (set to zero for quasi-equilibrium mode)
+tau_e     =  1e2*yr;              % extraction/eruption time (set to 0 to tie to dt)
 
-% set model buoyancy and pressure parameters
-bPx      =  1e-11;               % solid compressibility [1/Pa]
-bPm      =  1e-11;               % melt  compressibility [1/Pa]
-dx0      =  1e-2;                % crystal size [m]
+% physical parameters
+bPx       =  1e-11;               % solid compressibility [1/Pa]
+bPm       =  1e-11;               % melt  compressibility [1/Pa]
+dx0       =  1e-2;                % matrix grain size
 g0       =  10.;                 % gravity [m/s2]
+aTm       =  5e-5;                % melt  thermal expansivity [1/K]
+aTx       =  1e-5;                % xtal  thermal expansivity [1/K]
+kTm       =  1;                   % melt  thermal conductivity [W/m/K]
+kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
+cPm       =  1300;                % melt  heat capacity [J/kg/K]
+cPx       =  1000;                % xtal  heat capacity [J/kg/K]
+tyield    =  6e7;                 % yield stress for shear failure [Pa]
+pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e20;                % minimum yield viscosity
+n_disl    =   3.0;                % dislocation creep powerlaw 
+lmbd_melt =  27;                  % exponential melt weakening prefactor
+b_perm    = 100;                  % permeability geometric factor [50-1000]
+cff_reg   =   0;                  % rheological coefficient regularisation level
+buoy      =   1;                  % switch between active and passive flow
+Delta     =  100;                 % dispersivity correlation length [m]
+km        =  1e-9;                % minimum diffusivity for regularisation [m2/s]
+kx        =  1e-9;                % minimum diffusivity for regularisation [m2/s]
+
 
 % set numerical model parameters
 meansw   =  0;                   % 0 = Geometric mean 1 = Arithmetic mean

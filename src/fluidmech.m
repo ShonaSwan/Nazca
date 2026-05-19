@@ -114,20 +114,11 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-if bndmode == 0 % Mid ocean Ridge set up 
-    ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
-    aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)-1];
-    % aa  = zeros(size(ii)) + bnd_spr/u0 * 2;
-    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
-else
     ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
     aa  = zeros(size(ii));
     IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
     IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
     IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];   
-end
 
 % bottom boundary
 ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
@@ -145,6 +136,7 @@ aa  = zeros(size(ii));
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % right boundary
+if bndmode == 0 % Mid ocean Ridge set up 
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
 if iter==1; indm = U((2:end-1),end-1) < 0 | Zc.' < LAB_depth(end); end
 aa  = zeros(size(ii));
@@ -152,6 +144,14 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uright];
 aa  = zeros(size(ii)) + (Zc.' < LAB_depth(end)).*sprate/u0;
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+else
+ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Uright];
+aa  = zeros(size(ii));
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];   
+end
 
 % internal points
 ii    = MapU(2:end-1,2:end-1);
@@ -380,8 +380,13 @@ aa  = zeros(size(ii));
 % Coefficients multiplying fluid pressure Pf
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
-rr  = (MFDSrc + MFDCrr)/MFD0;
-if bnchm; rr = rr + src_Pf_mms(2:end-1,2:end-1)/MFD0; end
+
+if bnchm
+    rr  = zeros(size(ii));
+    rr = rr + src_Pf_mms(2:end-1,2:end-1)/MFD0;
+else 
+    rr  = (MFDSrc + MFDCrr)/MFD0;
+end
 
 IIR = [IIR; ii(:)];
 AAR = [AAR; rr(:)];
@@ -436,9 +441,13 @@ aa  = rhox./zeta./(Drho0./e0);
 IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the centre
 
 % RHS
-rr  = (CMPSrc + CMPCrr)./MFD0;
 
-% if bnchm; rr = rr + src_Pc_mms(2:end-1,2:end-1); end
+if bnchm
+    rr  = zeros(size(ii));
+    rr = rr + src_Pc_mms(2:end-1,2:end-1)/p0;
+else 
+    rr  = (CMPSrc + CMPCrr)./MFD0;
+end
 
 IIR = [IIR; ii(:)];AAR = [AAR; rr(:)];
 
@@ -551,9 +560,6 @@ else
     ip0 = MapP(ipz,ipx);
     KP(ip0,:)   = 0;
     KP(ip0,ip0) = speye(length(ip0));
-    % DDs(ip0,: ) = 0;
-    % DDm(ip0,: ) = 0;
-    % RP(ip0    ) = 0;
     
 end
 
@@ -636,10 +642,11 @@ um     = um  * u0;
 Pf     = Pf  * p0;
 Pc     = Pc  * p0;
 
-% phase diffusion rates (for regularisation)
-[~,wqm,uqm] = diffus(mu,km,h,[1,2],BCD);
 
 if ~bnchm
+
+    % phase diffusion rates (for regularisation)
+    [~,wqm,uqm] = diffus(mu,km,h,[1,2],BCD);
 
     % update phase velocities
     Wx  = W + 0. + 0.;  % xtl z-velocity

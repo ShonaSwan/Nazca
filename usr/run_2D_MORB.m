@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB_hc1';      % run identifier
+runID     =  '2D_MORB';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -29,7 +29,7 @@ tracer_sw =  0;                   % Tracer point switch
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
-bndmode   =  0;                   % boundary assimilation mode (0 = MOR; 1 = Plume 
+bndmode   =  1;                   % boundary assimilation mode ( 0 = MOR 1/2; 1 = MOR full; 2 = Plume; 3 = Plume/Ridge
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt

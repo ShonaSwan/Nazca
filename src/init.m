@@ -130,17 +130,22 @@ bnd_V = zeros(Nz,Nx);
 
 % Boundary condition options:
 % -1 = free slip, +1 = No slip, 0 = No gradient/Symetrical
-if bndmode == 0 %Mid Ocean Ridge
+if bndmode == 0 % Mid Ocean Ridge 1/2 spreading 
 Wtop   =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
-Utop   = +1;  Ubot  = -1;  Uleft  =  0;  Uright  = -1;
+Utop   = -1;  Ubot  = -1;  Uleft  = +1;  Uright  = -1;
 qDxtop = -1; 
 Pall = -1;  
-elseif bndmode == 1 % Mantle Plume
+elseif bndmode == 1 % Mid Ocean Ridge full ridge 
+Wtop   =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
+Utop   = -1;  Ubot  = -1;  Uleft  = -1;  Uright  = -1;
+qDxtop = -1; 
+Pall = -1;  
+elseif bndmode == 2 % Mantle Plume
 Wtop  =  0;   Wbot  = -1;  Wleft  = -1;  Wright  = -1;
 Utop  =  -1;  Ubot  = -1;  Uleft  =  0;  Uright  =  0;
 qDxtop = -1;
 Pall = -1;
-elseif bndmode == 2 %Plume-Ridge Setting 
+elseif bndmode == 3 %Plume-Ridge Setting 
 Wtop   =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
 Utop   = +1;  Ubot  = -1;  Uleft  =  0;  Uright  = -1;
 qDxtop = -1; 
@@ -184,7 +189,11 @@ switch init_mode
          trc(:,:,i) = trc0(i) + (trc_plume(i) - trc0(i)) .* pl_profile + (trc_crust(i) - trc0(i)) .* (1 - erf((ZZ/D - Hc/D + rp*h*dlay)/wlay_c))/2 + dr_trc(i).*rp + dg_trc(i).*gp;
         end
     case 'MOR'
+        if bndmode == 0  
         sprtime = XX./sprate + minage;
+        elseif bndmode == 1  
+        sprtime = abs(XX-L/2)./sprate + minage;
+        end 
         Tp = T0 + (T1 - T0) * erf(ZZ ./ (2 * sqrt(1e-6 * sprtime)));
 
         for i = 1:cal.ncmp
@@ -219,10 +228,8 @@ switch init_mode
     
 end 
 
-
 %Defining the top bounday spreading rate 's' shape function
-bnd_spr = (1-exp(-Xu./bnd_sprw)) .* sprate;
-
+%bnd_spr = (1-exp(-Xu./bnd_sprw)) .* sprate;
 % apply initial boundary layers
 
 Tin = Tp;
@@ -371,11 +378,15 @@ while res > tol
         eqtime = toc(eqtime);
         EQtime = EQtime + eqtime;
 
+
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             mi  = m;
-            % msc = m.*minit./max(m(:));%.*(1-ZZ./D).^2.*(1-XX/L).^2;
-            msc = (minit.^-1+(m+eps).^-1).^(-1/1).*(1-XX/L).^1;
+             if bndmode == 1 
+                  msc = (minit.^-1 + (m+eps).^-1).^(-1).* (1 - abs(XX-L/2)./(L/2)).^1;
+             else
+                  msc = (minit.^-1+(m+eps).^-1).^(-1/1).*(1-XX/L).^1;
+             end
             m   = m .* min(1,msc./(m+eps)).^0.1;
             % m(end-1:end,:) = 0;
             % m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);

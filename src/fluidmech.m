@@ -128,20 +128,30 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Ubot];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % left boundary
+if bndmode == 1 % Mid ocean Ridge Full spreading 
+ii  = MapU((2:end-1),1); jj1 = ii; jj2 = MapU((2:end-1),2);
+if iter==1; indm = U((2:end-1),1) > 0 | Zc.' < LAB_depth(end); end
+aa  = zeros(size(ii));
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uleft];
+aa  = zeros(size(ii)) - (Zc.' < LAB_depth(end)).*sprate/u0;
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+else 
 ii  = MapU((2:end-1),1); jj1 = ii; jj2 = MapU((2:end-1),2);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Uleft];
 aa  = zeros(size(ii));
-IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];  
+end
 
 % right boundary
-if bndmode == 0 % Mid ocean Ridge set up 
+if bndmode == 0  || bndmode == 1 % Mid ocean Ridge set up 
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
-if iter==1; indm = U((2:end-1),end-1) < 0 | Zc.' < LAB_depth(end); end
+if iter==1; indmR = U((2:end-1),end-1) < 0 | Zc.' < LAB_depth(end); end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uright];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indmR).*Uright];
 aa  = zeros(size(ii)) + (Zc.' < LAB_depth(end)).*sprate/u0;
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 else

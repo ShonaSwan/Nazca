@@ -132,7 +132,8 @@ bnd_V = zeros(Nz,Nx);
 % -1 = free slip, +1 = No slip, 0 = No gradient/Symetrical
 if bndmode == 0 % Mid Ocean Ridge 1/2 spreading 
 Wtop   =  0;  Wbot  = -1;  Wleft  = -1;  Wright  = -1;
-Utop   = -1;  Ubot  = -1;  Uleft  = +1;  Uright  = -1;
+%Utop   = -1;  Ubot  = -1;  Uleft  = +1;  Uright  = -1;
+Utop   = -1;  Ubot  = -1;  Uleft  = 0;  Uright  = -1;
 qDxtop = -1; 
 Pall = -1;  
 elseif bndmode == 1 % Mid Ocean Ridge full ridge 

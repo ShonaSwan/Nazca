@@ -9,8 +9,8 @@ CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
 res_MFD = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
 res_CMP = rhox.*(Pc(2:end-1,2:end-1)./zeta + ups);
 
-% [MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/2,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
-% MFDCrr = MFDCrr*MFD0;
+[MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/2,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
+MFDCrr = MFDCrr*MFD0;
 
 % [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/2,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter*~frst);
 % CMPCrr = CMPCrr*MFD0;

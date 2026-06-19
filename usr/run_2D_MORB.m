@@ -8,7 +8,7 @@ run('./par_default')
 
 runID     =  '2D_MORB';      % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  50;                  % output frame plotted/saved every 'nop' time steps
+nop       =  5;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
 save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
@@ -74,9 +74,11 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';           % phase diagram calibration
-tau_r     =  1e2*yr;              % phase change reaction time (set to 0 to tie to dt)
+tau_phs   =  1e2*yr;            % phase change reaction time (set to 0 to tie to dt)
+tau_cex   = 1e7;                 % reaction timescale [s] (grain_size^2 / diffusivity)
+reac_w    = 0.01;                % melt fraction threshold (for smooth transition)
 tau_e     =  1e2*yr;              % extraction/eruption time (set to 0 to tie to dt)
-minit     =  0.003;                % maximum initial melt fraction
+minit     =  0.003;               % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]

@@ -38,7 +38,7 @@ s = S./RHO;
 [T ,si] = StoT(T ,s,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
-
+%% 
 %***  update major component densities
 
 % major component advection
@@ -74,6 +74,7 @@ c = C./RHOC;
 
 if Rcouple || frst; phseql; end
 
+%% 
 
 %***  update phase fraction densities
 
@@ -117,34 +118,34 @@ subsol  = m<=eps^0.5 & T<=reshape(cal.Tsol+273.15,Nz,Nx);
 supliq  = x<=eps^0.5 & T>=reshape(cal.Tliq+273.15,Nz,Nx);
 subsolc = repmat(subsol,1,1,cal.ncmp);
 supliqc = repmat(supliq,1,1,cal.ncmp);
-rnorm   = 1;  tol  = atol;
-it      = 1;  mxit = 100;
-upd_cm  = 0.*cm;  upd_cx = 0.*cx;
-cm = cmq;  cx = cxq;
-while rnorm>tol && it<mxit
-
-    Kx = cx./(cm+eps);
-
-    cm  = c    ./(m + x.*Kx + eps); 
-    cx  = c.*Kx./(m + x.*Kx + eps); 
-
-    cm  = cm./sum(cm,3);
-    cx  = cx./sum(cx,3);
-
-    r = x.*cx + m.*cm - c;
-    r(subsolc) = 0; r(supliqc) = 0;
-    rnorm = norm(r(:))./norm(c(:));
-
-    it  = it+1;
-end
-
-if (it==mxit && rnorm>tol)
-    disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
-end
+% rnorm   = 1;  tol  = atol;
+% it      = 1;  mxit = 100;
+% upd_cm  = 0.*cm;  upd_cx = 0.*cx;
+% cm = cmq;  cx = cxq;
+% while rnorm>tol && it<mxit
+% 
+%     Kx = cx./(cm+eps);
+% 
+%     cm  = c    ./(m + x.*Kx + eps); 
+%     cx  = c.*Kx./(m + x.*Kx + eps); 
+% 
+%     cm  = cm./sum(cm,3);
+%     cx  = cx./sum(cx,3);
+% 
+%     r = x.*cx + m.*cm - c;
+%     r(subsolc) = 0; r(supliqc) = 0;
+%     rnorm = norm(r(:))./norm(c(:));
+% 
+%     it  = it+1;
+% end
+% 
+% if (it==mxit && rnorm>tol)
+%     disp(['!!! Lever rule adjustment not converged after ',num2str(mxit),' iterations !!!']);
+% end
 
 % fix subsolidus and superliquidus conditions
-cx(subsolc) = c(subsolc); x(subsol) = 1; m(subsol) = 0;
-cm(supliqc) = c(supliqc); m(supliq) = 1; x(supliq) = 0;
+% cx(subsolc) = c(subsolc); x(subsol) = 1; m(subsol) = 0;
+% cm(supliqc) = c(supliqc); m(supliq) = 1; x(supliq) = 0;
 
 % record timing
 TCtime = TCtime + toc - eqtime.*Rcouple;

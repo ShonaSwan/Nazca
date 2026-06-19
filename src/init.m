@@ -56,6 +56,7 @@ lncls = colmap([5,135],:);
 
 Dsm = cal.Dsx;
 
+
 % normalise major components to anhydrous unit sum, rescale to hydrous
 % c0(1:end-1) = c0(1:end-1)./sum(c0(1:end-1)).*(1-c0(end));
 % c1(1:end-1) = c1(1:end-1)./sum(c1(1:end-1)).*(1-c1(end));
@@ -306,8 +307,7 @@ if cal.noxd>9
 else
     cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
 end
-trcm = zeros(Nz,Nx,cal.ntrc);
-trcx = zeros(Nz,Nx,cal.ntrc);
+
 aT   = aTm;
 kT   = kTm;
 cP   = cPm; RhoCp = rho.*cP;
@@ -409,7 +409,10 @@ while res > tol
         X    = rho.*x;
         M    = rho.*m;  RHO = X+M;
         C    = rho.*c;
-        TRC  = rho.*trc;
+        TRCm = M.*trcm;
+        TRCx = X.*trcx;
+        
+
         S    = rho.*s;
 
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Pt),cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
@@ -426,7 +429,8 @@ Tpo  = Tp;
 So   = S;  
 Mo   = M;
 Co   = C;
-TRCo = TRC;
+TRCmo = TRCm;
+TRCxo = TRCx;
 Xo   = X;
 rhoo = rho;
 rhoxo = rhox;
@@ -471,24 +475,28 @@ bnd_TRC = zeros(Nz,Nx,cal.ntrc);
 adv_TRC = zeros(Nz,Nx,cal.ntrc);
 dff_TRC = zeros(Nz,Nx,cal.ntrc);
 K_trc   = zeros(Nz,Nx,cal.ntrc);
-dTRCdt  = 0.*trc; dTRCdto = dTRCdt;
+dTRCmdt  = 0.*trc; dTRCmdto = dTRCmdt;
+dTRCxdt  = 0.*trc; dTRCxdto = dTRCxdt;
 specrad.S.est   = 0.5.*ones(Nz*Nx,1);          specrad.S.mean   = 0.5;
 specrad.MFD.est = 0.5.*ones(Nz*Nx,1);          specrad.MFD.mean = 0.5;
 specrad.CMP.est = 0.5.*ones(Nz*Nx,1);          specrad.CMP.mean = 0.5;
 specrad.C.est   = 0.5.*ones(Nz*Nx*cal.ncmp,1); specrad.C.mean   = 0.5;
-specrad.TRC.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRC.mean = 0.5;
+specrad.TRCm.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRCm.mean = 0.5;
+specrad.TRCx.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRCx.mean = 0.5;
 specrad.PHS.est = 0.5.*ones(Nz*Nx*2       ,1); specrad.PHS.mean = 0.5;
 GHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.CMP = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
-GHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
+GHST.TRCm = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
+GHST.TRCx = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 GHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
 FHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.CMP = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
-FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
+FHST.TRCm = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
+FHST.TRCx = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 FHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
 
 % initialise timing and iterative parameters
@@ -527,7 +535,7 @@ if restart
     
     if exist(name,'file')
         fprintf('\n   restart from %s \n\n',name);
-        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+        load(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRCm','TRCx','trcm;','trcx','trc',dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
         name = [outdir,'/',runID,'/',runID,'_hist'];
         load(name,'hist');
 

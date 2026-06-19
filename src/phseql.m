@@ -23,12 +23,46 @@ xq = xq./(mq+xq);
 cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
 cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
 
-% phase mass transfer rates
-Gm  = (mq-m).*RHO/(tau_r+3*dt);
-Gx  = (xq-x).*RHO/(tau_r+3*dt);
+Ktrc    = zeros(Nz,Nx,cal.ntrc);
+trcmq   = zeros(Nz,Nx,cal.ntrc);
+trcxq   = zeros(Nz,Nx,cal.ntrc);
 
-Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+3*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
+for i = 1:cal.ntrc  
+    % update bulk partitioning coefficients
+    for j=1:cal.nmem; Ktrc(:,:,i) = Ktrc(:,:,i) + cal.Ktrc_mem(i,j) .* cx_mem(:,:,j)./100; end
+
+    % update trace element phase compositions
+    trcmq(:,:,i) = trc(:,:,i)./(m + x.*Ktrc(:,:,i));
+    trcxq(:,:,i) = trc(:,:,i)./(m./Ktrc(:,:,i) + x);
+end  
+
+% smooth weighting for small melt fraction (Low melt → force equilibrium)
+melt_weight = 0.5 * (1 + tanh((m - 0.005)/0.003)); 
+
+% phase mass transfer rates
+Gm  = (mq-m).*RHO/(tau_phs+3*dt);
+Gx  = (xq-x).*RHO/(tau_phs+3*dt);
+
+% equilibrium component transfer rates
+Gmcq = (cmq.*mq-cm.*m).*RHO/(tau_phs+3*dt);
+Gxcq = (cxq.*xq-cx.*x).*RHO/(tau_phs+3*dt);
+
+% disequilibrium component transfer rates
+
+% phase change component transfer (sum over comp to Gm, Gx, sum over phs to 0)
+Gmc = max(0,Gm).*cmq - max(0,Gx).*cxq;
+Gxc = max(0,Gx).*cxq - max(0,Gm).*cmq;
+
+Gmcex = (cmq - cm) .* M / tau_cex;
+Gxcex = (cxq - cx) .* X / tau_cex;
+
+% chemical exchange component transfer (sum over comp to 0, sum over phs to 0)
+Gmtrc = max(0,Gm).*trcmq - max(0,Gx).*trcxq;
+Gxtrc = max(0,Gx).*trcxq - max(0,Gm).*trcmq;
+
+Gmtrcex = (trcmq - trcm) .* M / tau_cex;
+Gxtrcex = (trcxq - trcx) .* X / tau_cex;
+
 
 % extract, extrude, and intrude melt
 

@@ -46,10 +46,14 @@ while time <= tend && step <= Nt
 
     % renormalise partial densities to bulk density
     X = x.*rho;  M   = m.*rho;   S = s.*rho;
-    C = c.*rho;  TRC = trc.*rho; 
-
+    C = c.*rho;  
+    %TRC = trc.*rho; 
+    TRCm = M.*trcm;
+    TRCx = X.*trcx;
     % record model history
     history;
+
+
 
     % print model diagnostics
     diagnose;

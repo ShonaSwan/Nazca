@@ -18,7 +18,9 @@ hist.sumB(stp  ) = sum(rho(:)*h*h*1)+eps;  % [kg]
 hist.sumM(stp  ) = sum(  M(:)*h*h*1)+eps;  % [kg]
 hist.sumX(stp  ) = sum(  X(:)*h*h*1)+eps;  % [kg]
 hist.sumC(stp,:) = squeeze(sum(sum(C  *h*h*1,1),2))+eps; % [kg]
-hist.sumT(stp,:) = squeeze(sum(sum(TRC*h*h*1,1),2))+eps; % [kg]
+hist.sumTm(stp,:) = squeeze(sum(sum(TRCm*h*h*1,1),2))+eps; % [kg]
+hist.sumTx(stp,:) = squeeze(sum(sum(TRCx*h*h*1,1),2))+eps; % [kg]
+
 
 % record expected rates of change by volume change and imposed boundaries layers
 dsumSdt =  sum(sum((diss_h + bnd_S + Gems + Gexs + Gins)*h*h*1)) ...
@@ -62,7 +64,8 @@ if step>=2; hist.DB(stp  ) = (a2*hist.DB(max(1,stp-1)  ) + a3*hist.DB(max(1,stp-
 if step>=2; hist.DM(stp  ) = (a2*hist.DM(max(1,stp-1)  ) + a3*hist.DM(max(1,stp-2)  ) + (b1*dsumMdt + b2*dsumMdto + b3*dsumMdtoo)*dt)/a1; else; hist.DM(stp  ) = 0; end  % [kg]
 if step>=2; hist.DX(stp  ) = (a2*hist.DX(max(1,stp-1)  ) + a3*hist.DX(max(1,stp-2)  ) + (b1*dsumXdt + b2*dsumXdto + b3*dsumXdtoo)*dt)/a1; else; hist.DX(stp  ) = 0; end  % [kg]
 if step>=2; hist.DC(stp,:) = (a2*hist.DC(max(1,stp-1),:) + a3*hist.DC(max(1,stp-2),:) + (b1*dsumCdt + b2*dsumCdto + b3*dsumCdtoo)*dt)/a1; else; hist.DC(stp,:) = zeros(1,cal.ncmp); end  % [kg]
-if step>=2; hist.DT(stp,:) = (a2*hist.DT(max(1,stp-1),:) + a3*hist.DT(max(1,stp-2),:) + (b1*dsumTdt + b2*dsumTdto + b3*dsumTdtoo)*dt)/a1; else; hist.DT(stp,:) = zeros(1,cal.ntrc); end  % [kg]
+if step>=2; hist.DTm(stp,:) = (a2*hist.DTm(max(1,stp-1),:) + a3*hist.DTm(max(1,stp-2),:) + (b1*dsumTdt + b2*dsumTdto + b3*dsumTdtoo)*dt)/a1; else; hist.DTm(stp,:) = zeros(1,cal.ntrc); end  % [kg]
+if step>=2; hist.DTx(stp,:) = (a2*hist.DTx(max(1,stp-1),:) + a3*hist.DTx(max(1,stp-2),:) + (b1*dsumTdt + b2*dsumTdto + b3*dsumTdtoo)*dt)/a1; else; hist.DTx(stp,:) = zeros(1,cal.ntrc); end  % [kg]
 
 % if step>=2; hist.DS(stp  ) = (1*hist.DS(max(1,stp-1)  ) + 0*hist.DS(max(1,stp-2)  ) + (1*dsumSdt + 0*dsumSdto + 0*dsumSdtoo)*dt)/1; else; hist.DS(stp  ) = 0; end  % [kg]
 % if step>=2; hist.DB(stp  ) = (1*hist.DB(max(1,stp-1)  ) + 0*hist.DB(max(1,stp-2)  ) + (1*dsumBdt + 0*dsumBdto + 0*dsumBdtoo)*dt)/1; else; hist.DB(stp  ) = 0; end  % [kg]
@@ -77,7 +80,8 @@ hist.EB(stp  ) = (hist.sumB(stp  ) - hist.DB(stp  ) - hist.sumB(1  ))./hist.sumB
 hist.EM(stp  ) = (hist.sumM(stp  ) - hist.DM(stp  ) - hist.sumM(1  ))./hist.sumB(1);  % [kg/kg]
 hist.EX(stp  ) = (hist.sumX(stp  ) - hist.DX(stp  ) - hist.sumX(1  ))./hist.sumB(1);  % [kg/kg]
 hist.EC(stp,:) = (hist.sumC(stp,:) - hist.DC(stp,:) - hist.sumC(1,:))./hist.sumB(1);  % [kg/kg]
-hist.ET(stp,:) = (hist.sumT(stp,:) - hist.DT(stp,:) - hist.sumT(1,:))./hist.sumB(1);  % [kg/kg]
+hist.ETm(stp,:) = (hist.sumTm(stp,:) - hist.DTm(stp,:) - hist.sumTm(1,:)) ./ hist.sumB(1); % melt [kg/kg]
+hist.ETx(stp,:) = (hist.sumTx(stp,:) - hist.DTx(stp,:) - hist.sumTx(1,:)) ./ hist.sumB(1); % solid [kg/kg]
 
 % record variable and coefficient diagnostics
 hist.W(stp,1) = min(min(-W(:,2:end-1)));

@@ -31,3 +31,4 @@ trcm = TRCm ./ max(1e-3,M);
 trcx = TRCx ./ max(1e-3,X);
 
 % TRC = TRCm + TRCx;
+

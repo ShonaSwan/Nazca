@@ -63,7 +63,6 @@ Gxtrc = max(0,Gx).*trcxq - max(0,Gm).*trcmq;
 Gmtrcex = (trcmq - trcm) .* M / tau_cex;
 Gxtrcex = (trcxq - trcx) .* X / tau_cex;
 
-
 % extract, extrude, and intrude melt
 
 findmoho;

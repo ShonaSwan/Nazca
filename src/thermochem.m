@@ -46,33 +46,38 @@ sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 [advn_Cx,qz_advn_Cx,qx_advn_Cx] = advect(X.*cx,Ux(2:end-1,:),Wx(:,2:end-1),h,{ADVN,''},[1,2],BCA);     % solid advection
 
 % major component dispersion
-[diff_Cm,qz_diff_Cm,qx_diff_Cm] = diffus(cm,M.*kd,h,[1,2],BCD); 
-[diff_Cx,qz_diff_Cx,qx_diff_Cx] = diffus(cx,X.*kx,h,[1,2],BCD);
+[diff_Cm,qz_diff_Cm,qx_diff_Cm] = diffus(m.*cm, rho.*kd, h, [1,2], BCD); 
+[diff_Cx,qz_diff_Cx,qx_diff_Cx] = diffus(x.*cx, rho.*kx, h, [1,2], BCD);
 
 bnd_C = zeros(size(C));
 if ~isnan(cwall(1)); bnd_C = bnd_C + ((cwall(1,:,:).*rho)-C)./(tau_T+dt) .* topshape; end
 if ~isnan(cwall(2)); bnd_C = bnd_C + ((cwall(2,:,:).*rho)-C)./(tau_T+dt) .* botshape; end
 
-% total rate of change
-dCdt = - advn_Cm - advn_Cx + diff_Cm + diff_Cx + bnd_C + Gemc + Gexc + Ginc + bnd_C;                         
-  
+% total rate of change      
+dCmdt = -advn_Cm + diff_Cm + Gemc + Ginc + Gmc + Gmcex;     
+dCxdt = -advn_Cx + diff_Cx + Gexc        + Gxc + Gxcex + bnd_C; 
+
 % residual of major component evolution
-res_C = (a1*C-a2*Co-a3*Coo) - (b1*dCdt + b2*dCdto + b3*dCdtoo)*dt;
+res_Cm = (a1*Cm-a2*CMo-a3*CMoo) - (b1*dCmdt + b2*dCmdto + b3*dCmdtoo)*dt;
+res_Cx = (a1*Cx-a2*CXo-a3*CXoo) - (b1*dCxdt + b2*dCxdto + b3*dCxdtoo)*dt;
 
 % semi-implicit update of major component density
-[C,GHST.C,FHST.C,specrad.C] = iterate(C,res_C,specrad.C,GHST.C,FHST.C,itpar,iter);
-
+[Cm, GHST.Cm, FHST.Cm, specrad.Cm] = iterate(Cm, res_Cm, specrad.Cm, GHST.Cm, FHST.Cm, itpar, iter);
+[Cx, GHST.Cx, FHST.Cx, specrad.Cx] = iterate(Cx, res_Cx, specrad.Cx, GHST.Cx, FHST.Cx, itpar, iter);
 % impose min/max limits on component densities
-C = max(0,min(rho, C ));
 
-% convert component density to concentration
-RHOC = sum(C,3);
-c = C./RHOC;
+cm = Cm ./ max(1e-3, M);
+cx = Cx ./ max(1e-3, X);
+
+C = Cm + Cx;
+RHOC = sum(C,3);          % for normalisation if needed
+c = C ./ max(1e-12, RHOC);
 
 
 %*** update phase equilibrium if full reactive coupling on
 
 if Rcouple || frst; phseql; end
+
 
 %% 
 

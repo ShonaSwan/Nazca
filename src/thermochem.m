@@ -53,9 +53,9 @@ bnd_C = zeros(size(C));
 if ~isnan(cwall(1)); bnd_C = bnd_C + ((cwall(1,:,:).*rho)-C)./(tau_T+dt) .* topshape; end
 if ~isnan(cwall(2)); bnd_C = bnd_C + ((cwall(2,:,:).*rho)-C)./(tau_T+dt) .* botshape; end
 
-% total rate of change      
-dCmdt = -advn_Cm + diff_Cm + Gemc + Ginc + Gmc + Gmcex;     
-dCxdt = -advn_Cx + diff_Cx + Gexc        + Gxc + Gxcex + bnd_C; 
+% total rate of change
+dCmdt = -advn_Cm + diff_Cm + Gemc + Ginc + GmcSum ;
+dCxdt = -advn_Cx + diff_Cx + Gexc + GxcSum + bnd_C;
 
 % residual of major component evolution
 res_Cm = (a1*Cm-a2*CMo-a3*CMoo) - (b1*dCmdt + b2*dCmdto + b3*dCmdtoo)*dt;

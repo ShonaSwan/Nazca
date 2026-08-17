@@ -47,14 +47,15 @@ Gx  = (xq-x).*RHO/(tau_phs+3*dt);
 Gmcq = (cmq.*mq-cm.*m).*RHO/(tau_phs+3*dt);
 Gxcq = (cxq.*xq-cx.*x).*RHO/(tau_phs+3*dt);
 
-% phase change component transfer (sum over comp to Gm, Gx, sum over phs to 0)
+% disequlibrium apporach
+% 1. phase change component transfer (sum over comp to Gm, Gx, sum over phs to 0)
 Gmc = max(0,Gm).*cmq - max(0,Gx).*cxq;
 Gxc = max(0,Gx).*cxq - max(0,Gm).*cmq;
 
 Gmtrc = max(0,Gm).*trcmq - max(0,Gx).*trcxq;
 Gxtrc = max(0,Gx).*trcxq - max(0,Gm).*trcmq;
 
-% chemical exchange component transfer (sum over comp to 0, sum over phs to 0)
+% 2. chemical exchange component transfer (sum over comp to 0, sum over phs to 0)
 Gmcex = (cmq - cm) .* M / tau_cex;
 Gxcex = (cxq - cx) .* X / tau_cex;
 
@@ -65,12 +66,13 @@ Gxtrcex = (trcxq - trcx) .* X / tau_cex;
 % defining melt transition point
 mutra = 1e-4;
 %Taking the smoothing from the update two phase transiton
-%mufact .* [two phase] + (1-mufact) .* [single phase]
+% 0 = equlirburm 1 = disequlibrum 
 f_diseq = 1 - exp(-mu./mutra);
 %Adding equlibrum and disequlirbum components weighted by smooth
 %transition functon
 GmcSum = Gmcq + f_diseq .* (Gmc + Gmcex);
 GxcSum = Gxcq + f_diseq .* (Gxc + Gxcex);
+
 % extract, extrude, and intrude melt
 
 findmoho;

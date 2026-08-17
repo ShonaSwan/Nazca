@@ -69,6 +69,9 @@ res_Cx = (a1*Cx-a2*CXo-a3*CXoo) - (b1*dCxdt + b2*dCxdto + b3*dCxdtoo)*dt;
 cm = Cm ./ max(1e-3, M);
 cx = Cx ./ max(1e-3, X);
 
+cm = (1-f_diseq).*cmq + f_diseq.*cm;
+cx = (1-f_diseq).*cxq + f_diseq.*cx;
+
 C = Cm + Cx;
 RHOC = sum(C,3);          % for normalisation if needed
 c = C ./ max(1e-12, RHOC);

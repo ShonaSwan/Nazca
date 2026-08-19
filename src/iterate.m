@@ -37,11 +37,11 @@ end
 
 % Moving average for stability
 rho.est  = 0.7*rho.est  + 0.3*rho_new;                   % moving average
-rho.mean = 0.7*rho.mean + 0.3*geomean(rho_new(ratio>0)); % moving average
+rho.mean = 0.5*rho.mean + 0.5*mean(rho_new); % moving average
 rho.est  = (rho.est.^4 + (rho.mean/2).^4).^(1/4); % avoid outliers
 
 % Fixed-point update coefficients
-alpha(:) = 4./(2 + rho.est).^2;
+alpha(:) = 4./(2 + rho.mean).^2;
 
 % New fixed-point update and iterate
 f(:) = itpar.fp.damp * -alpha(:).*r(:);

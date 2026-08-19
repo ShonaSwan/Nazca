@@ -384,9 +384,9 @@ while res > tol
         if it>10 && any(m(:)>minit)
             mi  = m;
              if bndmode == 1 
-                  msc = (minit.^-1 + (m+eps).^-1).^(-1).* (1 - abs(XX-L/2)./(L/2)).^1;
+                  msc = (minit.^-2 + (m+eps).^-2).^(-1/2).* (1 - abs(XX-L/2)./(L/2)).^(1/3);
              else
-                  msc = (minit.^-1+(m+eps).^-1).^(-1/1).*(1-XX/L).^1;
+                  msc = (minit.^-2 + (m+eps).^-2).^(-1/2).* (1 -     XX/L          ).^(1/3);
              end
             m   = m .* min(1,msc./(m+eps)).^0.1;
             % m(end-1:end,:) = 0;
@@ -431,8 +431,8 @@ Tpo  = Tp;
 So   = S;  
 Mo   = M;
 %Co   = C;
-CMo  = Cm;
-CXo  = Cx;
+Cmo  = Cm;
+Cxo  = Cx;
 % CMoo = Cm;
 % CXoo = Cx;
 TRCmo = TRCm;
@@ -522,7 +522,8 @@ dsumSdto = 0;  dsumSdt = 0;
 dsumBdto = 0;  dsumBdt = 0;
 dsumMdto = 0;  dsumMdt = 0;
 dsumXdto = 0;  dsumXdt = 0;
-dsumCdto = 0;  dsumCdt = 0;
+dsumCmdto = 0;  dsumCmdt = 0;
+dsumCxdto = 0;  dsumCxdt = 0;
 dsumTdto = 0;  dsumTdt = 0;
 
 % tracer switch 

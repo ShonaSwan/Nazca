@@ -17,18 +17,27 @@ if ~isnan(trcwall(1)); bnd_TRC = bnd_TRC + ((trcwall(1,:,:).*rho)-TRCx)./(tau_T+
 if ~isnan(trcwall(2)); bnd_TRC = bnd_TRC + ((trcwall(2,:,:).*rho)-TRCx)./(tau_T+dt) .* botshape; end
 
 % Total rate of change
-dTRCmdt = - advn_TRCm + diff_TRCm + Gemt + Gint + Gmtrc + Gmtrcex;              % re-equilibration
-dTRCxdt = - advn_TRCx + diff_TRCx + Gext        + Gxtrc + Gxtrcex + bnd_TRC;    % re-equilibration
+dTRCmdt = - advn_TRCm + diff_TRCm + Gmtrc + Gemt + Gint;         
+dTRCxdt = - advn_TRCx + diff_TRCx + Gxtrc + Gext        + bnd_TRC;
+
+dTRCmdt_lim0 = -TRCm/3/dt;
+dTRCxdt_lim0 = -TRCx/3/dt;
+
+dTRCmdt = max(dTRCmdt_lim0,dTRCmdt);
+dTRCxdt = max(dTRCxdt_lim0,dTRCxdt);
 
 % Time integration
 res_TRCm = (a1*TRCm-a2*TRCmo-a3*TRCmoo) - (b1*dTRCmdt + b2*dTRCmdto + b3*dTRCmdtoo)*dt;
 res_TRCx = (a1*TRCx-a2*TRCxo-a3*TRCxoo) - (b1*dTRCxdt + b2*dTRCxdto + b3*dTRCxdtoo)*dt;
 
-[TRCm,GHST.TRCm,FHST.TRCm,specrad.TRCm] = iterate(TRCm,res_TRCm,specrad.TRCm,GHST.TRCm,FHST.TRCm,itpar,iter);
-[TRCx,GHST.TRCx,FHST.TRCx,specrad.TRCx] = iterate(TRCx,res_TRCx,specrad.TRCx,GHST.TRCx,FHST.TRCx,itpar,iter);
+[trcm,GHST.TRCm,FHST.TRCm,specrad.TRCm] = iterate(trcm,res_TRCm./max(mutra.*rho,M),specrad.TRCm,GHST.TRCm,FHST.TRCm,itpar,iter);
+[trcx,GHST.TRCx,FHST.TRCx,specrad.TRCx] = iterate(trcx,res_TRCx./max(mutra.*rho,X),specrad.TRCx,GHST.TRCx,FHST.TRCx,itpar,iter);
 
-trcm = TRCm ./ max(1e-3,M); 
-trcx = TRCx ./ max(1e-3,X);
+% impose min/max limits on component densities
+trcm = max(0,trcm);
+trcx = max(0,trcx);
 
-% TRC = TRCm + TRCx;
-
+trc  = m.*trcm + x.*trcx;
+TRCm = M.*trcm;
+TRCx = X.*trcx;
+TRC  = TRCm + TRCx;

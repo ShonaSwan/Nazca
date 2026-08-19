@@ -1,7 +1,7 @@
 [Soo    , So    ] = deal(So    , S    );
 %[Coo    , Co    ] = deal(Co    , C    );
-[CMoo   , CMo   ] = deal(CMo   , Cm   );
-[CXoo   , CXo   ] = deal(CXo   , Cx   );
+[Cmoo   , Cmo   ] = deal(Cmo   , Cm   );
+[Cxoo   , Cxo   ] = deal(Cxo   , Cx   );
 [Moo    , Mo    ] = deal(Mo    , M    );
 [Xoo    , Xo    ] = deal(Xo    , X    );
 [rhooo  , rhoo  ] = deal(rhoo  , rho  );

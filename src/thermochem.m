@@ -66,9 +66,9 @@ res_C  = (a1*C -a2*Co -a3*Coo ) - (b1*dCdt  + b2*dCdto  + b3*dCdtoo )*dt;
 [C , GHST.C , FHST.C , specrad.C ] = iterate(C , res_C , specrad.C , GHST.C , FHST.C , itpar,iter, [0,nan]);
 
 % impose min/max limits on component densities
-Cm = max(0,min(rho,Cm));  %cm = cm./sum(cm+eps,3);
-Cx = max(0,min(rho,Cx));  %cx = cx./sum(cx+eps,3);
-C  = max(0,min(rho,C ));  %c  = c ./sum(c +eps,3);
+Cm = max(0,min(rho,Cm));
+Cx = max(0,min(rho,Cx));
+C  = max(0,min(rho,C ));
 
 
 %***  update trace components
@@ -137,10 +137,6 @@ x  = X./(M+X);
 
 %***  update partial densities
 
-% partial phase densities
-% X  = x.*rho;
-% M  = m.*rho;
-
 % blend diseq/eq phase and mixture major components
 cq  = C./(M+X);  cq = cq./sum(cq+eps,3);
 cmd = (1-f_diseq).*cmq + f_diseq .* Cm./max(M,1e-9.*rho);  cmd = cmd./sum(cmd+eps,3);
@@ -153,11 +149,6 @@ cx = (1-f_diseq).*c./(m./Kx + x) + f_diseq.*cxd;  cx = cx./sum(cx+eps,3);
 Kx = (cx+eps)./(cm+eps);
 end
 
-% partial major component densities
-% Cm = cm.*M;
-% Cx = cx.*X;
-% C  = Cm + Cx;
-
 % truncate residuals to diseq/eq domain
 res_Cm = f_diseq.*res_Cm;
 res_Cx = f_diseq.*res_Cx;
@@ -168,24 +159,14 @@ trcq  = TRC./(M+X);
 trcmd = (1-f_diseq).*trcmq + f_diseq .* TRCm./max(M,1e-9.*rho);
 trcxd = (1-f_diseq).*trcxq + f_diseq .* TRCx./max(X,1e-9.*rho);
 trc   = (1-f_diseq).*trcq  + f_diseq .* (m.*trcmd + x.*trcxd);
-trcm  = (1-f_diseq).*trc./(m + x.*Ktrc) + f_diseq.*trcm;
-trcx  = (1-f_diseq).*trc./(m./Ktrc + x) + f_diseq.*trcx;
-
-% partial trace component densities
-% TRCm = M.*trcm;
-% TRCx = X.*trcx;
-% TRC  = TRCm + TRCx;
+trcm  = (1-f_diseq).*trc./(m + x.*Ktrc) + f_diseq.*trcmd;
+trcx  = (1-f_diseq).*trc./(m./Ktrc + x) + f_diseq.*trcxd;
 
 % convert entropy S to natural temperature T and potential temperature Tp
 s = S./(M+X);
 [Tp,~ ] = StoT(Tp,s,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 [T ,si] = StoT(T ,s,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
-
-% partial entropy densities
-% Sm = M.*sm;
-% Sx = X.*sx;
-% S  = Sm + Sx;
 
 
 %*** update phase equilibrium if full reactive coupling on

@@ -41,9 +41,28 @@ while time <= tend && step <= Nt
 
     %%%% Upsate phase equlibrium
     phseql; 
-    
+
     % record model history
     history;
+
+    % partial phase densities
+    X  = x.*rho;
+    M  = m.*rho;
+
+    % partial major component densities
+    Cm = cm.*M;
+    Cx = cx.*X;
+    C  = Cm + Cx;
+
+    % partial trace component densities
+    TRCm = M.*trcm;
+    TRCx = X.*trcx;
+    TRC  = TRCm + TRCx;
+
+    % partial entropy densities
+    Sm = M.*sm;
+    Sx = X.*sx;
+    S  = Sm + Sx;
 
     % print model diagnostics
     diagnose;

@@ -359,8 +359,8 @@ while res > tol
         xq = xq./(mq+xq);
         x  = xq;  m = mq;
 
-        cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-        cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+        cxq = reshape(var.cx,Nz,Nx,cal.ncmp); cxq = cxq./sum(cxq,3);
+        cmq = reshape(var.cm,Nz,Nx,cal.ncmp); cmq = cmq./sum(cmq,3);
         cm  = cmq; cx = cxq;
 
         update;
@@ -383,12 +383,13 @@ while res > tol
         % Removing melt to get a suitable initial melt fraction
         if it>10 && any(m(:)>minit)
             mi  = m;
-             if bndmode == 1 
-                  msc = (minit.^-2 + (m+eps).^-2).^(-1/2).* (1 - abs(XX-L/2)./(L/2)).^(1/3);
-             else
-                  msc = (minit.^-2 + (m+eps).^-2).^(-1/2).* (1 -     XX/L          ).^(1/3);
-             end
-            m   = m .* min(1,msc./(m+eps)).^0.1;
+            if bndmode == 1
+                rdist = max(0.01,min(0.99,sqrt((XX./L-1/2).^2 + (ZZ./D).^2)));
+            else
+                rdist = max(0.01,min(0.99,sqrt((XX./L).^2 + (ZZ./D).^2)));
+            end
+            msc = (minit.^-4 + (m+eps).^-4).^(-1/4).* (1 - rdist).^(1/1);
+            m   = m .* min(1,msc./(m+eps)).^0.01;
             % m(end-1:end,:) = 0;
             % m   = m + diffus(m,1e-3*ones(size(rp)),1,[1,2],BCD);
 
@@ -411,11 +412,12 @@ while res > tol
         C    = rho.*c;
         Cm   = M.*cm;
         Cx   = X.*cx;
+        TRC  = rho.*trc;
         TRCm = M.*trcm;
         TRCx = X.*trcx;
-
-
-        S    = rho.*s;
+        Sm = M.*sm;
+        Sx = X.*sx;
+        S  = Sm + Sx;
 
         [T ,si] = StoT(T ,S./rho,cat(3,Pt,Pt),cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 
@@ -430,11 +432,10 @@ To   = T;
 Tpo  = Tp;
 So   = S;  
 Mo   = M;
-%Co   = C;
+Co   = C;
 Cmo  = Cm;
 Cxo  = Cx;
-% CMoo = Cm;
-% CXoo = Cx;
+TRCo = TRC;
 TRCmo = TRCm;
 TRCxo = TRCx;
 Xo   = X;
@@ -457,14 +458,14 @@ Gemc = 0.*c; Gexc = 0.*c;
 Gemt = 0.*trc; Gext = 0.*trc;
 
 % initialise auxiliary variables
-dSdt   = 0.*T;  dSdto  = dSdt; diss_h = 0.*T;
+dSdt   = 0.*T;  dSdto  = dSdt; diss_h = 0.*T;  res_S = 0.*S;
 dTpdt  = 0.*T;  dTpdto = dTpdt;
 dTdt   = 0.*T;  dTdto  = dTdt;
-%dCdt   = 0.*c;  dCdto  = dCdt;
-dCmdt  = 0.*c;  dCmdto  = dCmdt;
-dCxdt  = 0.*c;  dCxdto  = dCxdt;
-dXdt   = 0.*x;  dXdto  = dXdt;
-dMdt   = 0.*m;  dMdto  = dMdt;
+dCdt   = 0.*c;  dCdto  = dCdt;
+dCmdt  = 0.*c;  dCmdto  = dCmdt; res_Cm = 0.*cm;
+dCxdt  = 0.*c;  dCxdto  = dCxdt; res_Cx = 0.*cx;
+dXdt   = 0.*x;  dXdto  = dXdt; res_X = 0.*x;
+dMdt   = 0.*m;  dMdto  = dMdt; res_M = 0.*m;
 qz_advn_Sx = 0.*W; qx_advn_Sx = 0.*U;
 qz_advn_Sm = 0.*W; qx_advn_Sm = 0.*U;
 qz_diff_S  = 0.*W; qx_diff_S  = 0.*U;
@@ -479,41 +480,50 @@ qz_diff_TRCm = 0.*W; qx_diff_TRCm = 0.*U;
 qz_advn_X  = 0.*W; qx_advn_X  = 0.*U;
 qz_advn_M  = 0.*W; qx_advn_M  = 0.*U;
 qz_diff_M  = 0.*W; qx_diff_M  = 0.*U;
+qz_diff_X  = 0.*W; qx_diff_X  = 0.*U;
 bnd_TRC = zeros(Nz,Nx,cal.ntrc);
 adv_TRC = zeros(Nz,Nx,cal.ntrc);
 dff_TRC = zeros(Nz,Nx,cal.ntrc);
 K_trc   = zeros(Nz,Nx,cal.ntrc);
+dTRCdt   = 0.*trc; dTRCdto  = dTRCdt;
 dTRCmdt  = 0.*trc; dTRCmdto = dTRCmdt;
 dTRCxdt  = 0.*trc; dTRCxdto = dTRCxdt;
-specrad.S.est   = 0.5.*ones(Nz*Nx,1);          specrad.S.mean   = 0.5;
-specrad.MFD.est = 0.5.*ones(Nz*Nx,1);          specrad.MFD.mean = 0.5;
-specrad.CMP.est = 0.5.*ones(Nz*Nx,1);          specrad.CMP.mean = 0.5;
-specrad.Cm.est  = 0.5.*ones(Nz*Nx*cal.ncmp,1); specrad.Cm.mean  = 0.5;
-specrad.Cx.est  = 0.5.*ones(Nz*Nx*cal.ncmp,1); specrad.Cx.mean  = 0.5;
-specrad.TRCm.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRCm.mean = 0.5;
-specrad.TRCx.est = 0.5.*ones(Nz*Nx*cal.ntrc,1); specrad.TRCx.mean = 0.5;
-specrad.PHS.est = 0.5.*ones(Nz*Nx*2       ,1); specrad.PHS.mean = 0.5;
+specrad.S.est   = 0.9.*ones(Nz*Nx,1);          specrad.S.mean   = 0.9;
+specrad.MFD.est = 0.9.*ones(Nz*Nx,1);          specrad.MFD.mean = 0.9;
+specrad.CMP.est = 0.9.*ones(Nz*Nx,1);          specrad.CMP.mean = 0.9;
+specrad.C.est   = 0.9.*ones(Nz*Nx*cal.ncmp,1); specrad.C.mean   = 0.9;
+specrad.Cm.est  = 0.9.*ones(Nz*Nx*cal.ncmp,1); specrad.Cm.mean  = 0.9;
+specrad.Cx.est  = 0.9.*ones(Nz*Nx*cal.ncmp,1); specrad.Cx.mean  = 0.9;
+specrad.TRC.est = 0.9.*ones(Nz*Nx*cal.ntrc,1); specrad.TRC.mean = 0.9;
+specrad.TRCm.est = 0.9.*ones(Nz*Nx*cal.ntrc,1); specrad.TRCm.mean = 0.9;
+specrad.TRCx.est = 0.9.*ones(Nz*Nx*cal.ntrc,1); specrad.TRCx.mean = 0.9;
+specrad.X.est = 0.9.*ones(Nz*Nx       ,1); specrad.X.mean = 0.9;
+specrad.M.est = 0.9.*ones(Nz*Nx       ,1); specrad.M.mean = 0.9;
 GHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
 GHST.CMP = zeros(Nz*Nx, itpar.aa.m+1);
-%GHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
+GHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
 GHST.Cm  = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
 GHST.Cx  = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
+GHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 GHST.TRCm = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 GHST.TRCx = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
-GHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
+GHST.X = zeros(Nz*Nx       , itpar.aa.m+1);
+GHST.M = zeros(Nz*Nx       , itpar.aa.m+1);
 FHST.S   = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.MFD = zeros(Nz*Nx, itpar.aa.m+1);
 FHST.CMP = zeros(Nz*Nx, itpar.aa.m+1);
-%FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
+FHST.C   = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
 FHST.Cm  = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
 FHST.Cx  = zeros(Nz*Nx*cal.ncmp, itpar.aa.m+1);
+FHST.TRC = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 FHST.TRCm = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
 FHST.TRCx = zeros(Nz*Nx*cal.ntrc, itpar.aa.m+1);
-FHST.PHS = zeros(Nz*Nx*2       , itpar.aa.m+1);
+FHST.X = zeros(Nz*Nx       , itpar.aa.m+1);
+FHST.M = zeros(Nz*Nx       , itpar.aa.m+1);
 
 % initialise timing and iterative parameters
-frst    = 1;
+frst    = 0;
 step    = 0;
 time    = 0;
 %iter    = 2;
@@ -524,7 +534,10 @@ dsumMdto = 0;  dsumMdt = 0;
 dsumXdto = 0;  dsumXdt = 0;
 dsumCmdto = 0;  dsumCmdt = 0;
 dsumCxdto = 0;  dsumCxdt = 0;
-dsumTdto = 0;  dsumTdt = 0;
+dsumCdto  = 0;  dsumCdt  = 0;
+dsumTRCmdto = 0;  dsumTRCmdt = 0;
+dsumTRCxdto = 0;  dsumTRCxdt = 0;
+dsumTRCdto  = 0;  dsumTRCdt  = 0;
 
 % tracer switch 
 if tracer_sw == 1

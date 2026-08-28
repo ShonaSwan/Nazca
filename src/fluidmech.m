@@ -6,13 +6,13 @@ if ~bnchm && step>0 && ~restart
 MFDSrc = - (a1*rho -a2*rhoo -a3*rhooo )/dt + Gex + Gem + Gin;
 CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
 
-res_MFD = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
-res_CMP = rhox.*(Pc(2:end-1,2:end-1)./zeta + ups);
+res_MFD = (a1*rho-a2*rhoo-a3*rhooo) - (b1*drhodt + b2*drhodto + b3*drhodtoo)*dt;
+res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
 
-[MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
+[MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/dt,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter,[nan,nan]);
 MFDCrr = MFDCrr*MFD0;
 
-% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter*~frst);
+% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/dt,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter,[nan,nan]);
 % CMPCrr = CMPCrr*MFD0;
 
 end

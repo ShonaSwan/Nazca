@@ -14,28 +14,29 @@ save_op   =  0;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  180e3;               % chamber depth [m]
-N         =  90;                 % number of grid points in z-direction
+D         =  100e3;               % chamber depth [m]
+N         =  50;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
-dt        =  1e2*yr;              % initial time step [s]
-mumin     =  1e-5;                % Setting lower limit for melt fraction in coeff. 
-mumax     =  0.20;                % Setting upper limit for melt fraction in coeff.
+dt        =  100*yr;              % initial time step [s]
+mumin     =  1e-6;                % lower limit for melt fraction in coeff. 
+mumax     =  0.20;                % upper limit for melt fraction in coeff.
+mutra     =  1e-4;                % transition point to disequilibrium, tensile plasticity
 tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
-bndmode   =  1;                   % boundary assimilation mode ( 0 = MOR 1/2; 1 = MOR full; 2 = Plume; 3 = Plume/Ridge
+bndmode   =  0;                   % boundary assimilation mode ( 0 = MOR 1/2; 1 = MOR full; 2 = Plume; 3 = Plume/Ridge
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.50;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
 path_ratio  = 0.10;               % melt spread across the extraction path 
-mthr        = 0.20;               % threshold melt fraction for extraction/eruption
+mthr        = 0.10;               % threshold melt fraction for extraction/eruption
 
 % MOR Spreading parameters  
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
@@ -46,10 +47,10 @@ minage    =  1e5*yr;              % (20e6 / 7e5)
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.64 0.15 0.20 0.01 0.004 0.002];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.64 0.15 0.20 0.01 0.000 0.000];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,1,1,-1,-1,-1]*0e-4;     % Random perturbation of the composition field
-dr_trc    =  [1,1,1,-1,-1,0]*0e-2;       % trace elements random noise           
+dcr       =  [1,1,-1,-1,-0,-0]*0e-3;     % Random perturbation of the composition field
+dr_trc    =  [1,1,0,-1,-1,-10]*0e-3;       % trace elements random noise           
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
 
 % set initial thermo-chemical state of the Crust  
@@ -60,14 +61,14 @@ trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 0;                                % Temperature difference between the plume and the mantle 
-pl_width  = 50e3;                               % Width of the plume [m]
+pl_width  = 10e3;                               % Width of the plume [m]
 pl_local  = 0; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.68 0.16 0.15 0.01 0 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
-trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];   % trace elements system plume [wt ppm]
+c_plume   = [0.60 0.13 0.22 0.04 0.008 0.004];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+trc_plume = [10.0, 10.0, 10.0, 0.1, 0.1, 1.0];   % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/4;                 % boundary layer width [m]
-tau_T     =  (h/2)^2/1e-6;        % wall cooling/assimilation time [s]
+tau_T     =  (h/4)^2/1e-6;        % wall cooling/assimilation time [s]
 Twall     =  [T0,1350,nan,nan];   % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
 cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 Ptop      =  4.0e7;               % top pressure [Pa]
@@ -75,10 +76,10 @@ Ptop      =  4.0e7;               % top pressure [Pa]
 % set thermo-chemical material parameters
 calID     =  'MORB_lo';           % phase diagram calibration
 tau_phs   =  1e2*yr;              % phase change reaction time (set to 0 to tie to dt)
-tau_cex   =  1e2*yr;              % reaction timescale [s] (grain_size^2 / diffusivity)
+tau_cex   =  1e3*yr;              % reaction timescale [s] (grain_size^2 / diffusivity)
 reac_w    =  0.01;                % melt fraction threshold (for smooth transition)
 tau_e     =  1e3*yr;              % extraction/eruption time (set to 0 to tie to dt)
-minit     =  0.01;                % maximum initial melt fraction
+minit     =  0.005;                % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]
@@ -90,12 +91,12 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  4e7;                 % yield stress for shear failure [Pa]
-pyield    =  2e7;                 % yield pressure for tensile failure [Pa]
-etaymin   =  1e19;                % minimum yield viscosity
+tyield    =  6e7;                 % yield stress for shear failure [Pa]
+pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
+etaymin   =  1e20;                % minimum yield viscosity
 n_disl    =   1.0;                % dislocation creep powerlaw 
-lmbd_melt =  27;                  % exponential melt weakening prefactor
-b_perm    = 100;                  % permeability geometric factor [50-1000]
+lmbd_melt =   27;                 % exponential melt weakening prefactor
+b_perm    =  100;                 % permeability geometric factor [50-1000]
 cff_reg   =   0;                  % rheological coefficient regularisation level
 buoy      =   0;                  % switch between active and passive flow
 Delta     =  100;                 % dispersivity correlation length [m]
@@ -107,8 +108,8 @@ TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
 CFL       =  0.75;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-3;                % outer its relative tolerance
-atol      =  1e-7;                % outer its absolute tolerance
-maxit     =  10;                  % maximum outer its
+atol      =  1e-5;                % outer its absolute tolerance
+maxit     =  15;                  % maximum outer its
 delta     =  0.2;                % relaxing parameter for viscosity update
 etacntr   =  1e8;                 % maximum viscosity contrast
 etamin    =  1e16;                % minimum viscosity
@@ -116,7 +117,7 @@ Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
 itpar.fp.damp = 1.0;              % fixed-point iterative damping (0-1)
 itpar.aa.m    = 4;                % Anderson acceleration depth (2-7)
-itpar.aa.damp = 0.25;              % Anderson acceleration damping (0-1)
+itpar.aa.damp = 0.0;              % Anderson acceleration damping (0-1)
 itpar.aa.reg  = 1e-9;             % Anderson acceleration regularisation (0-1)
 
 %*****  RUN NAKHLA MODEL  *************************************************

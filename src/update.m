@@ -46,12 +46,6 @@ rhox   = rhox0 .* (1 - aTx.*(T-293) + bPx.*(Pt-Pref));
 rho0   = 1./(m./rhom0 + x./rhox0);
 rho    = 1./(m./rhom  + x./rhox );
 
-% S   = rho.*s;
-% C   = rho.*c;
-% M   = rho.*m;
-% X   = rho.*x;
-% TRC = rho.*trc;
-
 % interpolate to staggered stencil nodes
 
 if meansw == 0 % Geometric
@@ -116,7 +110,7 @@ rhop  = 1./(m./rhomp + x./rhoxp);
 chi    = max(0,min(1, x.*rho./rhox ));
 mu     = max(0,min(1, m.*rho./rhom ));
 
-mucff  = min(mumax,max(mumin,mu)); %(1./mu.^4 + 1./mumax.^4).^-(1/4) + mumin;
+mucff  = min(mumax,max(mumin,mu));
 
 % interpolate to staggered stencil nodes
  
@@ -199,6 +193,7 @@ Xux      = Xu(icz,:).*U;
 Div_rhoV = ddz(rhoW(:,2:end-1),h) + ddx(rhoU(2:end-1,:),h) ...
          + ddz(Mwm (:,2:end-1),h) + ddx(Mum (2:end-1,:),h);
 DivRhoxV = ddz(rhoxw.*W(:,2:end-1),h) + ddx(rhoxu.*U(2:end-1,:),h);
+% DivRhoxV = advect(X,U(2:end-1,:),W(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
 % update compaction rate
 if step>0 && ~restart
@@ -214,7 +209,7 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
        + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
        +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
 
-mufact = (1-exp(-mu./1e-4));%(1-exp(-deltac./100)).*(mu>mumin);
+mufact = (1-exp(-mu./mutra));
 Peff   = Pt - mufact.*(Pl + Pf(2:end-1,2:end-1));
 yieldt = max(1e4,mufact.*min(pyield + Pc(2:end-1,2:end-1), 10*pyield - Pc(2:end-1,2:end-1)) + (1-mufact).*(tyield + 0.5.*Pt));
 yieldp = max(1e4,pyield - tII);
@@ -296,6 +291,6 @@ end
 % update time step
 dtk = (h/2)^2/max([kT(:)./rho(:)./cP(:);kd(:)]);                           % diffusive time step size
 dta =  h/2   /max(abs([Um(:);Wm(:);Ux(:);Wx(:)]));                         % advective time step size
-dt  = min([2*dto,min(CFL*[dtk,dta]),dtmax]);     % time step size
+dt  = min([1.1*dto,min(CFL*[dtk,dta]),dtmax]);     % time step size
 
 UDtime = UDtime + toc;

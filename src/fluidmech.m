@@ -12,8 +12,8 @@ res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
 [MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/dt,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter,[nan,nan]);
 MFDCrr = MFDCrr*MFD0;
 
-% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/dt,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter,[nan,nan]);
-% CMPCrr = CMPCrr*MFD0;
+[CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/dt,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter,[nan,nan]);
+CMPCrr = CMPCrr*MFD0;
 
 end
 
@@ -628,7 +628,7 @@ RR = SCL * RR;
 
 %% Solve linear system of equations for W, U, Pf, Pc
 
-if iter<3; pcol = colamd(LL); end               % update column permutation for sparsity pattern once per time step
+pcol = colamd(LL);                               % update column permutation for sparsity pattern once per time step
 dLL          = decomposition(LL(:,pcol), 'lu');  % get LU-decomposition for consistent performance of LL \ RR
 SS(pcol,1)   = dLL \ RR;                         % solve permuted decomposed system
 

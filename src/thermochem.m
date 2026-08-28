@@ -33,7 +33,7 @@ dSdt  = - advn_Sm - advn_Sx + diff_S + diss_h + Gems + Gexs + Gins + bnd_S;
 res_S = (a1*S-a2*So-a3*Soo) - (b1*dSdt + b2*dSdto + b3*dSdtoo)*dt;
 
 % semi-implicit update of bulk entropy density
-[s,GHST.S,FHST.S,specrad.S] = iterate(s,res_S./rho,specrad.S,GHST.S,FHST.S,itpar,iter,[nan,nan]);
+[S,GHST.S,FHST.S,specrad.S] = iterate(S,res_S,specrad.S,GHST.S,FHST.S,itpar,iter,[nan,nan]);
 
 
 %***  update major components
@@ -61,14 +61,14 @@ res_Cx = (a1*Cx-a2*Cxo-a3*Cxoo) - (b1*dCxdt + b2*dCxdto + b3*dCxdtoo)*dt;
 res_C  = (a1*C -a2*Co -a3*Coo ) - (b1*dCdt  + b2*dCdto  + b3*dCdtoo )*dt;
 
 % semi-implicit update of major component density
-[cm, GHST.Cm, FHST.Cm, specrad.Cm] = iterate(cm, res_Cm./max(M,1e-4.*rho), specrad.Cm, GHST.Cm, FHST.Cm, itpar,iter, [0,1]);
-[cx, GHST.Cx, FHST.Cx, specrad.Cx] = iterate(cx, res_Cx./max(X,1e-4.*rho), specrad.Cx, GHST.Cx, FHST.Cx, itpar,iter, [0,1]);
-[c , GHST.C , FHST.C , specrad.C ] = iterate(c , res_C./             rho , specrad.C , GHST.C , FHST.C , itpar,iter, [0,1]);
+[Cm, GHST.Cm, FHST.Cm, specrad.Cm] = iterate(Cm, res_Cm, specrad.Cm, GHST.Cm, FHST.Cm, itpar,iter, [0,nan]);
+[Cx, GHST.Cx, FHST.Cx, specrad.Cx] = iterate(Cx, res_Cx, specrad.Cx, GHST.Cx, FHST.Cx, itpar,iter, [0,nan]);
+[C , GHST.C , FHST.C , specrad.C ] = iterate(C , res_C , specrad.C , GHST.C , FHST.C , itpar,iter, [0,nan]);
 
 % impose min/max limits on component densities
-cm = max(0,min(1,cm));  cm = cm./sum(cm+eps,3);
-cx = max(0,min(1,cx));  cx = cx./sum(cx+eps,3);
-c  = max(0,min(1,c ));  c  = c ./sum(c +eps,3);
+Cm = max(0,min(rho,Cm));  %cm = cm./sum(cm+eps,3);
+Cx = max(0,min(rho,Cx));  %cx = cx./sum(cx+eps,3);
+C  = max(0,min(rho,C ));  %c  = c ./sum(c +eps,3);
 
 
 %***  update trace components
@@ -96,13 +96,13 @@ res_TRCm = (a1*TRCm-a2*TRCmo-a3*TRCmoo) - (b1*dTRCmdt + b2*dTRCmdto + b3*dTRCmdt
 res_TRCx = (a1*TRCx-a2*TRCxo-a3*TRCxoo) - (b1*dTRCxdt + b2*dTRCxdto + b3*dTRCxdtoo)*dt;
 res_TRC  = (a1*TRC -a2*TRCo -a3*TRCoo ) - (b1*dTRCdt  + b2*dTRCdto  + b3*dTRCdtoo )*dt;
 
-[trcm,GHST.TRCm,FHST.TRCm,specrad.TRCm] = iterate(trcm,res_TRCm./(M+1e-6.*rho),specrad.TRCm,GHST.TRCm,FHST.TRCm,itpar,iter,[0,nan]);
-[trcx,GHST.TRCx,FHST.TRCx,specrad.TRCx] = iterate(trcx,res_TRCx./(X+1e-6.*rho),specrad.TRCx,GHST.TRCx,FHST.TRCx,itpar,iter,[0,nan]);
-[trc ,GHST.TRC ,FHST.TRC ,specrad.TRC ] = iterate(trc ,res_TRC ./         rho ,specrad.TRC ,GHST.TRC ,FHST.TRC ,itpar,iter,[0,nan]);
+[TRCm,GHST.TRCm,FHST.TRCm,specrad.TRCm] = iterate(TRCm,res_TRCm,specrad.TRCm,GHST.TRCm,FHST.TRCm,itpar,iter,[0,nan]);
+[TRCx,GHST.TRCx,FHST.TRCx,specrad.TRCx] = iterate(TRCx,res_TRCx,specrad.TRCx,GHST.TRCx,FHST.TRCx,itpar,iter,[0,nan]);
+[TRC ,GHST.TRC ,FHST.TRC ,specrad.TRC ] = iterate(TRC ,res_TRC ,specrad.TRC ,GHST.TRC ,FHST.TRC ,itpar,iter,[0,nan]);
 
 % impose min/max limits on component densities
-trcm = max(0,trcm);
-trcx = max(0,trcx);
+TRCm = max(0,TRCm);
+TRCx = max(0,TRCx);
 
 
 %***  update phase fractions
@@ -116,71 +116,76 @@ trcx = max(0,trcx);
 [diff_X,qz_diff_X,qx_diff_X] = diffus(x, rho.*kd, h, [1,2], BCD);
 
 % total rates of change
-% dMdt = - advn_M + diff_M + Gm + Gem + Gin;
-% dXdt = - advn_X + diff_X + Gx + Gex      ;
-% drhodt = - advn_M - advn_X + Gem + Gin + Gex;
-dMdt   = sum(dCmdt,3);
-dXdt   = sum(dCxdt,3);
-drhodt = dXdt + dMdt;
+dMdt = - advn_M + diff_M + Gm + Gem + Gin;
+dXdt = - advn_X + diff_X + Gx + Gex      ;
+drhodt = - advn_M - advn_X + Gem + Gin + Gex;
 
 % residual of phase density evolution
 res_X = (a1*X-a2*Xo-a3*Xoo) - (b1*dXdt + b2*dXdto + b3*dXdtoo)*dt;
 res_M = (a1*M-a2*Mo-a3*Moo) - (b1*dMdt + b2*dMdto + b3*dMdtoo)*dt;
 
-[x,GHST.X,FHST.X,specrad.X] = iterate(x,res_X./rho,specrad.X,GHST.X,FHST.X,itpar,iter, [0,1]);
-[m,GHST.M,FHST.M,specrad.M] = iterate(m,res_M./rho,specrad.M,GHST.M,FHST.M,itpar,iter, [0,1]);
+[X,GHST.X,FHST.X,specrad.X] = iterate(X,res_X,specrad.X,GHST.X,FHST.X,itpar,iter, [0,nan]);
+[M,GHST.M,FHST.M,specrad.M] = iterate(M,res_M,specrad.M,GHST.M,FHST.M,itpar,iter, [0,nan]);
 
 % impose min/max limits and normalise component densities
-m  = max(0,min(1,m));
-x  = max(0,min(1,x));
+M  = max(0,min(rho,M));
+X  = max(0,min(rho,X));
 
-m  = m./(m+x);
-x  = x./(m+x);
+m  = M./(M+X);
+x  = X./(M+X);
+
 
 %***  update partial densities
 
 % partial phase densities
-X  = x.*rho;
-M  = m.*rho;
+% X  = x.*rho;
+% M  = m.*rho;
 
 % blend diseq/eq phase and mixture major components
-c  = (1-f_diseq).*c + f_diseq.*(m.*cm + x.*cx);
-Kx = (cxq+eps)./(cmq+eps);
+cq  = C./(M+X);  cq = cq./sum(cq+eps,3);
+cmd = (1-f_diseq).*cmq + f_diseq .* Cm./max(M,1e-9.*rho);  cmd = cmd./sum(cmd+eps,3);
+cxd = (1-f_diseq).*cxq + f_diseq .* Cx./max(X,1e-9.*rho);  cxd = cxd./sum(cxd+eps,3);
+c   = (1-f_diseq).*cq  + f_diseq .* (m.*cmd + x.*cxd);
+Kx  = (cxq+eps)./(cmq+eps);
 for i=1:20
-cm = (1-f_diseq).*c./(m + x.*Kx) + f_diseq.*cm;  cm = cm./sum(cm+eps,3);
-cx = (1-f_diseq).*c./(m./Kx + x) + f_diseq.*cx;  cx = cx./sum(cx+eps,3);
+cm = (1-f_diseq).*c./(m + x.*Kx) + f_diseq.*cmd;  cm = cm./sum(cm+eps,3);
+cx = (1-f_diseq).*c./(m./Kx + x) + f_diseq.*cxd;  cx = cx./sum(cx+eps,3);
 Kx = (cx+eps)./(cm+eps);
 end
+
+% partial major component densities
+% Cm = cm.*M;
+% Cx = cx.*X;
+% C  = Cm + Cx;
 
 % truncate residuals to diseq/eq domain
 res_Cm = f_diseq.*res_Cm;
 res_Cx = f_diseq.*res_Cx;
 res_C  = (1-f_diseq).*res_C;
 
-% partial major component densities
-Cm = cm.*M;
-Cx = cx.*X;
-C  = Cm + Cx;
-
 % blend diseq/eq phase and mixture major components
-trc  = (1-f_diseq).*trc + f_diseq.*(m.*trcm + x.*trcx);
-trcm = (1-f_diseq).*trc./(m + x.*Ktrc) + f_diseq.*trcm;
-trcx = (1-f_diseq).*trc./(m./Ktrc + x) + f_diseq.*trcx;
+trcq  = TRC./(M+X);
+trcmd = (1-f_diseq).*trcmq + f_diseq .* TRCm./max(M,1e-9.*rho);
+trcxd = (1-f_diseq).*trcxq + f_diseq .* TRCx./max(X,1e-9.*rho);
+trc   = (1-f_diseq).*trcq  + f_diseq .* (m.*trcmd + x.*trcxd);
+trcm  = (1-f_diseq).*trc./(m + x.*Ktrc) + f_diseq.*trcm;
+trcx  = (1-f_diseq).*trc./(m./Ktrc + x) + f_diseq.*trcx;
 
 % partial trace component densities
-TRCm = M.*trcm;
-TRCx = X.*trcx;
-TRC  = TRCm + TRCx;
+% TRCm = M.*trcm;
+% TRCx = X.*trcx;
+% TRC  = TRCm + TRCx;
 
 % convert entropy S to natural temperature T and potential temperature Tp
+s = S./(M+X);
 [Tp,~ ] = StoT(Tp,s,cat(3,Pt,Pt)*0+Pref,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 [T ,si] = StoT(T ,s,cat(3,Pt,Pt)       ,cat(3,m,x),[cPm;cPx],[aTm;aTx],[bPm;bPx],cat(3,rhom0,rhox0),[sref+Dsm;sref],Tref,Pref);
 sm = si(:,:,1); sx = si(:,:,2);  % read out phase entropies
 
 % partial entropy densities
-Sm = M.*sm;
-Sx = X.*sx;
-S  = Sm + Sx;
+% Sm = M.*sm;
+% Sx = X.*sx;
+% S  = Sm + Sx;
 
 
 %*** update phase equilibrium if full reactive coupling on

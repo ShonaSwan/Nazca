@@ -23,14 +23,11 @@ while time <= tend && step <= Nt
         %%%% solve thermo-chemical equations
         thermochem;
 
-        %%%% update geochemical evolution
-        geochem;
+        %%%% update non-linear parameters and auxiliary variables
+        update;
 
         %%%% solve fluid-mechanics equations
         fluidmech;
-
-        %%%% update non-linear parameters and auxiliary variables
-        update;
 
         %%%% report convergence
         report;

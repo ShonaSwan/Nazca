@@ -15,7 +15,7 @@ plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  100e3;               % chamber depth [m]
-N         =  50;                 % number of grid points in z-direction
+N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -23,7 +23,7 @@ L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  100*yr;              % initial time step [s]
-mumin     =  1e-6;                % lower limit for melt fraction in coeff. 
+mumin     =  1e-5;                % lower limit for melt fraction in coeff. 
 mumax     =  0.20;                % upper limit for melt fraction in coeff.
 mutra     =  1e-4;                % transition point to disequilibrium, tensile plasticity
 tracer_sw =  0;                   % Tracer point switch 
@@ -109,15 +109,15 @@ ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fr
 CFL       =  0.75;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-3;                % outer its relative tolerance
 atol      =  1e-5;                % outer its absolute tolerance
-maxit     =  15;                  % maximum outer its
-delta     =  0.2;                % relaxing parameter for viscosity update
+maxit     =  12;                  % maximum outer its
+delta     =  0.25;                % relaxing parameter for viscosity update
 etacntr   =  1e8;                 % maximum viscosity contrast
 etamin    =  1e16;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
-itpar.fp.damp = 1.0;              % fixed-point iterative damping (0-1)
+itpar.fp.damp = 0.9;              % fixed-point iterative damping (0-1)
 itpar.aa.m    = 4;                % Anderson acceleration depth (2-7)
-itpar.aa.damp = 0.0;              % Anderson acceleration damping (0-1)
+itpar.aa.damp = 0.5;              % Anderson acceleration damping (0-1)
 itpar.aa.reg  = 1e-9;             % Anderson acceleration regularisation (0-1)
 
 %*****  RUN NAKHLA MODEL  *************************************************

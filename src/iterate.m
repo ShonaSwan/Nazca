@@ -40,7 +40,7 @@ rho.mean = 0.5*rho.mean + 0.5*mean(rho_new);      % moving average
 rho.est  = 0.2*rho.mean + 0.8*rho.est;            % dampen towards mean to avoid outliers
 
 % Fixed-point update coefficients
-alpha(:) = 0.5;%4./(2 + rho.est).^2;
+alpha(:) = 4./(2 + rho.est).^2;
 
 % New fixed-point update and iterate
 f(:) = itpar.fp.damp * -alpha(:).*r(:);

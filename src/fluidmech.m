@@ -8,6 +8,7 @@ CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
 
 res_MFD = (a1*rho-a2*rhoo-a3*rhooo) - (b1*drhodt + b2*drhodto + b3*drhodtoo)*dt;
 res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
+% res_MFD = rho-RHO;
 
 [MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/dt,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter,[nan,nan]);
 MFDCrr = MFDCrr*MFD0;

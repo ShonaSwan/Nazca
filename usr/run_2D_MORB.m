@@ -6,16 +6,16 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB';      % run identifier
+runID     =  '2D_MORB';           % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
-save_op   =  0;                   % switch on to save output to file
+save_op   =  1;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
 D         =  100e3;               % chamber depth [m]
-N         =  60;                 % number of grid points in z-direction
+N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
 L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 
@@ -47,11 +47,12 @@ minage    =  1e5*yr;              % (20e6 / 7e5)
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.64 0.15 0.20 0.01 0.000 0.000];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+c0        =  [0.64 0.15 0.20 0.01 0 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
 dcr       =  [1,1,-1,-1,-0,-0]*0e-3;     % Random perturbation of the composition field
-dr_trc    =  [1,1,0,-1,-1,-10]*0e-3;       % trace elements random noise           
+dr_trc    =  [0,0,0,0,0,0]*1e-7;  % trace elements random noise           
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
+trcscale  =  1e-8;
 
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  0;                     % 0 = no crust, 1 = crust 
@@ -115,7 +116,7 @@ etacntr   =  1e8;                 % maximum viscosity contrast
 etamin    =  1e16;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
-itpar.fp.damp = 0.9;              % fixed-point iterative damping (0-1)
+itpar.fp.damp = 0.95;              % fixed-point iterative damping (0-1)
 itpar.aa.m    = 4;                % Anderson acceleration depth (2-7)
 itpar.aa.damp = 0.2;              % Anderson acceleration damping (0-1)
 itpar.aa.reg  = 1e-9;             % Anderson acceleration regularisation (0-1)

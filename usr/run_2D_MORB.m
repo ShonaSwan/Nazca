@@ -6,7 +6,7 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB';           % run identifier
+runID     =  '2D_MORB';            % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop       =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
@@ -23,14 +23,14 @@ L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  100*yr;              % initial time step [s]
-mumin     =  1e-6;                % lower limit for melt fraction in coeff. 
+mumin     =  1e-5;                % lower limit for melt fraction in coeff. 
 mumax     =  0.20;                % upper limit for melt fraction in coeff.
 mutra     =  1e-4;                % transition point to disequilibrium, tensile plasticity
 tracer_sw =  0;                   % Tracer point switch 
 
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
-bndmode   =  0;                   % boundary assimilation mode ( 0 = MOR 1/2; 1 = MOR full; 2 = Plume; 3 = Plume/Ridge
+bndmode   =  0;                   % boundary assimilation mode ( 0 = MOR 1/2; 1 = MOR full; 2 = Plume only (closed sides);
 meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
@@ -46,32 +46,30 @@ bnd_sprw  =  7e3;                 % Width of top boundary spreading rate 'S' fun
 minage    =  1e5*yr;              % (20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
-wlay_c    =  2*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-c0        =  [0.64 0.15 0.20 0.01 0 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
-c1        =  c0;                  % components (maj comp, H2O) base layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,1,-1,-1,-0,-0]*0e-3;     % Random perturbation of the composition field
-dr_trc    =  [0,0,0,0,0,0]*1e-7;  % trace elements random noise           
-trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppm]
-trcscale  =  1e-8;
+wlay_c    =  1*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
+maj0      =  [0.64 0.15 0.20 0.01 0 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+maj1      =  maj0;                % major element components base layer [wt] (will be normalised to unit sum!)
+dr_maj    =  [1,1,-1,-1,-0,-0]*0e-3;     % Random perturbation of the composition field
+trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppb]
+trcscale  =  1e-9;                % parts per billion (ppb) conversion
+dr_trc    =  [0,0,-1,0,0,+1]*0e-2;% trace elements random noise           
 
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  0;                     % 0 = no crust, 1 = crust 
 Hcmin     =  0e3;                   % Minimum crustal thickness 
-c_crust   =  [0.01 0.13 0.80 0.06 0 0];    % components (maj comp, H2O) Crustal layer
-trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
+maj_crust =  [0.01 0.13 0.80 0.06 0 0];% components (maj comp, H2O) Crustal layer
+trc_crust =  [10,3,0.5,0.3,0.1,1]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 0;                                % Temperature difference between the plume and the mantle 
-pl_width  = 10e3;                               % Width of the plume [m]
-pl_local  = 0; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.60 0.13 0.22 0.04 0.008 0.004];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
-trc_plume = [10.0, 10.0, 10.0, 0.1, 0.1, 1.0];   % trace elements system plume [wt ppm]
+pl_width  = 0e3;                               % Width of the plume [m]
+pl_local  = L; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
+maj_plume = [0.62 0.13 0.22 0.03 0 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+trc_plume = [5, 1.5, 2.0, 0.6, 0.2, 1.0];   % trace elements system plume [wt ppm]
 
 % set thermo-chemical boundary parameters
 bnd_w     =  h/4;                 % boundary layer width [m]
 tau_T     =  (h/4)^2/1e-6;        % wall cooling/assimilation time [s]
-Twall     =  [T0,1350,nan,nan];   % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
-cwall     =  nan(3,7,7);          % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 Ptop      =  4.0e7;               % top pressure [Pa]
 
 % set thermo-chemical material parameters
@@ -80,7 +78,7 @@ tau_phs   =  1e2*yr;              % phase change reaction time (set to 0 to tie 
 tau_cex   =  1e3*yr;              % reaction timescale [s] (grain_size^2 / diffusivity)
 reac_w    =  0.01;                % melt fraction threshold (for smooth transition)
 tau_e     =  1e3*yr;              % extraction/eruption time (set to 0 to tie to dt)
-minit     =  0.005;                % maximum initial melt fraction
+minit     =  0.01;                % maximum initial melt fraction
 
 % physical parameters
 bPx       =  1e-11;               % solid compressibility [1/Pa]

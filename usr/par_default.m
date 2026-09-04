@@ -47,11 +47,10 @@ T0        =  5;                   % temperature top layer [deg C]
 T1        =  1350;                % temperature base layer [deg C]
 dTr       =  0;                   % amplitude of random noise [deg C]
 dTg       =  0;                   % amplitude of centred gaussian [deg C]
-c0        =  [0.64 0.15 0.20 0.01 0.004 0.002];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
-
-c1        =  c0;                  % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
-dcr       =  [1,1,1,-1,-1,-1]*0e-4;    % amplitude of random noise [wt SiO2]
-dcg       =  [0,0,0,0,0,0,0];     % amplitude of centred gaussian [wt SiO2]
+maj0      =  [0.64 0.15 0.20 0.01 0.004 0.002];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+maj1      =  maj0;                % components (maj comp, H2O) bot layer [wt] (will be normalised to unit sum!)
+dr_maj    =  [1,1,1,-1,-1,-1]*0e-4;    % amplitude of random noise [wt SiO2]
+dg_maj    =  [0,0,0,0,0,0,0];     % amplitude of centred gaussian [wt SiO2]
 delta     =  0.2;                 % relaxing parameter for viscosity update
 
 % set model trace and isotope geochemistry parameters (must match # trace elements and isotope ratios in calibration!)
@@ -63,14 +62,14 @@ dg_trc   =  [0,0,0,0,0,0];       % trace elements centred gaussian [wt ppm]
 % set initial thermo-chemical state (Crust)
 crust_sw  =  1;                     % 0 = no crust, 1 = crust 
 Hcmin     =  6e3;                   % Minimum crustal thickness 
-c_crust   =  [0.01 0.13 0.80 0.06 0 0];    % components (maj comp, H2O) Crustal layer
+maj_crust =  [0.01 0.13 0.80 0.06 0 0];    % components (maj comp, H2O) Crustal layer
 trc_crust =  [0.1,0.1,0.5,10,10,2]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state (Plume)
 dT_plume  = 150;                                % Temperature difference between the plume and the mantle 
 pl_width  = 50e3;                               % Width of the plume [m]
 pl_local  = L/2;                                % Location of the mantle plume along the bottom boundary [m]
-c_plume   = [0.68 0.16 0.15 0.01 0 0];           % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
+maj_plume = [0.68 0.16 0.15 0.01 0 0];           % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
 trc_plume = [10.0, 10.0, 2.0, 0.1, 0.1, 2.0];    % trace elements system plume [wt ppm]
 tracer_sw =  0;                   
 
@@ -87,7 +86,7 @@ bnd_h    =  [0,0,0];               % internal wall rock layer thickness [m]
 tau_T    =  1e4*yr;                % wall cooling/assimilation time [s]
 tau_a    =  24*hr;                 % wall cooling/assimilation tie [s]
 Twall    =  [T0,nan,nan,nan];      % [top,bot,left,right] wall rock temperature [degC] (nan = insulating)
-cwall    =  nan(3,7,7);            % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
+majwall  =  nan(3,7,7);            % [top,bot,left,right] wall rock major component [wt SiO2] (nan = no assimilation)
 trcwall  =  nan(3,6,6);            % [top,bot,left,right] wall rock trace elements [wt ppm] (nan = no assimilation)
 
 % set thermo-chemical material parameters

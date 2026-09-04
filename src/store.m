@@ -1,6 +1,6 @@
 [Soo    , So    ] = deal(So    , S    );
-[CCmoo  , CCmo  ] = deal(CCmo  , CCm  );
-[CCxoo  , CCxo  ] = deal(CCxo  , CCx  );
+[Cmoo   , Cmo   ] = deal(Cmo   , Cm   );
+[Cxoo   , Cxo   ] = deal(Cxo   , Cx   );
 [rhooo  , rhoo  ] = deal(rhoo  , rho  );
 [rhoxoo , rhoxo ] = deal(rhoxo , rhox );
 [Too    , To    ] = deal(To    , T    );

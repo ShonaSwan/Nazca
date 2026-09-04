@@ -3,42 +3,42 @@ tic;
 
 % update phase oxide compositions
 
-c_oxd  = reshape(reshape(c ,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
-cm_oxd = reshape(reshape(cm,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
-cx_oxd = reshape(reshape(cx,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
+maj_oxd  = reshape(reshape(maj ,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
+majm_oxd = reshape(reshape(majm,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
+majx_oxd = reshape(reshape(majx,Nz*Nx,cal.ncmp)*cal.cmp_oxd,Nz,Nx,cal.noxd);
 
 % update phase mineral end-member compositions
-c_mem  = reshape(reshape(c ,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
-cm_mem = reshape(reshape(cm,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
-cx_mem = reshape(reshape(cx,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
+maj_mem  = reshape(reshape(maj ,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
+majm_mem = reshape(reshape(majm,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
+majx_mem = reshape(reshape(majx,Nz*Nx,cal.ncmp)*cal.cmp_mem,Nz,Nx,cal.nmem);
 
 % update mineral systems composition for solid assemblage
-c_msy  = reshape(reshape( c_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
-cm_msy = reshape(reshape(cm_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
-cx_msy = reshape(reshape(cx_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
+maj_msy  = reshape(reshape( maj_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
+majm_msy = reshape(reshape(majm_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
+majx_msy = reshape(reshape(majx_mem,Nz*Nx,cal.nmem)*cal.msy_mem.',Nz,Nx,cal.nmsy);
 
 % update mineral systems oxide compositions for solid assemblage
-cx_msy_oxd = zeros(Nz,Nx,cal.nmsy,cal.noxd);
+majx_msy_oxd = zeros(Nz,Nx,cal.nmsy,cal.noxd);
 for j = 1:cal.nmsy
-    cx_msy_oxd(:,:,j,:) = reshape(reshape(cx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,nnz(cal.msy_mem(j,:)==1))*cal.mem_oxd(cal.msy_mem(j,:)==1,:)./sum(reshape(cx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,nnz(cal.msy_mem(j,:)==1))+1e-32,2),Nz,Nx,1,cal.noxd);
+    majx_msy_oxd(:,:,j,:) = reshape(reshape(majx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,nnz(cal.msy_mem(j,:)==1))*cal.mem_oxd(cal.msy_mem(j,:)==1,:)./sum(reshape(majx_mem(:,:,cal.msy_mem(j,:)==1),Nz*Nx,nnz(cal.msy_mem(j,:)==1))+1e-32,2),Nz,Nx,1,cal.noxd);
 end
 
-cm_oxd_all = zeros(size(c,1),size(c,2),9);
-cx_oxd_all = zeros(size(c,1),size(c,2),9);
- c_oxd_all = zeros(size(c,1),size(c,2),9);
+majm_oxd_all = zeros(size(maj,1),size(maj,2),9);
+majx_oxd_all = zeros(size(maj,1),size(maj,2),9);
+ maj_oxd_all = zeros(size(maj,1),size(maj,2),9);
 if cal.noxd>9
-    cm_oxd_all = cm_oxd(:,:,cal.ioxd);
-    cx_oxd_all = cx_oxd(:,:,cal.ioxd);
-     c_oxd_all =  c_oxd(:,:,cal.ioxd);
+    majm_oxd_all = majm_oxd(:,:,cal.ioxd);
+    majx_oxd_all = majx_oxd(:,:,cal.ioxd);
+     maj_oxd_all =  maj_oxd(:,:,cal.ioxd);
 else
-    cm_oxd_all(:,:,cal.ioxd) = cm_oxd;
-    cx_oxd_all(:,:,cal.ioxd) = cx_oxd;
-     c_oxd_all(:,:,cal.ioxd) = c_oxd;
+    majm_oxd_all(:,:,cal.ioxd) = majm_oxd;
+    majx_oxd_all(:,:,cal.ioxd) = majx_oxd;
+     maj_oxd_all(:,:,cal.ioxd) = maj_oxd;
 end
 
 % update phase densities
-rhom0  = reshape(DensityX(reshape(cm_oxd_all,Nz*Nx,9),293,Pref./1e8)    ,Nz,Nx);
-rhox0  = reshape(sum(reshape(cx_mem/100,Nz*Nx,cal.nmem)./cal.rhox0,2).^-1,Nz,Nx);
+rhom0  = reshape(DensityX(reshape(majm_oxd_all,Nz*Nx,9),293,Pref./1e8)    ,Nz,Nx);
+rhox0  = reshape(sum(reshape(majx_mem/100,Nz*Nx,cal.nmem)./cal.rhox0,2).^-1,Nz,Nx);
 
 rhom   = rhom0 .* (1 - aTm.*(T-293) + bPm.*(Pt-Pref));
 rhox   = rhox0 .* (1 - aTx.*(T-293) + bPx.*(Pt-Pref));
@@ -126,7 +126,7 @@ elseif meansw == 1 % Arithmetic
    chiu = (chi (:,icx(1:end-1))+chi (:,icx(2:end)))./2;
 end
 
-chi_mem = reshape(reshape(cx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
+chi_mem = reshape(reshape(majx_mem/100.*rhox,Nz*Nx,cal.nmem)./cal.rhox0,Nz,Nx,cal.nmem);
 chi_mem = chi_mem./sum(chi_mem,3);
 
 % update thermal parameters
@@ -150,7 +150,7 @@ if Nz==1; Pt    = max(Ptop,(1-delta).*Pt + delta.*(Ptop.*ones(size(Tp)) + Pcoupl
 end
 
 % update melt viscosity
-etam    = reshape(Giordano08(reshape(cm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
+etam    = reshape(Giordano08(reshape(majm_oxd_all,Nz*Nx,9),T(:)-273.15),Nz,Nx);  % T in [C]
 etammax = etacntr.*min(etam(:));
 etam    = 1./(1./etammax + 1./etam);
 
@@ -207,7 +207,7 @@ eII = (0.5.*(exx.^2 + ezz.^2 ...
        + 2.*(exz(1:end-1,1:end-1).^2+exz(2:end,1:end-1).^2 ...
        +     exz(1:end-1,2:end  ).^2+exz(2:end,2:end  ).^2)/4)).^0.5 + eps;
 
-mufact = (1-exp(-mu./mutra));
+mufact = (1-exp(-mu./1e-4));
 Peff   = Pt - mufact.*(Pl + Pf(2:end-1,2:end-1));
 yieldt = max(1e4,mufact.*min(pyield + Pc(2:end-1,2:end-1), 10*pyield - Pc(2:end-1,2:end-1)) + (1-mufact).*(tyield + 0.5.*Pt));
 yieldp = max(1e4,pyield - tII);
@@ -289,6 +289,6 @@ end
 % update time step
 dtk = (h/2)^2/max([kT(:)./rho(:)./cP(:);kd(:)]);                           % diffusive time step size
 dta =  h/2   /max(abs([Um(:);Wm(:);Ux(:);Wx(:)]));                         % advective time step size
-dt  = min([1.1*dto,min(CFL*[dtk,dta]),dtmax]);     % time step size
+dt  = min([1.5*dto,min(CFL*[dtk,dta]),dtmax]);     % time step size
 
 UDtime = UDtime + toc;

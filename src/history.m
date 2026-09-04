@@ -14,13 +14,13 @@ stp = max(1,step);
 hist.time(stp) = time;
 
 % record total mass, heat, component mass in model (assume hy = 1, unit length in third dimension)
-hist.sumS(stp  ) = sum(  S(:)*h*h*1)+eps;  % [J/K]
-hist.sumB(stp  ) = sum(rho(:)*h*h*1)+eps;  % [kg]
-hist.sumM(stp  ) = sum(  M(:)*h*h*1)+eps;  % [kg]
-hist.sumX(stp  ) = sum(  X(:)*h*h*1)+eps;  % [kg]
-hist.sumC(stp,:)  = squeeze(sum(sum(CC  *h*h*1,1),2))+eps; % [kg]
-hist.sumCm(stp,:) = squeeze(sum(sum(CCm *h*h*1,1),2))+eps;
-hist.sumCx(stp,:) = squeeze(sum(sum(CCx *h*h*1,1),2))+eps;
+hist.sumS(stp  )  = sum(  S(:)*h*h*1)+eps;  % [J/K]
+hist.sumB(stp  )  = sum(rho(:)*h*h*1)+eps;  % [kg]
+hist.sumM(stp  )  = sum(  M(:)*h*h*1)+eps;  % [kg]
+hist.sumX(stp  )  = sum(  X(:)*h*h*1)+eps;  % [kg]
+hist.sumC(stp,:)  = squeeze(sum(sum(C  *h*h*1,1),2))+eps; % [kg]
+hist.sumCm(stp,:) = squeeze(sum(sum(Cm *h*h*1,1),2))+eps;
+hist.sumCx(stp,:) = squeeze(sum(sum(Cx *h*h*1,1),2))+eps;
 
 
 % record expected rates of change by volume change and imposed boundaries layers
@@ -105,30 +105,30 @@ hist.Tliq(stp,2) = mean(mean(Tliq));
 hist.Tliq(stp,3) = max(max(Tliq));
 
 for i=1:cal.ncmp
-    hist.c(stp,1,i) = min(min(c(:,:,i)));
-    hist.c(stp,2,i) = mean(mean(c(:,:,i)));
-    hist.c(stp,3,i) = max(max(c(:,:,i)));
+    hist.maj(stp,1,i) = min(min(maj(:,:,i)));
+    hist.maj(stp,2,i) = mean(mean(maj(:,:,i)));
+    hist.maj(stp,3,i) = max(max(maj(:,:,i)));
 end
 for i=1:cal.noxd
-    hist.c_oxd(stp,1,i) = min(min(c_oxd(:,:,i)));
-    hist.c_oxd(stp,2,i) = mean(mean(c_oxd(:,:,i)));
-    hist.c_oxd(stp,3,i) = max(max(c_oxd(:,:,i)));
+    hist.maj_oxd(stp,1,i) = min(min(maj_oxd(:,:,i)));
+    hist.maj_oxd(stp,2,i) = mean(mean(maj_oxd(:,:,i)));
+    hist.maj_oxd(stp,3,i) = max(max(maj_oxd(:,:,i)));
 end
 
 for i=1:cal.ncmp
-    hist.cx(stp,1,i) = min(min(cx(:,:,i)));
-    hist.cx(stp,2,i) = sum(sum(cx(:,:,i).*x.*rho))./sum(sum(x.*rho));
-    hist.cx(stp,3,i) = max(max(cx(:,:,i)));
+    hist.majx(stp,1,i) = min(min(majx(:,:,i)));
+    hist.majx(stp,2,i) = sum(sum(majx(:,:,i).*x.*rho))./sum(sum(x.*rho));
+    hist.majx(stp,3,i) = max(max(majx(:,:,i)));
 end
 for i=1:cal.noxd
-    hist.cx_oxd(stp,1,i) = min(min(cx_oxd(:,:,i)));
-    hist.cx_oxd(stp,2,i) = sum(sum(cx_oxd(:,:,i).*x.*rho))./sum(sum(x.*rho));
-    hist.cx_oxd(stp,3,i) = max(max(cx_oxd(:,:,i)));
+    hist.majx_oxd(stp,1,i) = min(min(majx_oxd(:,:,i)));
+    hist.majx_oxd(stp,2,i) = sum(sum(majx_oxd(:,:,i).*x.*rho))./sum(sum(x.*rho));
+    hist.majx_oxd(stp,3,i) = max(max(majx_oxd(:,:,i)));
 end
 for i=1:cal.nmsy
-    hist.cx_msy(stp,1,i) = min(min(cx_msy(:,:,i)));
-    hist.cx_msy(stp,2,i) = sum(sum(cx_msy(:,:,i).*x.*rho))./sum(sum(x.*rho));
-    hist.cx_msy(stp,3,i) = max(max(cx_msy(:,:,i)));
+    hist.majx_msy(stp,1,i) = min(min(majx_msy(:,:,i)));
+    hist.majx_msy(stp,2,i) = sum(sum(majx_msy(:,:,i).*x.*rho))./sum(sum(x.*rho));
+    hist.majx_msy(stp,3,i) = max(max(majx_msy(:,:,i)));
 end
 
 hist.rhox(stp,1) = min(min(rhox));
@@ -136,20 +136,20 @@ hist.rhox(stp,2) = sum(sum(rhox.*x.*rho))./sum(sum(x.*rho));
 hist.rhox(stp,3) = max(max(rhox));
 
 for i=1:cal.ncmp
-    hist.cm(stp,1,i) = min(min(cm(:,:,i)));
-    hist.cm(stp,2,i) = sum(sum(cm(:,:,i).*m.*rho))./sum(sum(m.*rho));
-    hist.cm(stp,3,i) = max(max(cm(:,:,i)));
+    hist.majm(stp,1,i) = min(min(majm(:,:,i)));
+    hist.majm(stp,2,i) = sum(sum(majm(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.majm(stp,3,i) = max(max(majm(:,:,i)));
 end
 for i=1:cal.noxd
-    hist.cm_oxd(stp,1,i) = min(min(cm_oxd(:,:,i)));
-    hist.cm_oxd(stp,2,i) = sum(sum(cm_oxd(:,:,i).*m.*rho))./sum(sum(m.*rho));
-    hist.cm_oxd(stp,3,i) = max(max(cm_oxd(:,:,i)));
+    hist.majm_oxd(stp,1,i) = min(min(majm_oxd(:,:,i)));
+    hist.majm_oxd(stp,2,i) = sum(sum(majm_oxd(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.majm_oxd(stp,3,i) = max(max(majm_oxd(:,:,i)));
 end
 
 for i=1:cal.nmsy
-    hist.cm_msy(stp,1,i) = min(min(cm_msy(:,:,i)));
-    hist.cm_msy(stp,2,i) = sum(sum(cm_msy(:,:,i).*m.*rho))./sum(sum(m.*rho));
-    hist.cm_msy(stp,3,i) = max(max(cm_msy(:,:,i)));
+    hist.majm_msy(stp,1,i) = min(min(majm_msy(:,:,i)));
+    hist.majm_msy(stp,2,i) = sum(sum(majm_msy(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.majm_msy(stp,3,i) = max(max(majm_msy(:,:,i)));
 end
 
 hist.rhom(stp,1) = min(min(rhom));

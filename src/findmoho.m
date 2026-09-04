@@ -1,5 +1,5 @@
 %get vertical gradient of bulk SiO2
-SiO2ByMgO = cx_oxd(:,:,cal.Si)./cx_oxd(:,:,cal.Mg);
+SiO2ByMgO = majx_oxd(:,:,cal.Si)./majx_oxd(:,:,cal.Mg);
 
 indLAB    = (T-273.15) < 1200;
 [LAB_depth,LAB_iz] = max(ZZ.*indLAB,[],1);

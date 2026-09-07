@@ -7,14 +7,14 @@ MFDSrc = - (a1*rho -a2*rhoo -a3*rhooo )/dt + Gex + Gem + Gin;
 CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
 
 res_MFD = (a1*rho-a2*rhoo-a3*rhooo) - (b1*drhodt + b2*drhodto + b3*drhodtoo)*dt;
-res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
+% res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
 % res_MFD = rho-RHO;
 
 [MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/dt,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter,[nan,nan]);
 MFDCrr = MFDCrr*MFD0;
 
-[CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/dt,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter,[nan,nan]);
-CMPCrr = CMPCrr*MFD0;
+% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/dt,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter,[nan,nan]);
+% CMPCrr = CMPCrr*MFD0;
 
 end
 
@@ -116,7 +116,11 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 
 % top boundary
 ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
-aa  = zeros(size(ii));
+if bndmode == 0 % Mid ocean Ridge half-spreading 
+    aa  = (1-exp(-Xf/bnd_sprw))*sprate/u0*2;
+else
+    aa  = zeros(size(ii));
+end
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];

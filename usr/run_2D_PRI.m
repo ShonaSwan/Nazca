@@ -23,7 +23,7 @@ L         =  2*D;                 % domain width (equal to h for 1-D mode) [m]
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  100*yr;              % initial time step [s]
-mumin     =  1e-5;                % lower limit for melt fraction in coeff. 
+mumin     =  1e-6;                % lower limit for melt fraction in coeff. 
 mumax     =  0.20;                % upper limit for melt fraction in coeff.
 mutra     =  1e-4;                % transition point to disequilibrium, tensile plasticity
 tracer_sw =  0;                   % Tracer point switch 
@@ -62,7 +62,7 @@ trc_crust =  [10,3,0.5,0.3,0.1,1]; % trace elements crust layer [wt ppm]
 
 % set initial thermo-chemical state of the Plume 
 dT_plume  = 50;                                % Temperature difference between the plume and the mantle 
-pl_width  = 10e3;                               % Width of the plume [m]
+pl_width  = 5e3;                               % Width of the plume [m]
 pl_local  = L; % L/2 + 100                    % Location of the mantle plume along the bottom boundary [m]
 maj_plume = [0.62 0.13 0.22 0.03 0 0];                 % components of plume (maj comp, H2O) [wt] (will be normalised to unit sum!)
 trc_plume = [5, 1.5, 2.0, 0.6, 0.2, 1.0];   % trace elements system plume [wt ppm]

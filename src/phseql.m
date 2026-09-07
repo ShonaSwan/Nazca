@@ -70,8 +70,8 @@ Gxc = -Gmc;
 findmoho;
 
 % Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+2e3,Nz,1));%(etax>1e20);
-Gem  = min(0,mthr    .*RHO-M )/(tau_e+3*dt).*(etax>1e20);
-Gemc = min(0,mthr.*cm.*RHO-Cm)/(tau_e+3*dt).*(etax>1e20);
+Gem  = min(0,mthr    .*RHO-M )/(tau_e+3*dt).*(etax>3e20);
+Gemc = min(0,mthr.*cm.*RHO-Cm)/(tau_e+3*dt).*(etax>3e20);
 Gems = sm.*Gem;
 
 findmelt;

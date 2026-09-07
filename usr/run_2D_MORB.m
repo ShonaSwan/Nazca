@@ -23,7 +23,7 @@ L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
 dt        =  100*yr;              % initial time step [s]
-mumin     =  1e-5;                % lower limit for melt fraction in coeff. 
+mumin     =  1e-6;                % lower limit for melt fraction in coeff. 
 mumax     =  0.20;                % upper limit for melt fraction in coeff.
 mutra     =  1e-4;                % transition point to disequilibrium, tensile plasticity
 tracer_sw =  0;                   % Tracer point switch 
@@ -40,7 +40,7 @@ mthr        = 0.10;               % threshold melt fraction for extraction/erupt
 
 % MOR Spreading parameters  
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
-bnd_sprw  =  7e3;                 % Width of top boundary spreading rate 'S' function [km] 
+bnd_sprw  =  1e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
 minage    =  1e5*yr;              % (20e6 / 7e5) 

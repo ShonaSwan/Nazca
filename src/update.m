@@ -190,8 +190,8 @@ Xwx      = Xw(:,icx).*W;
 Xux      = Xu(icz,:).*U;
 Div_rhoV = ddz(rhoW(:,2:end-1),h) + ddx(rhoU(2:end-1,:),h) ...
          + ddz(Mwm (:,2:end-1),h) + ddx(Mum (2:end-1,:),h);
-% DivRhoxV = ddz(rhoxw.*W(:,2:end-1),h) + ddx(rhoxu.*U(2:end-1,:),h);
-DivRhoxV = advect(X,U(2:end-1,:),W(:,2:end-1),h,{ADVN,''},[1,2],BCA);
+DivRhoxV = ddz(rhoxw.*W(:,2:end-1),h) + ddx(rhoxu.*U(2:end-1,:),h);
+% DivRhoxV = advect(X,U(2:end-1,:),W(:,2:end-1),h,{ADVN,''},[1,2],BCA);
 
 % update compaction rate
 if step>0 && ~restart

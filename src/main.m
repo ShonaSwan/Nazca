@@ -10,11 +10,12 @@ while time <= tend && step <= Nt
 
     % Store previous solution
     store;
-    
+
     %%%% Reset residuals and iteration count
     resnorm  = 1;
     resnorm0 = resnorm;
     iter     = 1;
+    first    = 0;
 
     %%%%% Non-Linear Iteration Loop %%%%
     while resnorm/resnorm0 >= rtol/(1 + frst*100) && resnorm >= atol/(1 + frst*10) && iter <= maxit*(1 + frst) || iter <=3
@@ -28,9 +29,6 @@ while time <= tend && step <= Nt
         %%%% solve fluid-mechanics equations
         fluidmech;
 
-        %%%% update geochemical evolution
-        geochem;
-
         %%%% report convergence
         report;
 
@@ -40,16 +38,22 @@ while time <= tend && step <= Nt
    
     %%%% The end of the Non-Linear Iteration Loop %%%%
     end
-    
-    %%%% Upsate phase equlibrium 
-    phseql; 
 
-    % renormalise partial densities to bulk density
-    X = x.*rho;  M   = m.*rho;   S = s.*rho;
-    C = c.*rho;  TRC = trc.*rho; 
+    %%%% Upsate phase equlibrium
+    phseql; 
 
     % record model history
     history;
+
+    % Cm  = cm.*m.*rho;
+    % Cx  = cx.*x.*rho;
+    % C   = Cm + CCx;
+    % M   = sum(Cm,3);
+    % X   = sum(Cx,3);
+    % RHO = M+X;
+    % Sm  = M.*sm;
+    % Sx  = X.*sx;
+    % S   = Sm + Sx;
 
     % print model diagnostics
     diagnose;

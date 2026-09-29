@@ -30,15 +30,17 @@ function  [cal, flag]  =  Tsolidus(var,cal)
 
 %*****  subroutine to compute solidus temperature at given bulk composition
 
+c = var.c(:,1:cal.ncmp); c = c./sum(c,2);
+
 %***  exclude invalid compositions
-ii  =  sum(var.c,2)<=1+1e-15;
+ii  =  sum(c,2)<=1+1e-15;
 
 %***  get T,P-,H2O-dependent partition coefficients Kxi
 [var,cal] = leappart(var,cal,'K');
 
 %***  set starting guess for Tsol
 if ~isfield(cal,'Tsol')
-    Tsol =  max(min(cal.Tm(:)),min(max(cal.Tm(:)),sum(var.c.*cal.Tm,2)));
+    Tsol =  max(min(cal.Tm(:)),min(max(cal.Tm(:)),sum(c.*cal.Tm,2)));
 else
     Tsol =  cal.Tsol;
 end
@@ -62,10 +64,10 @@ while rnorm > cal.tol  % iterate down to full accuracy
     TmK  = cal.Tm+273.15;
 
     %***  get residual r
-    r    = sum( -(var.c.*exp((cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(- 1) ,2) - 1;
+    r    = sum( -(c.*exp((cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(- 1) ,2) - 1;
 
     %***  get analytical derivative of residual dr/dT
-    drdT = sum( -(cal.Dsx.*var.c.*exp((cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(TmK.*cal.r.*(- 1)) ,2);
+    drdT = sum( -(cal.Dsx.*c.*exp((cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(TmK.*cal.r.*(- 1)) ,2);
     
     %***  apply Newton correction to current guess of Tsol
     Tsol(ii)  =  Tsol(ii) - r(ii)./drdT(ii)/1.1;
@@ -91,6 +93,8 @@ function  [cal, flag]  =  Tliquidus(var,cal)
 
 %*****  subroutine to compute liquidus temperature at given bulk composition
 
+c = var.c(:,1:cal.ncmp); c = c./sum(c,2);
+
 %***  exclude invalid compositions
 ii  =  sum(var.c,2)<=1+1e-15;
 
@@ -99,7 +103,7 @@ ii  =  sum(var.c,2)<=1+1e-15;
 
 %***  set starting guess for Tliq
 if ~isfield(cal,'Tliq')
-    Tliq =  max(min(cal.Tm(:)),min(max(cal.Tm(:)),sum(var.c.*cal.Tm,2)));
+    Tliq =  max(min(cal.Tm(:)),min(max(cal.Tm(:)),sum(c.*cal.Tm,2)));
 else
     Tliq =  cal.Tliq;
 end
@@ -123,10 +127,10 @@ while rnorm > cal.tol  % iterate down to full accuracy
     TmK  = cal.Tm+273.15;
 
     %***  get residual r
-    r    = sum( -(var.c.*exp(-(cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(- 1) ,2) - 1;
+    r    = sum( -(c.*exp(-(cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(- 1) ,2) - 1;
 
     %***  get get analytical derivative of residual dr/dT
-    drdT = sum( (cal.Dsx.*var.c.*exp(-(cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(TmK.*cal.r.*(- 1)) ,2);
+    drdT = sum( (cal.Dsx.*c.*exp(-(cal.Dsx.*(TK - TmK))./(TmK.*cal.r)))./(TmK.*cal.r.*(- 1)) ,2);
 
     %***  apply Newton correction to Tliq
     Tliq(ii)  =  Tliq(ii) - r(ii)./drdT(ii)/1.1;
@@ -153,6 +157,8 @@ function  [cal,var,flag]  =  equilibrium(var,cal)
 %*****  subroutine to compute equilibrium melt fraction and phase 
 %       compositions at given bulk composition, pressure and temperature
 
+c = var.c; c = c./sum(c,2);
+
 %***  get Tsol, Tliq at c
 [var,cal,flag]  = leappart(var,cal,'T');
 
@@ -167,31 +173,15 @@ rnorm     = 1;     % initialize residual norm for iterations
 n         = 0;     % initialize iteration count
 its_tol   = 100;   % maximum number of iterations
 flag.eql  = 1;     % tells us whether the Newton solver converged
-eps       = 1e-9;
 
 while rnorm > cal.tol     % Newton iteration
 
     %***  get residual of unity sum of components
     [var,cal]   = leappart(var,cal,'K');
-    r           = sum( (var.c.*(1-cal.Kx)   )./(cal.Kx + (1-cal.Kx).*var.m + 1e-32)   ,2);
+    r           = sum( (c.*(1-cal.Kx)   )./(cal.Kx + (1-cal.Kx).*var.m + 1e-32)   ,2);
 
     % %***  get analytical derivative of residual dr/dm
-    drdm        = sum(-(var.c.*(1-cal.Kx).^2)./(cal.Kx + (1-cal.Kx).*var.m + 1e-32).^2,2);
-
-    % %*** get numerical derivative of residual dr/dm
-    % varp        = var;
-    % varp.m      = var.m+eps;
-    % varp.H2Om   = max(0,min(cal.H2Osat, varp.H2O./(varp.m+1e-32) ));
-    % [varp,calp] = leappart(varp,cal,'K');
-    % rp          = sum( (varp.c.*(1-calp.Kx)   )./(calp.Kx + (1-calp.Kx).*varp.m + 1e-32)   ,2);
-    % 
-    % varm        = var;
-    % varm.m      = var.m-eps;
-    % varm.H2Om   = max(0,min(cal.H2Osat, varm.H2O./(varm.m+1e-32) ));
-    % [varm,calm] = leappart(varm,cal,'K');
-    % rm          = sum( (varm.c.*(1-calm.Kx)   )./(calm.Kx + (1-calm.Kx).*varm.m + 1e-32)   ,2);
-    % 
-    % drdm_n      = (rp-rm)./2/eps;
+    drdm        = sum(-(c.*(1-cal.Kx).^2)./(cal.Kx + (1-cal.Kx).*var.m + 1e-32).^2,2);
 
     %***  apply Newton correction to crystal fraction x
     upd_m = - cal.alpha * r./drdm;
@@ -230,6 +220,7 @@ cal.Tm  =  cal.T0 .* (1 + var.P./cal.A).^(1./cal.B);
 cal.L  = (var.T+273.15).*cal.Dsx;
 
 cal.Kx = zeros(size(var.c));
-cal.Kx = exp(cal.L./cal.r.*(1./(var.T+273.15) - 1./(cal.Tm+273.15)));
-        
+cal.Kx(:,    1:cal.ncmp) = exp(cal.L./cal.r.*(1./(var.T+273.15) - 1./(cal.Tm+273.15)));
+cal.Kx(:,cal.ncmp+1:end) = cal.Ktrc;
+
 end % function

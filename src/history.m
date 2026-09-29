@@ -4,8 +4,9 @@ dsumSdtoo = dsumSdto; dsumSdto = dsumSdt;
 dsumBdtoo = dsumBdto; dsumBdto = dsumBdt;
 dsumMdtoo = dsumMdto; dsumMdto = dsumMdt;
 dsumXdtoo = dsumXdto; dsumXdto = dsumXdt;
-dsumCdtoo = dsumCdto; dsumCdto = dsumCdt;
-dsumTdtoo = dsumTdto; dsumTdto = dsumTdt;
+dsumCmdtoo = dsumCmdto; dsumCmdto = dsumCmdt;
+dsumCxdtoo = dsumCxdto; dsumCxdto = dsumCxdt;
+dsumCdtoo  = dsumCdto;  dsumCdto  = dsumCdt;
 
 stp = max(1,step);
 
@@ -13,12 +14,14 @@ stp = max(1,step);
 hist.time(stp) = time;
 
 % record total mass, heat, component mass in model (assume hy = 1, unit length in third dimension)
-hist.sumS(stp  ) = sum(  S(:)*h*h*1)+eps;  % [J/K]
-hist.sumB(stp  ) = sum(rho(:)*h*h*1)+eps;  % [kg]
-hist.sumM(stp  ) = sum(  M(:)*h*h*1)+eps;  % [kg]
-hist.sumX(stp  ) = sum(  X(:)*h*h*1)+eps;  % [kg]
-hist.sumC(stp,:) = squeeze(sum(sum(C  *h*h*1,1),2))+eps; % [kg]
-hist.sumT(stp,:) = squeeze(sum(sum(TRC*h*h*1,1),2))+eps; % [kg]
+hist.sumS(stp  )  = sum(  S(:)*h*h*1)+eps;  % [J/K]
+hist.sumB(stp  )  = sum(rho(:)*h*h*1)+eps;  % [kg]
+hist.sumM(stp  )  = sum(  M(:)*h*h*1)+eps;  % [kg]
+hist.sumX(stp  )  = sum(  X(:)*h*h*1)+eps;  % [kg]
+hist.sumC(stp,:)  = squeeze(sum(sum(C  *h*h*1,1),2))+eps; % [kg]
+hist.sumCm(stp,:) = squeeze(sum(sum(Cm *h*h*1,1),2))+eps;
+hist.sumCx(stp,:) = squeeze(sum(sum(Cx *h*h*1,1),2))+eps;
+
 
 % record expected rates of change by volume change and imposed boundaries layers
 dsumSdt =  sum(sum((diss_h + bnd_S + Gems + Gexs + Gins)*h*h*1)) ...
@@ -28,56 +31,37 @@ dsumSdt =  sum(sum((diss_h + bnd_S + Gems + Gexs + Gins)*h*h*1)) ...
         +  sum(qx_advn_Sx(2:end-1,1)*h*1) - sum(qx_advn_Sx(2:end-1,end)*h*1) ...
         +  sum(qx_advn_Sm(2:end-1,1)*h*1) - sum(qx_advn_Sm(2:end-1,end)*h*1) ...
         +  sum(qx_diff_S (2:end-1,1)*h*1) - sum(qx_diff_S (2:end-1,end)*h*1);  % [kg/s]
-dsumBdt =  sum(qz_advn_X(1,2:end-1)*h*1) - sum(qz_advn_X(end,2:end-1)*h*1) ...
-        +  sum(qz_advn_M(1,2:end-1)*h*1) - sum(qz_advn_M(end,2:end-1)*h*1) ...
-        +  sum(qx_advn_X(2:end-1,1)*h*1) - sum(qx_advn_X(2:end-1,end)*h*1) ...
-        +  sum(qx_advn_M(2:end-1,1)*h*1) - sum(qx_advn_M(2:end-1,end)*h*1);  % [kg/s]
-dsumMdt =  sum(sum((Gm + Gem + Gin)*h*h*1)) ...
-        +  sum(qz_advn_M(1,2:end-1)*h*1) - sum(qz_advn_M(end,2:end-1)*h*1) ...
-        +  sum(qx_advn_M(2:end-1,1)*h*1) - sum(qx_advn_M(2:end-1,end)*h*1);  % [kg/s]
-dsumXdt =  sum(sum((Gx + Gex)*h*h*1)) ...
-        +  sum(qz_advn_X(1,2:end-1)*h*1) - sum(qz_advn_X(end,2:end-1)*h*1) ...
-        +  sum(qx_advn_X(2:end-1,1)*h*1) - sum(qx_advn_X(2:end-1,end)*h*1);  % [kg/s]
-dsumCdt =  squeeze(sum(sum((bnd_C + Gemc + Gexc + Ginc)*h*h*1)) ...
-        +  sum(qz_advn_Cx(1,2:end-1,:)*h*1) - sum(qz_advn_Cx(end,2:end-1,:)*h*1) ...
+dsumCmdt =  squeeze(sum(sum((Gemc + Ginc + Gmc)*h*h*1)) ...   
         +  sum(qz_advn_Cm(1,2:end-1,:)*h*1) - sum(qz_advn_Cm(end,2:end-1,:)*h*1) ...
-        +  sum(qx_advn_Cx(2:end-1,1,:)*h*1) - sum(qx_advn_Cx(2:end-1,end,:)*h*1) ...
         +  sum(qx_advn_Cm(2:end-1,1,:)*h*1) - sum(qx_advn_Cm(2:end-1,end,:)*h*1) ...
+        +  sum(qz_diff_Cm(1,2:end-1,:)*h*1) - sum(qz_diff_Cm(end,2:end-1,:)*h*1) ...
+        +  sum(qx_diff_Cm(2:end-1,1,:)*h*1) - sum(qx_diff_Cm(2:end-1,end,:)*h*1)).';  
+dsumCxdt =  squeeze(sum(sum((Gexc        + Gxc + bnd_C)*h*h*1)) ...         
+        +  sum(qz_advn_Cx(1,2:end-1,:)*h*1) - sum(qz_advn_Cx(end,2:end-1,:)*h*1) ...
+        +  sum(qx_advn_Cx(2:end-1,1,:)*h*1) - sum(qx_advn_Cx(2:end-1,end,:)*h*1) ...
         +  sum(qz_diff_Cx(1,2:end-1,:)*h*1) - sum(qz_diff_Cx(end,2:end-1,:)*h*1) ...
-        +  sum(qx_diff_Cm(2:end-1,1,:)*h*1) - sum(qx_diff_Cm(2:end-1,end,:)*h*1) ...
-        +  sum(qz_diff_Cx(1,2:end-1,:)*h*1) - sum(qz_diff_Cx(end,2:end-1,:)*h*1) ...
-        +  sum(qx_diff_Cm(2:end-1,1,:)*h*1) - sum(qx_diff_Cm(2:end-1,end,:)*h*1)).';  % [kg/s]
-dsumTdt =  squeeze(sum(sum(bnd_TRC*h*h*1)) ...
-        +  sum(qz_advn_TRCx(1,2:end-1,:)*h*1) - sum(qz_advn_TRCx(end,2:end-1,:)*h*1) ...
-        +  sum(qz_advn_TRCm(1,2:end-1,:)*h*1) - sum(qz_advn_TRCm(end,2:end-1,:)*h*1) ...
-        +  sum(qx_advn_TRCx(2:end-1,1,:)*h*1) - sum(qx_advn_TRCx(2:end-1,end,:)*h*1) ...
-        +  sum(qx_advn_TRCm(2:end-1,1,:)*h*1) - sum(qx_advn_TRCm(2:end-1,end,:)*h*1) ...
-        +  sum(qz_diff_TRCx(1,2:end-1,:)*h*1) - sum(qz_diff_TRCx(end,2:end-1,:)*h*1) ...
-        +  sum(qx_diff_TRCm(2:end-1,1,:)*h*1) - sum(qx_diff_TRCm(2:end-1,end,:)*h*1) ...
-        +  sum(qz_diff_TRCx(1,2:end-1,:)*h*1) - sum(qz_diff_TRCx(end,2:end-1,:)*h*1) ...
-        +  sum(qx_diff_TRCm(2:end-1,1,:)*h*1) - sum(qx_diff_TRCm(2:end-1,end,:)*h*1)).';  % [kg/s]
+        +  sum(qx_diff_Cx(2:end-1,1,:)*h*1) - sum(qx_diff_Cx(2:end-1,end,:)*h*1)).';
+dsumCdt = dsumCmdt + dsumCxdt;
+dsumMdt = sum(dsumCmdt);
+dsumXdt = sum(dsumCxdt);
+dsumBdt = dsumMdt + dsumXdt;
 
-if step>=2; hist.DS(stp  ) = (a2*hist.DS(max(1,stp-1)  ) + a3*hist.DS(max(1,stp-2)  ) + (b1*dsumSdt + b2*dsumSdto + b3*dsumSdtoo)*dt)/a1; else; hist.DS(stp  ) = 0; end  % [kg]
-if step>=2; hist.DB(stp  ) = (a2*hist.DB(max(1,stp-1)  ) + a3*hist.DB(max(1,stp-2)  ) + (b1*dsumBdt + b2*dsumBdto + b3*dsumBdtoo)*dt)/a1; else; hist.DB(stp  ) = 0; end  % [kg]
-if step>=2; hist.DM(stp  ) = (a2*hist.DM(max(1,stp-1)  ) + a3*hist.DM(max(1,stp-2)  ) + (b1*dsumMdt + b2*dsumMdto + b3*dsumMdtoo)*dt)/a1; else; hist.DM(stp  ) = 0; end  % [kg]
-if step>=2; hist.DX(stp  ) = (a2*hist.DX(max(1,stp-1)  ) + a3*hist.DX(max(1,stp-2)  ) + (b1*dsumXdt + b2*dsumXdto + b3*dsumXdtoo)*dt)/a1; else; hist.DX(stp  ) = 0; end  % [kg]
-if step>=2; hist.DC(stp,:) = (a2*hist.DC(max(1,stp-1),:) + a3*hist.DC(max(1,stp-2),:) + (b1*dsumCdt + b2*dsumCdto + b3*dsumCdtoo)*dt)/a1; else; hist.DC(stp,:) = zeros(1,cal.ncmp); end  % [kg]
-if step>=2; hist.DT(stp,:) = (a2*hist.DT(max(1,stp-1),:) + a3*hist.DT(max(1,stp-2),:) + (b1*dsumTdt + b2*dsumTdto + b3*dsumTdtoo)*dt)/a1; else; hist.DT(stp,:) = zeros(1,cal.ntrc); end  % [kg]
-
-% if step>=2; hist.DS(stp  ) = (1*hist.DS(max(1,stp-1)  ) + 0*hist.DS(max(1,stp-2)  ) + (1*dsumSdt + 0*dsumSdto + 0*dsumSdtoo)*dt)/1; else; hist.DS(stp  ) = 0; end  % [kg]
-% if step>=2; hist.DB(stp  ) = (1*hist.DB(max(1,stp-1)  ) + 0*hist.DB(max(1,stp-2)  ) + (1*dsumBdt + 0*dsumBdto + 0*dsumBdtoo)*dt)/1; else; hist.DB(stp  ) = 0; end  % [kg]
-% if step>=2; hist.DM(stp  ) = (1*hist.DM(max(1,stp-1)  ) + 0*hist.DM(max(1,stp-2)  ) + (1*dsumMdt + 0*dsumMdto + 0*dsumMdtoo)*dt)/1; else; hist.DM(stp  ) = 0; end  % [kg]
-% if step>=2; hist.DX(stp  ) = (1*hist.DX(max(1,stp-1)  ) + 0*hist.DX(max(1,stp-2)  ) + (1*dsumXdt + 0*dsumXdto + 0*dsumXdtoo)*dt)/1; else; hist.DX(stp  ) = 0; end  % [kg]
-% if step>=2; hist.DC(stp,:) = (1*hist.DC(max(1,stp-1),:) + 0*hist.DC(max(1,stp-2),:) + (1*dsumCdt + 0*dsumCdto + 0*dsumCdtoo)*dt)/1; else; hist.DC(stp,:) = zeros(1,cal.ncmp); end  % [kg]
-% if step>=2; hist.DT(stp,:) = (1*hist.DT(max(1,stp-1),:) + 0*hist.DT(max(1,stp-2),:) + (1*dsumTdt + 0*dsumTdto + 0*dsumTdtoo)*dt)/1; else; hist.DT(stp,:) = zeros(1,cal.ntrc); end  % [kg]
+if step>=2; hist.DS(stp  )  = (a2*hist.DS(max(1,stp-1)  )  + a3*hist.DS(max(1,stp-2)  )  + (b1*dsumSdt + b2*dsumSdto + b3*dsumSdtoo)*dt)/a1;    else; hist.DS(stp  ) = 0; end  % [kg]
+if step>=2; hist.DB(stp  )  = (a2*hist.DB(max(1,stp-1)  )  + a3*hist.DB(max(1,stp-2)  )  + (b1*dsumBdt + b2*dsumBdto + b3*dsumBdtoo)*dt)/a1;    else; hist.DB(stp  ) = 0; end  % [kg]
+if step>=2; hist.DM(stp  )  = (a2*hist.DM(max(1,stp-1)  )  + a3*hist.DM(max(1,stp-2)  )  + (b1*dsumMdt + b2*dsumMdto + b3*dsumMdtoo)*dt)/a1;    else; hist.DM(stp  ) = 0; end  % [kg]
+if step>=2; hist.DX(stp  )  = (a2*hist.DX(max(1,stp-1)  )  + a3*hist.DX(max(1,stp-2)  )  + (b1*dsumXdt + b2*dsumXdto + b3*dsumXdtoo)*dt)/a1;    else; hist.DX(stp  ) = 0; end  % [kg]
+if step>=2; hist.DCm(stp,:) = (a2*hist.DCm(max(1,stp-1),:) + a3*hist.DCm(max(1,stp-2),:) + (b1*dsumCmdt + b2*dsumCmdto + b3*dsumCmdtoo)*dt)/a1; else; hist.DCm(stp,:) = zeros(1,cal.ncmp+cal.ntrc); end
+if step>=2; hist.DCx(stp,:) = (a2*hist.DCx(max(1,stp-1),:) + a3*hist.DCx(max(1,stp-2),:) + (b1*dsumCxdt + b2*dsumCxdto + b3*dsumCxdtoo)*dt)/a1; else; hist.DCx(stp,:) = zeros(1,cal.ncmp+cal.ntrc); end
+if step>=2; hist.DC (stp,:) = (a2*hist.DC (max(1,stp-1),:) + a3*hist.DC (max(1,stp-2),:) + (b1*dsumCdt  + b2*dsumCdto  + b3*dsumCdtoo )*dt)/a1; else; hist.DC (stp,:) = zeros(1,cal.ncmp+cal.ntrc); end  % [kg]
 
 % record conservation error of mass M, heat S, components C
 hist.ES(stp  ) = (hist.sumS(stp  ) - hist.DS(stp  ) - hist.sumS(1  ))./hist.sumS(1);  % [kg/kg]
 hist.EB(stp  ) = (hist.sumB(stp  ) - hist.DB(stp  ) - hist.sumB(1  ))./hist.sumB(1);  % [kg/kg]
 hist.EM(stp  ) = (hist.sumM(stp  ) - hist.DM(stp  ) - hist.sumM(1  ))./hist.sumB(1);  % [kg/kg]
 hist.EX(stp  ) = (hist.sumX(stp  ) - hist.DX(stp  ) - hist.sumX(1  ))./hist.sumB(1);  % [kg/kg]
-hist.EC(stp,:) = (hist.sumC(stp,:) - hist.DC(stp,:) - hist.sumC(1,:))./hist.sumB(1);  % [kg/kg]
-hist.ET(stp,:) = (hist.sumT(stp,:) - hist.DT(stp,:) - hist.sumT(1,:))./hist.sumB(1);  % [kg/kg]
+hist.ECm(stp,:) = (hist.sumCm(stp,:) - hist.DCm(stp,:) - hist.sumCm(1,:))./hist.sumB(1); % [kg/kg]
+hist.ECx(stp,:) = (hist.sumCx(stp,:) - hist.DCx(stp,:) - hist.sumCx(1,:))./hist.sumB(1); % [kg/kg]
+hist.EC (stp,:) = (hist.sumC (stp,:) - hist.DC (stp,:) - hist.sumC (1,:))./hist.sumB(1); % [kg/kg]
 
 % record variable and coefficient diagnostics
 hist.W(stp,1) = min(min(-W(:,2:end-1)));
@@ -121,30 +105,30 @@ hist.Tliq(stp,2) = mean(mean(Tliq));
 hist.Tliq(stp,3) = max(max(Tliq));
 
 for i=1:cal.ncmp
-    hist.c(stp,1,i) = min(min(c(:,:,i)));
-    hist.c(stp,2,i) = mean(mean(c(:,:,i)));
-    hist.c(stp,3,i) = max(max(c(:,:,i)));
+    hist.maj(stp,1,i) = min(min(maj(:,:,i)));
+    hist.maj(stp,2,i) = mean(mean(maj(:,:,i)));
+    hist.maj(stp,3,i) = max(max(maj(:,:,i)));
 end
 for i=1:cal.noxd
-    hist.c_oxd(stp,1,i) = min(min(c_oxd(:,:,i)));
-    hist.c_oxd(stp,2,i) = mean(mean(c_oxd(:,:,i)));
-    hist.c_oxd(stp,3,i) = max(max(c_oxd(:,:,i)));
+    hist.maj_oxd(stp,1,i) = min(min(maj_oxd(:,:,i)));
+    hist.maj_oxd(stp,2,i) = mean(mean(maj_oxd(:,:,i)));
+    hist.maj_oxd(stp,3,i) = max(max(maj_oxd(:,:,i)));
 end
 
 for i=1:cal.ncmp
-    hist.cx(stp,1,i) = min(min(cx(:,:,i)));
-    hist.cx(stp,2,i) = sum(sum(cx(:,:,i).*x.*rho))./sum(sum(x.*rho));
-    hist.cx(stp,3,i) = max(max(cx(:,:,i)));
+    hist.majx(stp,1,i) = min(min(majx(:,:,i)));
+    hist.majx(stp,2,i) = sum(sum(majx(:,:,i).*x.*rho))./sum(sum(x.*rho));
+    hist.majx(stp,3,i) = max(max(majx(:,:,i)));
 end
 for i=1:cal.noxd
-    hist.cx_oxd(stp,1,i) = min(min(cx_oxd(:,:,i)));
-    hist.cx_oxd(stp,2,i) = sum(sum(cx_oxd(:,:,i).*x.*rho))./sum(sum(x.*rho));
-    hist.cx_oxd(stp,3,i) = max(max(cx_oxd(:,:,i)));
+    hist.majx_oxd(stp,1,i) = min(min(majx_oxd(:,:,i)));
+    hist.majx_oxd(stp,2,i) = sum(sum(majx_oxd(:,:,i).*x.*rho))./sum(sum(x.*rho));
+    hist.majx_oxd(stp,3,i) = max(max(majx_oxd(:,:,i)));
 end
 for i=1:cal.nmsy
-    hist.cx_msy(stp,1,i) = min(min(cx_msy(:,:,i)));
-    hist.cx_msy(stp,2,i) = sum(sum(cx_msy(:,:,i).*x.*rho))./sum(sum(x.*rho));
-    hist.cx_msy(stp,3,i) = max(max(cx_msy(:,:,i)));
+    hist.majx_msy(stp,1,i) = min(min(majx_msy(:,:,i)));
+    hist.majx_msy(stp,2,i) = sum(sum(majx_msy(:,:,i).*x.*rho))./sum(sum(x.*rho));
+    hist.majx_msy(stp,3,i) = max(max(majx_msy(:,:,i)));
 end
 
 hist.rhox(stp,1) = min(min(rhox));
@@ -152,20 +136,20 @@ hist.rhox(stp,2) = sum(sum(rhox.*x.*rho))./sum(sum(x.*rho));
 hist.rhox(stp,3) = max(max(rhox));
 
 for i=1:cal.ncmp
-    hist.cm(stp,1,i) = min(min(cm(:,:,i)));
-    hist.cm(stp,2,i) = sum(sum(cm(:,:,i).*m.*rho))./sum(sum(m.*rho));
-    hist.cm(stp,3,i) = max(max(cm(:,:,i)));
+    hist.majm(stp,1,i) = min(min(majm(:,:,i)));
+    hist.majm(stp,2,i) = sum(sum(majm(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.majm(stp,3,i) = max(max(majm(:,:,i)));
 end
 for i=1:cal.noxd
-    hist.cm_oxd(stp,1,i) = min(min(cm_oxd(:,:,i)));
-    hist.cm_oxd(stp,2,i) = sum(sum(cm_oxd(:,:,i).*m.*rho))./sum(sum(m.*rho));
-    hist.cm_oxd(stp,3,i) = max(max(cm_oxd(:,:,i)));
+    hist.majm_oxd(stp,1,i) = min(min(majm_oxd(:,:,i)));
+    hist.majm_oxd(stp,2,i) = sum(sum(majm_oxd(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.majm_oxd(stp,3,i) = max(max(majm_oxd(:,:,i)));
 end
 
 for i=1:cal.nmsy
-    hist.cm_msy(stp,1,i) = min(min(cm_msy(:,:,i)));
-    hist.cm_msy(stp,2,i) = sum(sum(cm_msy(:,:,i).*m.*rho))./sum(sum(m.*rho));
-    hist.cm_msy(stp,3,i) = max(max(cm_msy(:,:,i)));
+    hist.majm_msy(stp,1,i) = min(min(majm_msy(:,:,i)));
+    hist.majm_msy(stp,2,i) = sum(sum(majm_msy(:,:,i).*m.*rho))./sum(sum(m.*rho));
+    hist.majm_msy(stp,3,i) = max(max(majm_msy(:,:,i)));
 end
 
 hist.rhom(stp,1) = min(min(rhom));

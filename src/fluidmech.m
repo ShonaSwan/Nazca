@@ -6,13 +6,14 @@ if ~bnchm && step>0 && ~restart
 MFDSrc = - (a1*rho -a2*rhoo -a3*rhooo )/dt + Gex + Gem + Gin;
 CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
 
-res_MFD = (a1*rho-a2*rhoo-a3*rhooo)/dt - (b1*drhodt + b2*drhodto + b3*drhodtoo);
-res_CMP = rhox.*(Pc(2:end-1,2:end-1)./zeta + ups);
+res_MFD = (a1*rho-a2*rhoo-a3*rhooo) - (b1*drhodt + b2*drhodto + b3*drhodtoo)*dt;
+% res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
+% res_MFD = rho-RHO;
 
-[MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/2,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter*~frst);
+[MFDCrr,GHST.MFD,FHST.MFD,specrad.MFD] = iterate(MFDCrr/MFD0,res_MFD/MFD0/dt,specrad.MFD,GHST.MFD,FHST.MFD,itpar,iter,[nan,nan]);
 MFDCrr = MFDCrr*MFD0;
 
-% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/2,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter*~frst);
+% [CMPCrr,GHST.CMP,FHST.CMP,specrad.CMP] = iterate(CMPCrr/MFD0,res_CMP/MFD0/dt,specrad.CMP,GHST.CMP,FHST.CMP,itpar,iter,[nan,nan]);
 % CMPCrr = CMPCrr*MFD0;
 
 end
@@ -114,11 +115,15 @@ IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
 %  assemble coefficients of x-stress divergence
 
 % top boundary
-    ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
+ii  = MapU(1,:); jj1 = ii; jj2 = MapU(2,:);
+if bndmode == 0 % Mid ocean Ridge half-spreading 
+    aa  = (1-exp(-Xf/bnd_sprw))*sprate/u0*2;
+else
     aa  = zeros(size(ii));
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-    IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
-    IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];   
+end
+IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Utop];
+IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 
 % bottom boundary
 ii  = MapU(end,:); jj1 = ii; jj2 = MapU(end-1,:);
@@ -518,7 +523,7 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL; +M4(:)/(h/h0)];  % W one 
 DDm  = sparse(IIL,JJL,AAL,NP,NV);
 
 
-%% assemble coefficients for divergence of matrix mass flux (DDs)
+%% assemble coefficients for divergence of matrix mass flux (DDx)
 
 IIL = [];       % equation indeces into A
 JJL = [];       % variable indeces into A
@@ -628,7 +633,7 @@ RR = SCL * RR;
 
 %% Solve linear system of equations for W, U, Pf, Pc
 
-if iter<3; pcol = colamd(LL); end               % update column permutation for sparsity pattern once per time step
+pcol = colamd(LL);                               % update column permutation for sparsity pattern once per time step
 dLL          = decomposition(LL(:,pcol), 'lu');  % get LU-decomposition for consistent performance of LL \ RR
 SS(pcol,1)   = dLL \ RR;                         % solve permuted decomposed system
 
@@ -656,13 +661,13 @@ Pc     = Pc  * p0;
 if ~bnchm
 
     % phase diffusion rates (for regularisation)
-    [~,wqm,uqm] = diffus(mu,km,h,[1,2],BCD);
+    % [~,wqm,uqm] = diffus(mu,km,h,[1,2],BCD);
 
     % update phase velocities
     Wx  = W + 0. + 0.;  % xtl z-velocity
     Ux  = U + 0. + 0.;  % xtl x-velocity
-    Wm  = W + wm + wqm;  % mlt z-velocity
-    Um  = U + um + uqm;  % mlt x-velocity
+    Wm  = W + wm + 0.;  % mlt z-velocity
+    Um  = U + um + 0.;  % mlt x-velocity
 
     % update mixture velocity
     Umix = U + mx(icz,:).*um;

@@ -55,12 +55,12 @@ if Nx <= 1 && Nz <= 1  % create 0D plots
     title('$T [^\circ$C]',TX{:},FS{:}); set(gca,TL{:},TS{:});
     subplot(4,1,2)
     for i=1:cal.ncmp
-        pcmp(i) = plot(hist.time/TimeScale,squeeze(hist.cm(:,2,i)).*100,'-',LW{:},'color',ocean(round((i-1)*213/cal.ncmp)+1,:)); axis xy tight; box on; hold on
+        pcmp(i) = plot(hist.time/TimeScale,squeeze(hist.majm(:,2,i)).*100,'-',LW{:},'color',ocean(round((i-1)*213/cal.ncmp)+1,:)); axis xy tight; box on; hold on
     end
     title('melt cmps [wt\%]',TX{:},FS{:}); legend(pcmp,cal.cmpStr(1:end),TX{:},FS{1},8,'Location','northwest'); set(gca,TL{:},TS{:});
     subplot(4,1,3)
     for i=1:cal.ncmp
-        plot(hist.time/TimeScale,squeeze(hist.cx(:,2,i)).*100,'-',LW{:},'color',ocean(round((i-1)*213/cal.ncmp)+1,:)); axis xy tight; box on; hold on
+        plot(hist.time/TimeScale,squeeze(hist.majx(:,2,i)).*100,'-',LW{:},'color',ocean(round((i-1)*213/cal.ncmp)+1,:)); axis xy tight; box on; hold on
     end
     title('xtal cmps [wt\%]',TX{:},FS{:});
     subplot(4,1,4)
@@ -96,22 +96,22 @@ if Nx <= 1 && Nz <= 1  % create 0D plots
     end
     subplot(4,1,1)
     for i=1:cal.noxd
-        plot(hist.time/TimeScale,squeeze(hist.c_oxd(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis xy tight; box on; hold on
+        plot(hist.time/TimeScale,squeeze(hist.maj_oxd(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis xy tight; box on; hold on
     end
     title('Bulk oxds [wt\%]',TX{:},FS{:}); legend(cal.oxdStr,TX{:},FS{1},8,'Location','northwest'); set(gca,TL{:},TS{:});
     subplot(4,1,2)
     for i=1:cal.noxd
-        plot(hist.time/TimeScale,squeeze(hist.cm_oxd(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis xy tight; box on; hold on
+        plot(hist.time/TimeScale,squeeze(hist.majm_oxd(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis xy tight; box on; hold on
     end
     title('Melt oxds [wt\%]',TX{:},FS{:});
     subplot(4,1,3)
     for i=1:cal.noxd
-        plot(hist.time/TimeScale,squeeze(hist.cx_oxd(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis xy tight; box on; hold on
+        plot(hist.time/TimeScale,squeeze(hist.majx_oxd(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis xy tight; box on; hold on
     end
     title('Xtal oxds [wt\%]',TX{:},FS{:}); set(gca,TL{:},TS{:});
     subplot(4,1,4)
     for i=1:cal.nmsy
-        plot(hist.time/TimeScale,squeeze(hist.cx_msy(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.nmsy)+1,:)); axis xy tight; box on; hold on
+        plot(hist.time/TimeScale,squeeze(hist.majx_msy(:,2,i)),'-',LW{:},'color',ocean(round((i-1)*213/cal.nmsy)+1,:)); axis xy tight; box on; hold on
     end
     title('Xtal msys [wt\%]',TX{:},FS{:}); set(gca,TL{:},TS{:}); legend(cal.msyStr,TX{:},FS{1},8,'Location','northwest'); set(gca,TL{:},TS{:});
     xlabel(['Time [',TimeUnits,']'],TX{:},FS{:});
@@ -174,22 +174,22 @@ elseif Nx <= 1  % create 1D plots
     sgtitle(['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k');
     subplot(1,4,1)
     for i=1:cal.noxd
-        plot(squeeze( c_oxd(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis ij tight; box on; hold on;
+        plot(squeeze( maj_oxd(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis ij tight; box on; hold on;
     end
     title('Bulk oxds [wt\%]',TX{:},FS{:});ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); set(gca,TL{:},TS{:});
     subplot(1,4,2)
     for i=1:cal.noxd
-        plot(squeeze(cm_oxd(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis ij tight; box on; hold on;
+        plot(squeeze(majm_oxd(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis ij tight; box on; hold on;
     end
     title('Melt oxds [wt\%]',TX{:},FS{:}); set(gca,TL{:},TS{:});
     subplot(1,4,3)
     for i=1:cal.noxd
-        plot(squeeze(cx_oxd(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis ij tight; box on; hold on;
+        plot(squeeze(majx_oxd(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.noxd)+1,:)); axis ij tight; box on; hold on;
     end
     title('Xtal oxds [wt\%]',TX{:},FS{:}); legend(cal.oxdStr,TX{:},FS{:},'Location','west'); set(gca,TL{:},TS{:});
     subplot(1,4,4)
     for i=1:cal.nmsy
-        plot(squeeze(cx_msy(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.nmsy)+1,:)); axis ij tight; box on; hold on;
+        plot(squeeze(majx_msy(:,:,i)),Zsc.',LW{:},'color',ocean(round((i-1)*213/cal.nmsy)+1,:)); axis ij tight; box on; hold on;
     end
     title('Xtal msys [wt\%]',TX{:},FS{:}); legend(cal.msyStr,TX{:},FS{:},'Location','west'); set(gca,TL{:},TS{:});
 
@@ -363,23 +363,23 @@ else % create 2D plots
     plot(Xsc,LAB_depth./SpaceScale,'w--','LineWidth',1.5)
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$T_p$ [$^\circ$C]',TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh2,'CurrentAxes',ax(22));
-    imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Si)./sum(c_oxd(:,:,1:end-2),3).*100)); axis ij equal tight; hold on; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,squeeze(maj_oxd(:,:,cal.Si)./sum(maj_oxd(:,:,1:end-2),3).*100)); axis ij equal tight; hold on; box on; cb = colorbar;
     plot(Xsc,MOHO_depth./SpaceScale,'w--','LineWidth',1.5)
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('SiO$_2$ [wt\%]',TX{:},FS{:}); set(gca,'YTickLabel',[]); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh2,'CurrentAxes',ax(23));
     if any(c(:,:,end),'all')
-        imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.H))); axis ij equal tight; box on; cb = colorbar;
+        imagesc(Xsc,Zsc,squeeze(maj_oxd(:,:,cal.H))); axis ij equal tight; box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('H$_2$O [wt\%]',TX{:},FS{:}); set(gca,'YTickLabel',[]);
     else
-        imagesc(Xsc,Zsc,squeeze(c_oxd(:,:,cal.Mg)./sum(c_oxd(:,:,1:end-2),3).*100)); axis ij equal tight; box on; cb = colorbar;
+        imagesc(Xsc,Zsc,squeeze(maj_oxd(:,:,cal.Mg)./sum(maj_oxd(:,:,1:end-2),3).*100)); axis ij equal tight; box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('MgO [wt\%]',TX{:},FS{:}); set(gca,'YTickLabel',[]);
     end
 
     % plot phase fractions and reaction rates in Fig. 3
     set(0,'CurrentFigure',fh3)
     set(fh3,'CurrentAxes',ax(31));
-    imagesc(Xsc,Zsc,log10((m+mumin).*100)); axis ij equal tight; box on; cb = colorbar;
+    imagesc(Xsc,Zsc,log10(max(mumin,mu).*100)); axis ij equal tight; box on; cb = colorbar;
     set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$m$ [log$_{10}$ wt\%]',TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
     set(fh3,'CurrentAxes',ax(32));
     imagesc(Xsc,Zsc,ups); axis ij equal tight; box on; cb = colorbar;
@@ -412,7 +412,7 @@ else % create 2D plots
     set(0,'CurrentFigure',fh5)
     for i = 1:cal.ncmp
         set(fh5,'CurrentAxes',ax(50+i));
-        imagesc(Xsc,Zsc,c(:,:,i).*100); axis ij equal tight; hold on; box on; cb = colorbar;
+        imagesc(Xsc,Zsc,maj(:,:,i).*100); axis ij equal tight; hold on; box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title([cal.cmpStr{i},' [wt\%]'],TX{:},FS{:});
     end
     set(fh5,'CurrentAxes',ax(51));
@@ -431,13 +431,13 @@ else % create 2D plots
 
     % plot major oxide composition in Fig. 6
     set(0,'CurrentFigure',fh6)
-    sumanh = sum(c_oxd(:,:,1:end-2),3);
+    sumanh = sum(maj_oxd(:,:,1:end-2),3);
     for i = 1:min(9,cal.noxd)
         set(fh6,'CurrentAxes',ax(60+i));
         if i<cal.noxd
-            imagesc(Xsc,Zsc,c_oxd(:,:,i)./sumanh.*100); axis ij equal tight; box on; cb = colorbar;
+            imagesc(Xsc,Zsc,maj_oxd(:,:,i)./sumanh.*100); axis ij equal tight; box on; cb = colorbar;
         else
-            imagesc(Xsc,Zsc,c_oxd(:,:,i)); axis ij equal tight; box on; cb = colorbar;
+            imagesc(Xsc,Zsc,maj_oxd(:,:,i)); axis ij equal tight; box on; cb = colorbar;
         end
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title([cal.oxdStr{i},' [wt\%]'],TX{:},FS{:});
     end
@@ -464,7 +464,7 @@ else % create 2D plots
     set(0,'CurrentFigure',fh7)
     for i = 1:min(6,cal.nmsy)
         set(fh7,'CurrentAxes',ax(70+i));
-        imagesc(Xsc,Zsc,cx_msy(:,:,i)); axis ij equal tight; box on; cb = colorbar;
+        imagesc(Xsc,Zsc,majx_msy(:,:,i)); axis ij equal tight; box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title([cal.msyStr{i},' [wt\%]'],TX{:},FS{:});
     end
     set(fh7,'CurrentAxes',ax(71));
@@ -486,13 +486,13 @@ else % create 2D plots
     for i = 1:cal.ntrc
         set(fh8,'CurrentAxes',ax(80+i));
         imagesc(Xsc,Zsc,trc(:,:,i)); axis ij equal tight; box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title([cal.trcStr{i},' [1]'],TX{:},FS{:});
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title([cal.trcStr{i},' [wt ppb]'],TX{:},FS{:});
     end
     set(fh8,'CurrentAxes',ax(81));
     set(gca,'XTickLabel',[]);
     set(fh8,'CurrentAxes',ax(82));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
-    text(0.5,1.3,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
+    text(0.5,1.2,['time = ',num2str(time/TimeScale,3),' [',TimeUnits,']'],TX{:},FS{:},'Color','k','HorizontalAlignment','center','Units','normalized');
     set(fh8,'CurrentAxes',ax(83));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh8,'CurrentAxes',ax(84));
@@ -502,13 +502,15 @@ else % create 2D plots
     set(fh8,'CurrentAxes',ax(86));
     set(gca,'XTickLabel',[],'YTickLabel',[]);
     set(fh8,'CurrentAxes',ax(87));
-    imagesc(Xsc,Zsc,(m+mumin).*100); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('$m$ [log$_{10}$ wt\%]',TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    imagesc(Xsc,Zsc,trc(:,:,cal.ElRatio(1,1))./trc(:,:,cal.ElRatio(1,2))); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['Ratio ',int2str(cal.ElRatio(1,1)),'/',int2str(cal.ElRatio(1,2)),' [wt/wt]'],TX{:},FS{:}); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:});
     set(fh8,'CurrentAxes',ax(88));
-    imagesc(Xsc,Zsc,rho); axis ij equal tight; box on; cb = colorbar;
-    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Delta \bar{\rho}_h$ [kg/m$^3$]'],TX{:},FS{:}); set(gca,'XTickLabel',[]); ylabel(['Depth [',SpaceUnits,']'],TX{:},FS{:}); 
+    imagesc(Xsc,Zsc,trc(:,:,cal.ElRatio(2,1))./trc(:,:,cal.ElRatio(2,2))); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['Ratio ',int2str(cal.ElRatio(2,1)),'/',int2str(cal.ElRatio(2,2)),' [wt/wt]'],TX{:},FS{:});
     set(gca,'YTickLabel',[]); xlabel(['Width [',SpaceUnits,']'],TX{:},FS{:});
     set(fh8,'CurrentAxes',ax(89));
+    imagesc(Xsc,Zsc,trc(:,:,cal.ElRatio(3,1))./trc(:,:,cal.ElRatio(3,2))); axis ij equal tight; box on; cb = colorbar;
+    set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['Ratio ',int2str(cal.ElRatio(3,1)),'/',int2str(cal.ElRatio(3,2)),' [wt/wt]'],TX{:},FS{:});
     set(gca,'YTickLabel',[]);
 
 end
@@ -550,13 +552,13 @@ if Nz>1; clf; end
 for i=1:min(9,cal.noxd)
 subplot(3,3,i)
 if i<cal.ncmp
-    plot( c_oxd(:,:,i)./sum( c_oxd(:,:,1:end-2),3)*100,T-273.15,'k.','LineWidth',2,'MarkerSize',15); axis tight; box on; hold on;
-    plot(cx_oxd(:,:,i)./sum(cx_oxd(:,:,1:end-2),3)*100,T-273.15,'b.','LineWidth',2,'MarkerSize',15);
-    plot(cm_oxd(:,:,i)./sum(cm_oxd(:,:,1:end-2),3)*100,T-273.15,'r.','LineWidth',2,'MarkerSize',15);
+    plot( maj_oxd(:,:,i)./sum( maj_oxd(:,:,1:end-2),3)*100,T-273.15,'k.','LineWidth',2,'MarkerSize',15); axis tight; box on; hold on;
+    plot(majx_oxd(:,:,i)./sum(majx_oxd(:,:,1:end-2),3)*100,T-273.15,'b.','LineWidth',2,'MarkerSize',15);
+    plot(majm_oxd(:,:,i)./sum(majm_oxd(:,:,1:end-2),3)*100,T-273.15,'r.','LineWidth',2,'MarkerSize',15);
 else
-    plot( c_oxd(:,:,i),T-273.15,'k.','LineWidth',2,'MarkerSize',15); axis tight; box on; hold on;
-    plot(cx_oxd(:,:,i),T-273.15,'b.','LineWidth',2,'MarkerSize',15);
-    plot(cm_oxd(:,:,i),T-273.15,'r.','LineWidth',2,'MarkerSize',15);
+    plot( maj_oxd(:,:,i),T-273.15,'k.','LineWidth',2,'MarkerSize',15); axis tight; box on; hold on;
+    plot(majx_oxd(:,:,i),T-273.15,'b.','LineWidth',2,'MarkerSize',15);
+    plot(majm_oxd(:,:,i),T-273.15,'r.','LineWidth',2,'MarkerSize',15);
 end
 xlabel([cal.oxdStr{i},' [wt \%]'],'Interpreter','latex','FontSize',12)
 set(gca,'TickLabelInterpreter','latex','FontSize',10)
@@ -577,12 +579,12 @@ end
 if Nz>1 || step==0 || frst; clf;
 TAS; axis tight; box on; hold on;
 end
-cxSi = cx_oxd_all(:,:,1)./sum(cx_oxd_all(:,:,1:end-1),3).*100;
-cmSi = cm_oxd_all(:,:,1)./sum(cm_oxd_all(:,:,1:end-1),3).*100;
- cSi =  c_oxd_all(:,:,1)./sum( c_oxd_all(:,:,1:end-1),3).*100;
-cxNK = sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,1:end-1),3).*100;
-cmNK = sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,1:end-1),3).*100;
- cNK = sum( c_oxd_all(:,:,[7,8]),3)./sum( c_oxd_all(:,:,1:end-1),3).*100;
+cxSi = majx_oxd_all(:,:,1)./sum(majx_oxd_all(:,:,1:end-1),3).*100;
+cmSi = majm_oxd_all(:,:,1)./sum(majm_oxd_all(:,:,1:end-1),3).*100;
+ cSi =  maj_oxd_all(:,:,1)./sum( maj_oxd_all(:,:,1:end-1),3).*100;
+cxNK = sum(majx_oxd_all(:,:,[7,8]),3)./sum(majx_oxd_all(:,:,1:end-1),3).*100;
+cmNK = sum(majm_oxd_all(:,:,[7,8]),3)./sum(majm_oxd_all(:,:,1:end-1),3).*100;
+ cNK = sum( maj_oxd_all(:,:,[7,8]),3)./sum( maj_oxd_all(:,:,1:end-1),3).*100;
 scatter(cxSi(:),cxNK(:),50,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4}); colormap(colmap); cb = colorbar;
 scatter(cmSi(:),cmNK(:),50,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3});
 scatter( cSi(:), cNK(:),80,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2});
@@ -595,17 +597,17 @@ end
 if Nz>1 || step==0 || frst; clf;
 AFM; axis tight; box on; hold on;
 end
-[A,B] = terncoords(cx_oxd_all(:,:, 5      )./sum(cx_oxd_all(:,:,[5,4,7,8]),3), ...
-                   cx_oxd_all(:,:, 4      )./sum(cx_oxd_all(:,:,[5,4,7,8]),3), ...
-               sum(cx_oxd_all(:,:,[7,8]),3)./sum(cx_oxd_all(:,:,[5,4,7,8]),3));
+[A,B] = terncoords(majx_oxd_all(:,:, 5      )./sum(majx_oxd_all(:,:,[5,4,7,8]),3), ...
+                   majx_oxd_all(:,:, 4      )./sum(majx_oxd_all(:,:,[5,4,7,8]),3), ...
+               sum(majx_oxd_all(:,:,[7,8]),3)./sum(majx_oxd_all(:,:,[5,4,7,8]),3));
 scatter(A(:),B(:),50,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4}); colormap(colmap); cb = colorbar;
-[A,B] = terncoords(cm_oxd_all(:,:, 5      )./sum(cm_oxd_all(:,:,[5,4,7,8]),3), ...
-                   cm_oxd_all(:,:, 4      )./sum(cm_oxd_all(:,:,[5,4,7,8]),3), ...
-               sum(cm_oxd_all(:,:,[7,8]),3)./sum(cm_oxd_all(:,:,[5,4,7,8]),3));
+[A,B] = terncoords(majm_oxd_all(:,:, 5      )./sum(majm_oxd_all(:,:,[5,4,7,8]),3), ...
+                   majm_oxd_all(:,:, 4      )./sum(majm_oxd_all(:,:,[5,4,7,8]),3), ...
+               sum(majm_oxd_all(:,:,[7,8]),3)./sum(majm_oxd_all(:,:,[5,4,7,8]),3));
 scatter(A(:),B(:),50,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3}); colormap(colmap);
-[A,B] = terncoords(c_oxd_all(:,:, 5      )./(sum(c_oxd_all(:,:,[5,4,7,8]),3)), ...
-                   c_oxd_all(:,:, 4      )./(sum(c_oxd_all(:,:,[5,4,7,8]),3)), ...
-               sum(c_oxd_all(:,:,[7,8]),3)./(sum(c_oxd_all(:,:,[5,4,7,8]),3)));
+[A,B] = terncoords(maj_oxd_all(:,:, 5      )./(sum(maj_oxd_all(:,:,[5,4,7,8]),3)), ...
+                   maj_oxd_all(:,:, 4      )./(sum(maj_oxd_all(:,:,[5,4,7,8]),3)), ...
+               sum(maj_oxd_all(:,:,[7,8]),3)./(sum(maj_oxd_all(:,:,[5,4,7,8]),3)));
 scatter(A(:),B(:),80,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2}); colormap(colmap);
 set(cb,TL{:},'FontSize',12); set(gca,TL{:},'FontSize',15); xlabel('SiO$_2$ [wt \%]',TX{:},'FontSize',15); ylabel('Na$_2$O + K$_2$O [wt \%]',TX{:},'FontSize',15);
 
@@ -675,18 +677,18 @@ end
     ax(99) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
     set(0,'CurrentFigure',fh15)
-    sumanh_b = sum(c_oxd(:,:,1:end-1),3);
-    sumanh_x = sum(cx_oxd(:,:,1:end-1),3);
-    sumanh_m = sum(cm_oxd(:,:,1:end-1),3);
+    sumanh_b = sum(maj_oxd(:,:,1:end-1),3);
+    sumanh_x = sum(majx_oxd(:,:,1:end-1),3);
+    sumanh_m = sum(majm_oxd(:,:,1:end-1),3);
 
-    SiO2_vals_b = c_oxd(:,:,1); 
-    SiO2_vals_x = cx_oxd(:,:,1);
-    SiO2_vals_m = cm_oxd(:,:,1); 
+    SiO2_vals_b = maj_oxd(:,:,1); 
+    SiO2_vals_x = majx_oxd(:,:,1);
+    SiO2_vals_m = majm_oxd(:,:,1); 
 
     for i = 2:cal.noxd-1
-        oxide_valsb = c_oxd(:,:,i);
-        oxide_valsx = cx_oxd(:,:,i);
-        oxide_valsm = cm_oxd(:,:,i);
+        oxide_valsb = maj_oxd(:,:,i);
+        oxide_valsx = majx_oxd(:,:,i);
+        oxide_valsm = majm_oxd(:,:,i);
 
         set(fh15,'CurrentAxes',ax(90+i-1));
          hold on;
@@ -725,47 +727,47 @@ BTH;
 end
 
 % middle ternary (plg olv cpx)
-sumABC = sum(cx_msy(:,:,cal.imsy([1,2,3])),3);
-[A,B] = terncoords(cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(2))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC);
+sumABC = sum(majx_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords(majx_msy(:,:,cal.imsy(1))./sumABC,majx_msy(:,:,cal.imsy(2))./sumABC,majx_msy(:,:,cal.imsy(3))./sumABC);
 scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
-sumABC = sum(cm_msy(:,:,cal.imsy([1,2,3])),3);
-[A,B] = terncoords(cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(2))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC);
+sumABC = sum(majm_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords(majm_msy(:,:,cal.imsy(1))./sumABC,majm_msy(:,:,cal.imsy(2))./sumABC,majm_msy(:,:,cal.imsy(3))./sumABC);
 scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
-sumABC = sum( c_msy(:,:,cal.imsy([1,2,3])),3);
-[A,B] = terncoords( c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(2))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC);
+sumABC = sum( maj_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords( maj_msy(:,:,cal.imsy(1))./sumABC, maj_msy(:,:,cal.imsy(2))./sumABC, maj_msy(:,:,cal.imsy(3))./sumABC);
 scatter(A(:),sin60-B(:)+zshiftm,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap);
 
 % upper ternary (plg cpx qtz)
-sumABC = sum(cx_msy(:,:,cal.imsy([1,4,3])),3);
-[A,B] = terncoords(cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(4))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC);
+sumABC = sum(majx_msy(:,:,cal.imsy([1,4,3])),3);
+[A,B] = terncoords(majx_msy(:,:,cal.imsy(1))./sumABC,majx_msy(:,:,cal.imsy(4))./sumABC,majx_msy(:,:,cal.imsy(3))./sumABC);
 scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
-sumABC = sum(cm_msy(:,:,cal.imsy([1,2,3])),3);
-[A,B] = terncoords(cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(4))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC);
+sumABC = sum(majm_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords(majm_msy(:,:,cal.imsy(1))./sumABC,majm_msy(:,:,cal.imsy(4))./sumABC,majm_msy(:,:,cal.imsy(3))./sumABC);
 scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
-sumABC = sum( c_msy(:,:,cal.imsy([1,2,3])),3);
-[A,B] = terncoords( c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(4))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC);
+sumABC = sum( maj_msy(:,:,cal.imsy([1,2,3])),3);
+[A,B] = terncoords( maj_msy(:,:,cal.imsy(1))./sumABC, maj_msy(:,:,cal.imsy(4))./sumABC, maj_msy(:,:,cal.imsy(3))./sumABC);
 scatter(A(:),B(:)+zshift,120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap);
 
 % left ternary (olv cpx qtz)
-sumABC = sum(cx_msy(:,:,cal.imsy([2,3,4])),3);
-[A,B] = terncoords(cx_msy(:,:,cal.imsy(2))./sumABC,cx_msy(:,:,cal.imsy(3))./sumABC,cx_msy(:,:,cal.imsy(4))./sumABC);
+sumABC = sum(majx_msy(:,:,cal.imsy([2,3,4])),3);
+[A,B] = terncoords(majx_msy(:,:,cal.imsy(2))./sumABC,majx_msy(:,:,cal.imsy(3))./sumABC,majx_msy(:,:,cal.imsy(4))./sumABC);
 scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
-sumABC = sum(cm_msy(:,:,cal.imsy([2,3,4])),3);
-[A,B] = terncoords(cm_msy(:,:,cal.imsy(2))./sumABC,cm_msy(:,:,cal.imsy(3))./sumABC,cm_msy(:,:,cal.imsy(4))./sumABC);
+sumABC = sum(majm_msy(:,:,cal.imsy([2,3,4])),3);
+[A,B] = terncoords(majm_msy(:,:,cal.imsy(2))./sumABC,majm_msy(:,:,cal.imsy(3))./sumABC,majm_msy(:,:,cal.imsy(4))./sumABC);
 scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
-sumABC = sum( c_msy(:,:,cal.imsy([2,3,4])),3);
-[A,B] = terncoords( c_msy(:,:,cal.imsy(2))./sumABC, c_msy(:,:,cal.imsy(3))./sumABC, c_msy(:,:,cal.imsy(4))./sumABC);
+sumABC = sum( maj_msy(:,:,cal.imsy([2,3,4])),3);
+[A,B] = terncoords( maj_msy(:,:,cal.imsy(2))./sumABC, maj_msy(:,:,cal.imsy(3))./sumABC, maj_msy(:,:,cal.imsy(4))./sumABC);
 scatter(A(:)-0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap);
 
 % right ternary (qtz plg olv)
-sumABC = sum(cx_msy(:,:,cal.imsy([4,1,2])),3);
-[A,B] = terncoords(cx_msy(:,:,cal.imsy(4))./sumABC,cx_msy(:,:,cal.imsy(1))./sumABC,cx_msy(:,:,cal.imsy(2))./sumABC);
+sumABC = sum(majx_msy(:,:,cal.imsy([4,1,2])),3);
+[A,B] = terncoords(majx_msy(:,:,cal.imsy(4))./sumABC,majx_msy(:,:,cal.imsy(1))./sumABC,majx_msy(:,:,cal.imsy(2))./sumABC);
 scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','^','MarkerEdgeColor',CL{4},LW{1},1.5); colormap(colmap);
-sumABC = sum(cm_msy(:,:,cal.imsy([4,1,2])),3);
-[A,B] = terncoords(cm_msy(:,:,cal.imsy(4))./sumABC,cm_msy(:,:,cal.imsy(1))./sumABC,cm_msy(:,:,cal.imsy(2))./sumABC);
+sumABC = sum(majm_msy(:,:,cal.imsy([4,1,2])),3);
+[A,B] = terncoords(majm_msy(:,:,cal.imsy(4))./sumABC,majm_msy(:,:,cal.imsy(1))./sumABC,majm_msy(:,:,cal.imsy(2))./sumABC);
 scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','o','MarkerEdgeColor',CL{3},LW{1},1.5); colormap(colmap);
-sumABC = sum( c_msy(:,:,cal.imsy([4,1,2])),3);
-[A,B] = terncoords( c_msy(:,:,cal.imsy(4))./sumABC, c_msy(:,:,cal.imsy(1))./sumABC, c_msy(:,:,cal.imsy(2))./sumABC);
+sumABC = sum( maj_msy(:,:,cal.imsy([4,1,2])),3);
+[A,B] = terncoords( maj_msy(:,:,cal.imsy(4))./sumABC, maj_msy(:,:,cal.imsy(1))./sumABC, maj_msy(:,:,cal.imsy(2))./sumABC);
 scatter(A(:)+0.55,B(:),120,T(:)-273.15,'filled','s','MarkerEdgeColor',CL{2},LW{1},1.5); colormap(colmap); 
 
 if Nz>1 || step==0 || frst
@@ -829,9 +831,9 @@ if save_op && ~restart
     end
 
     name = [outdir,'/',runID,'/',runID,'_',num2str(floor(step/nop))];
-    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','Cm','Cx','T','Tp','c','cm','cx','maj','majm','majx','trc','trcm','trcx','dSdt','dCmdt','dCxdt','drhodt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
     name = [outdir,'/',runID,'/',runID,'_cont'];
-    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','T','Tp','c','cm','cx','TRC','trc','dSdt','dCdt','dXdt','dMdt','drhodt','dTRCdt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
+    save(name,'U','W','Pf','Pc','Pt','x','m','chi','mu','X','M','S','C','Cm','Cx','T','Tp','c','cm','cx','maj','majm','majx','trc','trcm','trcx','dSdt','dCmdt','dCxdt','drhodt','Gx','Gm','Gem','Gex','Gin','rho','rhox','eta','zeta','Ks','kd','ups','eII','tII','dt','time','step','MFDSrc','MFDCrr','CMPSrc','CMPCrr','wx','wm','cal','specrad');
     name = [outdir,'/',runID,'/',runID,'_hist'];
     save(name,'hist');
 

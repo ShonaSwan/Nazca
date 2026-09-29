@@ -16,7 +16,7 @@
 %      .aa.reg   : regularisation coefficient for Anderson acceleration
 % count    : iteration count to track history of run
 
-function [x,GHST,FHST,rho] = iterate(x,r,rho,GHST,FHST,itpar,count)
+function [x,GHST,FHST,rho] = iterate(x,r,rho,GHST,FHST,itpar,count,lim)
 
 % allocate arrays of correct shape
 alpha = 0.*x;
@@ -32,19 +32,29 @@ if count>2
     rho_new = min(0.9, max(0.1, ratio));                     % clamp values to desired range
 else
     rho_new = rho.mean;
-    ratio   = 0.*rho_new + 1;
 end
 
 % Moving average for stability
-rho.est  = 0.7*rho.est  + 0.3*rho_new;                   % moving average
-rho.mean = 0.7*rho.mean + 0.3*geomean(rho_new(ratio>0)); % moving average
-rho.est  = (rho.est.^4 + (rho.mean/2).^4).^(1/4); % avoid outliers
+rho.est  = 0.5*rho.est  + 0.5*rho_new;            % moving average
+rho.mean = 0.5*rho.mean + 0.5*mean(rho_new);      % moving average
+rho.est  = 0.2*rho.mean + 0.8*rho.est;            % dampen towards mean to avoid outliers
 
 % Fixed-point update coefficients
 alpha(:) = 4./(2 + rho.est).^2;
 
 % New fixed-point update and iterate
 f(:) = itpar.fp.damp * -alpha(:).*r(:);
+
+f_lowlim = -1e32;
+f_uprlim =  1e32;
+if ~isnan(lim(1))
+    f_lowlim = (lim(1)-x)/2;
+end
+if ~isnan(lim(2))
+    f_uprlim = (lim(2)-x)/2;
+end
+f    = max(f_lowlim,min(f_uprlim,f));
+
 g    = x + f;
 
 

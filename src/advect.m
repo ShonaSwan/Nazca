@@ -216,40 +216,80 @@ end
 % but i wanted to be able to handle any specified dimension
 if ~strcmp(BC,'periodic') && size(f,dim)>1
     if ischar(BC)
-        if dim==1
-            fmm(    1:2  ,:,:) = repmat(f( 1 ,:,:),2,1,1);
-            fm (    1    ,:,:) =        f( 1 ,:,:);
-            fp (      end,:,:) =        f(end,:,:);
-            fpp(end-1:end,:,:) = repmat(f(end,:,:),2,1,1);
+        switch BC(1:4)
+            case 'cont'
+                if dim==1
+                    dfdz1 = f( 2 ,:,:) - f(    1,:,:);
+                    dfdze = f(end,:,:) - f(end-1,:,:);
 
-            if (sten7)
-                dfdz = f( 2 ,:,:) - f(  1  ,:,:);
-                fmmm(    1:3  ,:,:) = f( 1 ,:,:) - (3:-1:1).'.*dfdz;
-                dfdz = f(end,:,:) - f(end-1,:,:);
-                fppp(end-2:end,:,:) = f(end,:,:) + (1: 1:3).'.*dfdz;
-                % fmmm(    1:3  ,:,:) = repmat(f( 1 ,:,:),3,1,1);
-                % fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
-            end
-        elseif dim==2
-            fmm(:,    1:2  ,:) = repmat(f(:, 1 ,:),1,2,1);
-            fm (:,    1    ,:) =        f(:, 1 ,:);
-            fp (:,      end,:) =        f(:,end,:);
-            fpp(:,end-1:end,:) = repmat(f(:,end,:),1,2,1);
+                    fmm(    1:2  ,:,:) = f( 1 ,:,:) - (2:-1:1).'.*dfdz1;
+                    fm (    1    ,:,:) = f( 1 ,:,:) - dfdz1;
+                    fpp(end-1:end,:,:) = f(end,:,:) + (1: 1:2).'.*dfdze;
+                    fp (      end,:,:) = f(end,:,:) + dfdze;
 
-            if (sten7)
-                fmmm(:,    1:3  ,:) = repmat(f(:, 1 ,:),1,3,1);
-                fppp(:,end-2:end,:) = repmat(f(:,end,:),1,3,1);
-            end
-        elseif dim==3
-            fmm(:,:,    1:2  ) = repmat(f(:,:, 1 ),1,1,2);
-            fm (:,:,    1    ) =        f(:,:, 1 );
-            fp (:,:,      end) =        f(:,:,end);
-            fpp(:,:,end-1:end) = repmat(f(:,:,end),1,1,2);
+                    if (sten7)
+                        fmmm(    1:3  ,:,:) = f( 1 ,:,:) - (3:-1:1).'.*dfdz1;
+                        fppp(end-2:end,:,:) = f(end,:,:) + (1: 1:3).'.*dfdze;
+                    end
+                elseif dim==2
+                    dfdz1 = f(:, 2 ,:) - f(:,    1,:);
+                    dfdze = f(:,end,:) - f(:,end-1,:);
 
-            if (sten7)
-                fmmm(:,:,    1:3  ) = repmat(f(:,:, 1 ),1,1,3);
-                fppp(:,:,end-2:end) = repmat(f(:,:,end),1,1,3);
-            end
+                    fmm(:,    1:2  ,:) = f(:, 1 ,:) - (2:-1:1).'.*dfdz1;
+                    fm (:,    1    ,:) = f(:, 1 ,:) - dfdz1;
+                    fpp(:,end-1:end,:) = f(:,end,:) + (1: 1:2).'.*dfdze;
+                    fp (:,      end,:) = f(:,end,:) + dfdze;
+
+                    if (sten7)
+                        fmmm(:,    1:3  ,:) = f(:, 1 ,:) - (3:-1:1).'.*dfdz1;
+                        fppp(:,end-2:end,:) = f(:,end,:) + (1: 1:3).'.*dfdze;
+                    end
+                elseif dim==3
+                    dfdz1 = f(:,:, 2 ) - f(:,:,    1);
+                    dfdze = f(:,:,end) - f(:,:,end-1);
+
+                    fmm(:,:,    1:2  ) = f(:,:, 1 ) - (2:-1:1).'.*dfdz1;
+                    fm (:,:,    1    ) = f(:,:, 1 ) - dfdz1;
+                    fpp(:,:,end-1:end) = f(:,:,end) + (1: 1:2).'.*dfdze;
+                    fp (:,:,      end) = f(:,:,end) + dfdze;
+
+                    if (sten7)
+                        fmmm(:,:,    1:3  ) = f(:,:, 1 ) - (3:-1:1).'.*dfdz1;
+                        fppp(:,:,end-2:end) = f(:,:,end) + (1: 1:3).'.*dfdze;
+                    end
+                end
+            case 'clos'
+                if dim==1
+                    fmm(    1:2  ,:,:) = repmat(f( 1 ,:,:),2,1,1);
+                    fm (    1    ,:,:) =        f( 1 ,:,:);
+                    fp (      end,:,:) =        f(end,:,:);
+                    fpp(end-1:end,:,:) = repmat(f(end,:,:),2,1,1);
+                    
+                    if (sten7)
+                        fmmm(    1:3  ,:,:) = repmat(f( 1 ,:,:),3,1,1);
+                        fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
+                    end
+                elseif dim==2
+                    fmm(:,    1:2  ,:) = repmat(f(:, 1 ,:),1,2,1);
+                    fm (:,    1    ,:) =        f(:, 1 ,:);
+                    fp (:,      end,:) =        f(:,end,:);
+                    fpp(:,end-1:end,:) = repmat(f(:,end,:),1,2,1);
+
+                    if (sten7)
+                        fmmm(:,    1:3  ,:) = repmat(f(:, 1 ,:),1,3,1);
+                        fppp(:,end-2:end,:) = repmat(f(:,end,:),1,3,1);
+                    end
+                elseif dim==3
+                    fmm(:,:,    1:2  ) = repmat(f(:,:, 1 ),1,1,2);
+                    fm (:,:,    1    ) =        f(:,:, 1 );
+                    fp (:,:,      end) =        f(:,:,end);
+                    fpp(:,:,end-1:end) = repmat(f(:,:,end),1,1,2);
+
+                    if (sten7)
+                        fmmm(:,:,    1:3  ) = repmat(f(:,:, 1 ),1,1,3);
+                        fppp(:,:,end-2:end) = repmat(f(:,:,end),1,1,3);
+                    end
+                end
         end
     else
         if dim==1

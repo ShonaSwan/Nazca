@@ -102,8 +102,9 @@ cal.Dsx = 300;
 
 % specify geochemical model parameters
 cal.ntrc     = 6;                    % number of trace elements
-cal.trcStr   = {'K 0.01','K 0.10','K 1.0','K 3.00','K 10.0','K 1.0'};
-cal.Ktrc_mem = [0.01;0.10;1.0;3.0;10.0;1.0].*ones(cal.ntrc,cal.nmem);
+cal.trcStr   = {'K 0.01','K 0.10','K 0.5','K 3.00','K 10.0','K 0.5'};
+cal.Ktrc_mem = [0.01;0.10;0.5;3.0;10.0;0.5].*ones(cal.ntrc,cal.nmem);
+cal.ElRatio  = [1,4;2,5;3,6];
 
 % specify density parameters
 %               for  fay  ant  san  dps  aug  ulv  crm  phl  dol  qtz

@@ -1,12 +1,18 @@
 %*** update phase equilibrium
 eqtime = tic;
 
-var.c      = reshape(c,Nx*Nz,cal.ncmp);   % component fractions [wt]
+Ktrc  = zeros(Nz,Nx,cal.ntrc);
+for i = 1:cal.ntrc  
+    % update bulk partitioning coefficients
+    for j=1:cal.nmem; Ktrc(:,:,i) = Ktrc(:,:,i) + cal.Ktrc_mem(i,j) .* majx_mem(:,:,j)./100; end
+end
+cal.Ktrc = reshape(Ktrc,Nz*Nx,cal.ntrc);
+
+var.c      = reshape(c,Nx*Nz,cal.ncmp+cal.ntrc);   % component fractions [wt]
 var.T      = reshape(T,Nx*Nz,1)-273.15;   % temperature [C]
 var.P      = reshape(Pt,Nx*Nz,1)/1e9;     % pressure [GPa]
 var.m      = reshape(mq,Nx*Nz,1);         % melt fraction [wt]
-var.H2O    = var.c(:,end);                % water concentration [wt]
-var.X      = reshape(cm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
+var.X      = reshape(majm_oxd_all,Nz*Nx,9); % melt oxide fractions [wt %]
 cal.H2Osat = fluidsat(var);               % water saturation [wt]
 
 [var,cal]  = leappart(var,cal,'E');
@@ -19,25 +25,54 @@ mq = reshape(var.m.*(var.m>eps^0.5),Nz,Nx);
 xq = reshape(var.x.*(var.x>eps^0.5),Nz,Nx);
 mq = mq./(mq+xq);
 xq = xq./(mq+xq);
+x  = xq;  m = mq;
 
-cxq = reshape(var.cx,Nz,Nx,cal.ncmp);
-cmq = reshape(var.cm,Nz,Nx,cal.ncmp);
+cxq = reshape(var.cx,Nz,Nx,cal.ncmp+cal.ntrc); cxq = cxq./sum(cxq,3);
+cmq = reshape(var.cm,Nz,Nx,cal.ncmp+cal.ntrc); cmq = cmq./sum(cmq,3);
+majmq = cmq(:,:,1:cal.ncmp);  majmq = majmq./sum(majmq,3);
+majxq = cxq(:,:,1:cal.ncmp);  majxq = majxq./sum(majxq,3);
+trcmq = cmq(:,:,cal.ncmp+1:end)/trcscale;
+trcxq = cxq(:,:,cal.ncmp+1:end)/trcscale;
 
-% phase mass transfer rates
-Gm  = (mq-m).*RHO/(tau_r+3*dt);
-Gx  = (xq-x).*RHO/(tau_r+3*dt);
+Kx = reshape(cal.Kx,Nz,Nx,cal.ncmp+cal.ntrc);
 
-Gmc = (cmq.*mq-cm.*m).*RHO/(tau_r+3*dt);
-Gxc = (cxq.*xq-cx.*x).*RHO/(tau_r+3*dt);
+% disequilibrium - equilibrium transition at low melt fraction
+f_diseq = 1 - exp(-mu./mutra) - exp(-chi./mutra); %(1+erf((mu-mutra)./mutra*4))/2;%
+
+% equilibrium component transfer rates
+Gmc_eq  = (cmq.*mq.*RHO-Cm)/(tau_phs+3*dt);
+
+% net phase mass transfer rates
+Gm = sum(Gmc_eq,3);
+Gx = -Gm;
+
+% disequlibrium apporach
+% 1. fractional melting/crystallisation compositions
+cxqf = cm.*Kx; cxqf = cxqf./sum(cxqf,3);
+cmqf = cx./Kx; cmqf = cmqf./sum(cmqf,3);
+
+% 2. phase change component transfer (sum over comp to Gm, Gx, sum over phs to 0)
+Gmc_phs = max(0,Gm).*cmqf   + min(0,Gm).*cxqf  ;
+
+% 3. chemical exchange component transfer (sum over comp to 0, sum over phs to 0)
+Gmc_cex   = Gmc_eq   - Gmc_phs  ;
+
+% 4. combined disequilibrium component tranfer rates
+Gmc_diseq = (Gmc_phs   + Gmc_cex);
+
+% 5. Adding equlibrum and disequilibrium components weighted by smooth
+% transition functon
+Gmc = (1-f_diseq).*Gmc_eq + f_diseq .* Gmc_diseq;
+Gxc = -Gmc;
 
 % extract, extrude, and intrude melt
 
 findmoho;
 
-Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+2e3,Nz,1));%(etax>1e20);
-Gemc = cm  .*Gem;
-Gemt = trcm.*Gem;
-Gems = sm  .*Gem;
+% Gem  = min(0,mthr-m).*RHO/(tau_e+3*dt).*(ZZ<repmat(LAB_depth+2e3,Nz,1));%(etax>1e20);
+Gem  = min(0,mthr    .*RHO-M )/(tau_e+3*dt).*(etax>3e20);
+Gemc = min(0,mthr.*cm.*RHO-Cm)/(tau_e+3*dt).*(etax>3e20);
+Gems = sm.*Gem;
 
 findmelt;
 
@@ -45,41 +80,28 @@ findmelt;
 
 extr_shape = (1-path_ratio).*exp(-abs(ZZ - h/2) / bnd_w);
 path_shape = path_ratio.*(ZZ<max(h,melt_depth));
-Gex = erupt_ratio * (extr_shape+path_shape).*(-sum(Gem,1))./sum((extr_shape+path_shape),1);
-for i=1:2; Gex = Gex + diff(Gex(:,icx),2,2)./4; end
+
+Gex  = erupt_ratio * (extr_shape+path_shape).*(-sum(Gem ,1))./sum((extr_shape+path_shape),1);
 
 Gexc = erupt_ratio * (extr_shape+path_shape).*(-sum(Gemc,1))./sum((extr_shape+path_shape),1);
-for i=1:2; Gexc = Gexc + diff(Gexc(:,icx,:),2,2)./4; end
-
-Gext = erupt_ratio * (extr_shape+path_shape).*(-sum(Gemt,1))./sum((extr_shape+path_shape),1);
-for i=1:2; Gext = Gext + diff(Gext(:,icx,:),2,2)./4; end
 
 sx0   = cPx.*log((T0+273.15)./Tref);
 Gems0 = sx0 .* Gem;
 Gexs  = erupt_ratio * extr_shape.*(-sum(Gems0,1))./sum(extr_shape,1) ...
       + erupt_ratio * path_shape.*(-sum(Gems ,1))./sum(path_shape,1);
-for i=1:2; Gexs = Gexs + diff(Gexs(:,icx,:),2,2)./4; end
 
 % Intrusion
 
 intr_shape = (1-path_ratio).*exp(-abs(ZZ - min(MOHO_depth,melt_depth-h)) / bnd_w) + path_ratio.*(ZZ>min(MOHO_depth,melt_depth-h) & ZZ<melt_depth);
 Gin = (1-erupt_ratio) * intr_shape.*(-sum(Gem,1))./sum(intr_shape,1);
-for i=1:2; Gin = Gin + diff(Gin(:,icx),2,2)./4; end
 Gex = Gex + Gin.*(T-273.15<=Tsol);
 Gin =       Gin.*(T-273.15> Tsol);
 
 Ginc = (1-erupt_ratio) * intr_shape.*(-sum(Gemc,1))./sum(intr_shape,1);
-for i=1:2; Ginc = Ginc + diff(Ginc(:,icx,:),2,2)./4; end
 Gexc = Gexc + Ginc.*(T-273.15<=Tsol);
 Ginc =        Ginc.*(T-273.15> Tsol);
 
-Gint = (1-erupt_ratio) * intr_shape.*(-sum(Gemt,1))./sum(intr_shape,1);
-for i=1:2; Gint = Gint + diff(Gint(:,icx,:),2,2)./4; end
-Gext = Gext + Gint.*(T-273.15<=Tsol);
-Gint =        Gint.*(T-273.15> Tsol);
-
 Gins = (1-erupt_ratio) * intr_shape.*(-sum(Gems,1))./sum(intr_shape,1);
-for i=1:2; Gins = Gins + diff(Gins(:,icx,:),2,2)./4; end
 Gexs = Gexs + Gins.*(T-273.15<=Tsol);
 Gins =        Gins.*(T-273.15> Tsol);
 

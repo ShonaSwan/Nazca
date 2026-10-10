@@ -5,14 +5,14 @@ clear cal;
 
 % number of oxides, mineral end-members, mineral systems, model components
 cal.noxd   = 10;
-cal.nmem   = 19;
+cal.nmem   = 18;
 cal.nmsy   = 7;
 cal.ncmp   = 5;
 
 % label strings for all compositional representations
 cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','Cr$_2$O$_3$','FeO','MgO','CaO','Na$_2$O','K$_2$O','H$_2$O'};
      elStr = {'Si','Ti','Al','Cr','Fe','Mg','Ca','Na','K','H'};
-cal.memStr = {'cpx1','cpx2','cpx3','cpx4','for','fay','spl1','spl2','spl3','opx1','opx2','opx3','fsp1','fsp2','fsp3','qtz','phl', 'bit', 'wat'};
+cal.memStr = {'cpx1','cpx2','cpx3','cpx4','for','fay','spl1','spl2','spl3','opx1','opx2','opx3','fsp1','fsp2','fsp3','qtz','phl','wat'};
 cal.msyStr = {'cpx','olv','spn','opx','fsp','qtz','phl'};
 cal.cmpStr = {'dun','spx','bas','pgr','hab'};
 
@@ -29,52 +29,49 @@ cal.imsy = [ 5    2    1    6];  % mineral system indices for plotting basalt te
 
 % oxide composition of mineral end-members
 %                SiO2       TiO2      Al2O3      Cr2O3     FeO       MgO        CaO       Na2O      K2O      H2O       
-cal.mem_oxd = [ 53.3400         0    7.3600         0    6.0600   23.5300    8.5300    1.1800         0         0
-                54.0500         0    2.3300         0    3.7000   20.4000   19.5000    0.0200         0         0
-                52.9900         0    3.3600         0    5.3000   17.9600   20.1200    0.2700         0         0
-                50.8000         0    0.5000         0     29.14    4.1600   13.8700    1.5300         0         0
-                
+cal.mem_oxd = [ 53.3600         0    7.1500         0    5.8800   23.3100    9.1800    1.1200         0         0
+                53.7000         0    2.5500         0    4.9100   20.1800   18.5700    0.0900         0         0
+                52.9900         0    3.6500         0    5.3200   17.1600   20.4600    0.4200         0         0
+                50.5100         0         0         0   33.1400    2.1000   12.3900    1.8600         0         0
                 41.1600         0         0         0    8.6300   50.2100         0         0         0         0
-                30.2500         0         0         0   66.7500    3.0000         0         0         0         0
+                30.2400         0         0         0   66.8300    2.9300         0         0         0         0
                       0    0.5000   49.1000   17.3000   12.6000   20.5000         0         0         0         0
                       0    1.0000   24.5800   37.4000   32.0000   5.00000         0         0         0         0
                       0   32.0000      0.25         0   67.4000    0.3500         0         0         0         0
-                54.6600         0    5.6500         0    5.8300   32.2000    1.6600         0         0         0
-                53.5500         0    7.0800         0    6.4000   31.0000    1.9700         0         0         0
-                55.5700         0    3.2800         0    6.1200   31.9400    3.0900         0         0         0
-                
-                46.2500         0   34.5800         0         0         0   17.7600    1.4100         0         0
-                63.9900         0   22.5100         0         0         0    3.6400    9.2800    0.5800         0
-                66.1100         0   19.7300         0         0         0    0.8500    5.7000    7.6100         0
-                
-                100.000         0         0         0         0         0         0         0         0         0
-                40.5000    2.6000   15.9000         0    3.0000   23.7000         0         0    10.700       3.6
-                34.8100    2.5200   20.1700         0   21.9300    9.0800         0         0     4.990       4.9
-                      0         0         0         0         0         0         0         0         0       100 ];
+                54.6600         0    5.6500         0    5.8300   32.1100    1.7500         0         0         0
+                53.5300         0    7.0700         0    6.4300   30.9600    2.0100         0         0         0
+                55.4100         0    3.5400         0    6.1400   31.9400    2.9700         0         0         0
+                47.5900         0   33.6500         0         0         0   16.6600    1.9300    0.1700         0
+                64.1100         0   22.4400         0         0         0    3.5500    9.3400    0.5600         0
+                66.1100         0   19.7300         0         0         0    0.8500    5.7000    7.6100         0        
+               100.0000         0         0         0         0         0         0         0         0         0
+                40.5000    2.6000   15.9000         0    3.0000   23.7000         0         0    10.700        3.6
+                      0         0         0         0         0         0         0         0         0       100];           
+        
 
 
 cal.mem_oxd = cal.mem_oxd./sum(cal.mem_oxd,2)*100; 
 
 % mineral end-members in mineral systems
-cal.msy_mem = [1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    % clinopyroxene (cpx)
-               0  0  0  0  1  1  0  0  0  0  0  0  0  0  0  0  0  0  0    % olivine (olv)
-               0  0  0  0  0  0  1  1  1  0  0  0  0  0  0  0  0  0  0      % spinel (spn)
-               0  0  0  0  0  0  0  0  0  1  1  1  0  0  0  0  0  0  0    % orthopyroxene(opx)
-               0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  0  0  0  0    % feldspar (fsp)
-               0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  0  0  0     % quartz (qtz)
-               0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1 ];    % micas (mic) 
+cal.msy_mem = [1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0      % clinopyroxene (cpx)
+               0  0  0  0  1  1  0  0  0  0  0  0  0  0  0  0  0  0      % olivine (olv)
+               0  0  0  0  0  0  1  1  1  0  0  0  0  0  0  0  0  0        % spinel (spn)
+               0  0  0  0  0  0  0  0  0  1  1  1  0  0  0  0  0  0      % orthopyroxene(opx)
+               0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  0  0  0      % feldspar (fsp)
+               0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  0  0       % quartz (qtz)
+               0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1   ];    % micas (mic) 
 
 % mineral end-member composition of melting model components
 %              cpx1  cpx2   cpx3   cpx4  for   fay  spl1  spl2  spl3  opx1  opx2  opx3  fsp1   fsp2   fsp3  qtz   phl     
-cal.cmp_mem = [97.0   3.0     0     0    0     0     0     0     0     0     0     0     0      0     0     0     0   0  0         % dunite (dun)
+cal.cmp_mem = [97.0   3.0     0     0    0     0     0     0     0     0     0     0     0      0     0     0     0   0           % dunite (dun)
                
-               18.0   4.0     0     0    0  72.0   0.0   6.0     0     0     0     0     0      0     0     0     0   0  0         % spinel pyroxenite (spx)
+               18.0   4.0     0     0    0  72.0   0.0   6.0     0     0     0     0     0      0     0     0     0   0           % spinel pyroxenite (spx)
 
-                8.0   4.0  26.0     0    10.0  20.0  26.0   5.0   1.0   0     0    0     0      0     0     0     0   0  0         % basalt (bas)
+                8.0   4.0  26.0     0    10.0  20.0  26.0   5.0   1.0   0     0    0     0      0     0     0     0   0          % basalt (bas)
                  
-                  0     0   1.0     0    51.0   0     5.0    0    3.0   0     0   40.0   0      0     0     0     0   0  0      % plagiogranite (pgr)
+                  0     0   1.0     0    51.0   0     5.0    0    3.0   0     0   40.0   0      0     0     0     0   0        % plagiogranite (pgr)
 
-                10.0   5.0   5.0     0    1.0  15.0   2.0   2.0     0  55.0   5.0   0     0      0     0     0     0   0  0    ];      % hydrous alkali basalt (hab)
+                10.0   5.0   5.0     0    1.0  15.0   2.0   2.0     0  55.0   5.0   0     0      0     0     0     0   0      ];      % hydrous alkali basalt (hab)
                   
 cal.cmp_mem = cal.cmp_mem./sum(cal.cmp_mem,2)*100;
 

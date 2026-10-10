@@ -38,7 +38,7 @@ uiopen(filename,1)
 %% *****  unpack calibration data  ****************************************
 
 % !!!  update table name on following line, then Run Section  !!!
-DAT = FracC_ig;       % residual fraction = 10%        % table name must correspond to table header above
+DAT = FracC_ig ;       % residual fraction = 10%        % table name must correspond to table header above
 DAT.Properties.VariableNames{'point___'} = 'point'; DAT.Properties.VariableNames{'T__C_'}    = 'TC';DAT.Properties.VariableNames{'P_kbar_'} = 'Pkbar';DAT.Properties.VariableNames{'mode_wt__'} = 'modewt'; DAT.Properties.VariableNames{'density_kg_m3_'} = 'densitykgm3';
 
 DAT.Properties.VariableNames{'SiO2_wt__'}  = 'SiO2wt';DAT.Properties.VariableNames{'TiO2_wt__'}  = 'TiO2wt';DAT.Properties.VariableNames{'Al2O3_wt__'} = 'Al2O3wt';DAT.Properties.VariableNames{'Cr2O3_wt__'} = 'Cr2O3wt';DAT.Properties.VariableNames{'FeO_wt__'}   = 'FeOwt'; DAT.Properties.VariableNames{'MgO_wt__'}   = 'MgOwt'; DAT.Properties.VariableNames{'CaO_wt__'}   = 'CaOwt'; DAT.Properties.VariableNames{'Na2O_wt__'}  = 'Na2Owt'; DAT.Properties.VariableNames{'K2O_wt__'}   = 'K2Owt'; DAT.Properties.VariableNames{'H2O_wt__'}   = 'H2Owt';
@@ -53,9 +53,9 @@ iliq = find(strcmp(phs,'liq'));                                            % ens
 iphs = 1:nphs; iphs(iliq) = []; iphs = [iliq,iphs];
 phs  = phs(iphs);
   
-liq = 1; ol = 2; pl = 3; spl = 4; cpx = 4;  usp = 6; 
-%liq = 1; pl = 2; cpx = 3; spl = 4; ol = 5;   usp = 6; 
-%liq = 1; cpx = 2; ol = 3; spl = 4;  opx = 5;
+%liq = 1; g = 2; cpx = 3; ol = 4; opx = 5; spl = 6;  
+%liq = 1; pl = 2; cpx = 3; spl = 4; ol = 5;  usp = 6; 
+liq = 1; ol = 2; pl = 3; spl = 4; cpx = 5; usp = 6;
 
 % set oxide list in preferred sequence   Reorder the oxides
 oxd  = ["SiO2";"TiO2";"Al2O3";"Cr2O3";"FeO";"MgO";"CaO";"Na2O";"K2O";"H2O"];       % set major oxides
@@ -110,7 +110,7 @@ hasphs(:,usp) = [];
 nphs = nphs - 1;
 
 
-% %% Take the Melt phase and run it through the shape function 
+%  % Take the Melt phase and run it through the shape function 
 % Melt_fractions = PHS_frc(:,1);                    % melt mode wt% at each point
 % Melt_oxd       = squeeze(PHS_oxd(:,liq,:));       % all oxide compositions of the melt at each point
 % 

@@ -23,10 +23,10 @@ if level>0
     figure(103); clf; 
     cmap = [colororder;[0 0 0]];
 
-    for iph=1:cal.nmsy+1
+    for iph=1:cal.nmsy-1
         plot(Tmp,PHS_frc   (:,iph),'.'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
     end
-    for iph=1:cal.nmsy+1
+    for iph=1:cal.nmsy-1
         plot(Tmp,PHS_frcfit(:,iph),'--','Color',cmap(iph,:),'LineWidth',1.5); axis tight;
     end
     legend(['mlt',cal.msyStr],Fs{:},TX{:},LB{:})

@@ -221,6 +221,6 @@ cal.L  = (var.T+273.15).*cal.Dsx;
 
 cal.Kx = zeros(size(var.c));
 cal.Kx(:,    1:cal.ncmp) = exp(cal.L./cal.r.*(1./(var.T+273.15) - 1./(cal.Tm+273.15)));
-cal.Kx(:,cal.ncmp+1:end) = cal.Ktrc;
+%cal.Kx(:,cal.ncmp+1:end) = cal.Ktrc;
 
 end % function

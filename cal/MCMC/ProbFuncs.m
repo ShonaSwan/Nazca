@@ -67,12 +67,12 @@ function [L,V] = LikeFuncSimplex(dhat, data, sigma, simplex_wt, Tdiff_wt, P_max,
 % L = ProbFuncs('LikeFunc', dhat, data, sigma, model, cal)
 % assumes normally-distributed errors. 
 % 
-T0      = model(               (1:cal.ncmp-1)).';
-A       = model(1*(cal.ncmp-1)+(1:cal.ncmp-1)).';
-% B       = model(2*(cal.ncmp-1)+(1:cal.ncmp-1)).';
-cmp_mem = reshape(model(5*(cal.ncmp-1)+(1:cal.ncmp*cal.nmem)),cal.ncmp,cal.nmem);
+T0      = model(               (1:cal.ncmp)).';
+A       = model(1*(cal.ncmp)+(1:cal.ncmp)).';
+B       = model(2*(cal.ncmp)+(1:cal.ncmp)).'; %%%
+cmp_mem = reshape(model(4*(cal.ncmp)+(1:cal.ncmp*cal.nmem)),cal.ncmp,cal.nmem);
 cmp_oxd = cmp_mem*cal.mem_oxd./100;
-F  = [cmp_oxd(1:end-1,1:end-1).';ones(1,cal.ncmp-1)];
+F  = [cmp_oxd(1:end,1:end).';ones(1,cal.ncmp)];
 V  = 1/factorial(8)*abs(det(F.'*F))^0.5;
 P  = linspace(0,P_max/10,10).';
 Tm =  T0 .* (1 + P./A).^(1./A);

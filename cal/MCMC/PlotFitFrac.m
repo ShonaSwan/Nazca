@@ -20,7 +20,7 @@ if level>0
     %drawnow
 
     % plot fitted phase fractions
-    figure(103); clf; 
+    figure(101); clf; 
     cmap = [colororder;[0 0 0]];
 
     for iph=1:cal.nmsy-1
@@ -37,7 +37,7 @@ if level>0
     drawnow
 
     % plot fitted phase fractions
-    figure(109); clf; 
+    figure(102); clf; 
     cmap = [colororder;[0 0 0]];
 
     for iph=1:cal.nmsy-1
@@ -54,7 +54,7 @@ if level>0
     drawnow
 
     % plotted fitted system components
-    figure(104); clf;
+    figure(103); clf;
 
     subplot(3,1,1)
     plot(Tmp,MLT_cmpfit*100,'-','LineWidth',1.5); axis tight
@@ -77,7 +77,7 @@ if level>0
     drawnow
 
   % plotted fitted system components
-    figure(110); clf;
+    figure(104); clf;
 
     subplot(3,1,1)
     plot(Prs,MLT_cmpfit*100,'-','LineWidth',1.5); axis tight
@@ -137,7 +137,7 @@ if level>0
     drawnow
     
 
-figno = 111;
+figno = 106;
     % plot fitted mineral system compositions
     kmem = 1;
     figure(figno); clf; figno = figno+1;
@@ -180,10 +180,10 @@ if level>1
     % plot fitted liquid, solid, mixture compositions
     
     ioxd = [   1    2    3   4    5   6    7    8   9   10  ];
-    figure(106); clf;
+    figure(107); clf;
 
     spz = ceil(sqrt(noxd));
-    spx = ceil((noxd-1)/spz);
+    spx = ceil((noxd)/spz);
 
     kk = 2;
     for ix = 1:spx
@@ -196,7 +196,7 @@ if level>1
                 scatter(MLT_oxdfit(:,ioxd(1)),MLT_oxdfit(:,ioxd(kk)),25,Tmp,'o','filled');
                 scatter(SOL_oxdfit(:,ioxd(1)),SOL_oxdfit(:,ioxd(kk)),25,Tmp,'s','filled');
                 scatter(SYS_oxdfit(:,ioxd(1)),SYS_oxdfit(:,ioxd(kk)),25,Tmp,'d','filled');
-                for iem = 1:cal.ncmp-1
+                for iem = 1:cal.ncmp
                     scatter(cmp_oxd_best(iem,ioxd(1)),cmp_oxd_best(iem,ioxd(kk)),200,'kh','filled');
                     scatter(cmp_oxd_init(iem,ioxd(1)),cmp_oxd_init(iem,ioxd(kk)),200,'kh');
                 end
@@ -212,45 +212,10 @@ if level>1
     end
     sgtitle('MLT \& SOL MCMC fit',FL{:},TX{:})
     drawnow
-
-
-    figure(112); clf;
-
-    spz = ceil(sqrt(noxd));
-    spx = ceil((noxd-1)/spz);
-
-    kk = 2;
-    for ix = 1:spx
-        for iz = 1:spz
-            if kk<=noxd
-                subplot(spz,spx,kk-1);
-                scatter(MLT_oxdp  (:,ioxd(1)),MLT_oxdp  (:,ioxd(kk)),25,Prs,'o'); colormap('copper'); axis tight; hold on
-                scatter(SOL_oxdp  (:,ioxd(1)),SOL_oxdp  (:,ioxd(kk)),25,Prs,'s');
-                scatter(SYS_oxdp  (:,ioxd(1)),SYS_oxdp  (:,ioxd(kk)),25,Prs,'d');
-                scatter(MLT_oxdfit(:,ioxd(1)),MLT_oxdfit(:,ioxd(kk)),25,Prs,'o','filled');
-                scatter(SOL_oxdfit(:,ioxd(1)),SOL_oxdfit(:,ioxd(kk)),25,Prs,'s','filled');
-                scatter(SYS_oxdfit(:,ioxd(1)),SYS_oxdfit(:,ioxd(kk)),25,Prs,'d','filled');
-                for iem = 1:cal.ncmp-1
-                    scatter(cmp_oxd_best(iem,ioxd(1)),cmp_oxd_best(iem,ioxd(kk)),200,'kh','filled');
-                    scatter(cmp_oxd_init(iem,ioxd(1)),cmp_oxd_init(iem,ioxd(kk)),200,'kh');
-                end
-                if kk==noxd; legend([{'proj. mlt'},{'proj. sol'},{'proj. sys'},{'fit sol'},{'fit mlt'},{'fit sys'},{'best cmp'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
-                xlabel(cal.oxdStr(ioxd(1 )),FS{:},TX{:})
-                ylabel(cal.oxdStr(ioxd(kk)),FS{:},TX{:})
-                set(gca,Fs{:},TL{:});
-                kk = kk+1;
-            else
-                break;
-            end
-        end
-    end
-    sgtitle('MLT \& SOL MCMC fit',FL{:},TX{:})
-    drawnow
-
 
 
     % plot fitted T-X diagrams
-    figure(107); clf; 
+    figure(108); clf; 
 
     spz = ceil(sqrt(noxd));
     spx = ceil((noxd)/spz);
@@ -284,7 +249,7 @@ if level>1
     drawnow
 
   % plot fitted T-X diagrams
-    figure(113); clf; 
+    figure(109); clf; 
 
     spz = ceil(sqrt(noxd));
     spx = ceil((noxd)/spz);
@@ -300,10 +265,7 @@ if level>1
                 scatter(MLT_oxdfit(:,kk),Prs,25,[0.7,0.1,0.2],'o','filled');
                 scatter(SOL_oxdfit(:,kk),Prs,25,[0.2,0.1,0.7],'s','filled');
                 scatter(SYS_oxdfit(:,kk),Prs,25,[0.1,0.1,0.1],'d','filled');
-                for iem = 1:cal.ncmp-1
-                    scatter(cmp_oxd_best(iem,kk),min(1900,T0_best(iem)),200,'kh','filled');
-                    scatter(cmp_oxd_init(iem,kk),min(1900,T0_init(iem)),200,'kh');
-                end
+                
                 if kk==noxd; legend([{'proj. mlt'},{'proj. sol'},{'proj. sys'},{'fit mlt'},{'fit sol'},{'fit sys'},{'best cmp'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
                 xlabel(cal.oxdStr(kk),FS{:},TX{:})
                 ylabel('pressure [kbar]',FS{:},TX{:})
@@ -322,7 +284,7 @@ end
  if level>2
 
 
-    figno = 108;
+    figno = 110;
     % plot fitted mineral system compositions
     kmem = 1;
     for iph=2:nphs-2

@@ -21,9 +21,9 @@ LO = {'Location','bestoutside'};
 % A parameter fitting algorithm is used to optimise the result, so that one endmember better represents the differentiation end point, while the other endmember better represents the starting point.
 
 % !!!  Run Section to load end-member calibration and prepare for pseudo-component calibration  !!!
-load('MORB_Comb');
+load('MORB_Comb_6');
 
-cal_MORB_combo;  % read calibration file
+cal_MORB_combo_6;  % read calibration file
 
 % !!!  Edit end-member appearances in pseudo-components  !!!
 % - number and sequence of end-members must correspond to list in cal file
@@ -33,17 +33,24 @@ cal_MORB_combo;  % read calibration file
 %   system to next pseudo-component
 % - phase out mineral systems and their end-members in accordance with
 %   their fading or disappearance in PHS_frc
-
+% 
 %                     Cpx   |  Ol |  Spl  |  Opx  |  Pl  |  Qrt | Phl
-indmem  = logical([ 0 0 0 0   1 1   0 0 0   0 0 0   0 0 0    0     0 0 0  ;   % dunite (dun)
-                    1 1 1 0   1 1   1 1 0   1 1 1   0 0 0    0     0 0 0  ;   % spinel pyroxenite (spx)
-                    0 1 1 1   0 1   0 1 1   0 0 0   1 1 0    0     0 0 0  ;   % basalt (bas)
-                    0 0 1 1   0 0   0 0 1   0 0 0   1 1 1    1     0 1 1  ;   % plagiogranite (pgr)
-                    1 0 0 0   1 1   1 0 0   1 0 0   1 0 0    0     1 0 1 ]);  % hydrous alkali basalt (hab)
+indmem  = logical([ 1 0 0    1 1    0 0      1 0    0 0 0    0     0  0  ;   % dunite (dun)
+                    1 1 0    1 1    1 0      1 1    0 0 0    0     0  0  ;   % spinel pyroxenite (spx) 
+                    0 1 1    1 1    1 1      0 0    1 1 0    0     0  0  ;   % basalt (bas)
+                    0 1 1    0 1    0 1      0 0    1 1 1    0     0  0  ;   % basalt (bas) evolved
+                    0 0 1    0 0    0 1      0 0    0 1 1    1     0  1  ;   % plagiogranite (pgr)
+                    1 0 1    1 1    1 0      1 0    1 0 0    0     1  1]);   % hydrous alkali basalt (hab)
+               
+% %                     Cpx   |  Ol |  Spl  |  Opx  |  Pl  |  Qrt |   Phl
+% indmem  = logical([ 1 0 0    1 1    1 0     1 0     0 0 0    0     0  0  ;   % dunite (dun)
+%                     1 1 1    1 1    1 0     1 1     0 0 0    0     0  0  ;   % spinel pyroxenite (spx) 
+%                     0 1 1    0 1    0 1     0 0     1 1 0    0     0  0  ;   % basalt (bas)
+%                     0 0 1    0 0    0 1     0 0     1 1 1    1     0  1  ;   % plagiogranite (pgr)
+%                     1 0 0    1 1    1 1     1 0     1 0     0     1  1]);   % hydrous alkali basalt (hab)
 
- 
-                    
-cmp_oxd = 1.0*EMInt + 0.0*EMExt; %*cal.mem_oxd(1:end-1,1:end-1)/100; EM_Int: internal endmembers obtained earlier via PCA and endmember extraction.
+
+cmp_oxd = 0.5*EMInt + 0.5*EMExt; %*cal.mem_oxd(1:end-1,1:end-1)/100; EM_Int: internal endmembers obtained earlier via PCA and endmember extraction.
 %cmp_oxd = [cmp_oxd,zeros(cal.ncmp)];
 %cmp_oxd = [cmp_oxd;zeros(1,cal.noxd)];
 
@@ -57,24 +64,52 @@ end
 
 % % getting the fractional melting to work maybe need garnet pyroxenite ?
 
+%            %cpx1      cpx2      cpx3        for       fay        spl1     spl2    opx1     opx2      fsp1      fsp2      fsp3       qtz       phl       wat 
+% cmp_mem = [       0         0         0   88.0000   12.0000         0         0         0         0         0         0         0         0         0         0
+%             20.6000    0.1000    0.2000   67.1000    5.0000    1.7000         0    9.1000    3.2000         0         0         0         0         0         0
+%                   0   40.1000   15.8000    3.9000    2.5000    0.1000    0.1000         0         0   31.4000    0.1000         0         0         0         0
+%                   0         0   32.4000         0         0         0    6.1000         0         0    0.1000   30.9000   40.8000    25.7000        0     5.1000
+%             42.1000         0         0    0.2000    5.9000    0.6000         0    6.5000         0   37.8000         0         0         0    10.6000    2.3000];
 
-% %             cpx1       cpx2      cpx3       cpx4          for       fay        spl1     spl2      spl3       opx1       opx2      opx3      fsp1      fsp2      fsp3      qtz       phl    bio     wat 
-%  cmp_mem = [  26.3376   12.8281    0         0          13.0445     6.1696    3.0705         0         0   13.0239   25.5258         0         0         0         0         0         0         0         0
-%                0         0.1001    0.1109    0          95.7275     1.0693         0         0         0         0    0.1017    2.8904         0         0         0         0         0         0         0
-%                0        14.8552   13.5618    4.1474      3.7666     7.5692         0    0.1287         0         0         0         0   48.9139    6.9569    0.1003         0         0         0         0
-%                0         0         0         20.8143      0          0             0         0         3         0         0         0    0.1004   42.9446    8.9190    5.2835         0         1.5991    0
-%                34.3273  20.3116    0         0           0.1007     8.5485         0         0         0         0    0.5027    1.9305   30.7101         0         0         0    3.8671         0         0];
-
- %             cpx1       cpx2      cpx3       cpx4          for       fay        spl1     spl2      spl3    opx1       opx2      opx3      fsp1      fsp2      fsp3      qtz       phl    bio     wat 
- cmp_mem = [  30.1869   14.4036         0           0    4.2714    7.8282    3.3265         0         0   14.1716   25.8117         0         0         0         0         0         0         0         0
-               0         0.1070    0.1927           0   94.1151    2.7353         0         0         0         0    0.1034    2.7465         0         0         0         0         0         0         0
-               0        11.3214   15.1971      3.7963    3.9384   10.2609         0    0.9529         0         0         0         0   51.1617    3.2645    2.1069         0         0         0         0
-               0         0         0            35.3938      0         0         0         0    3.1415         0         0         0    0.3439   47.4058   10.3661    2.1716         0     1.1773         2       
-              31.7594   20.8876         0           0    0.1404   10.3314         0         0         0         0    0.2157    1.5843   31.9089         0         0         0    3.1722         0         2];
-
+%            %cpx1      cpx2      cpx3        for       fay        spl1     spl2    opx1     opx2      fsp1      fsp2      fsp3       qtz       phl       wat 
+% cmp_mem = [       0         0         0   92.0000   8.0000         0        0         0         0         0         0         0         0         0         0
+%                25.0         0         0   15.1000   0              2        1        35        17         0         0         0         0         0         0
+%                   0   35.1000        10         5          3      0.5     0.5          0         0   35.4000    10.1000         0         0         0         1
+%                   0         0         2         0         0         0    6.1000         0        0    0         35.1000   33.000   28.8000            0     2
+%             35.1000         0         0    10.2000    5.9000    1.6000         0    0         0   39.8000         0         0         0    5    5];
 
 
+% %                     cpx1       cpx2      cpx3    cpx4       for        fay      spl1       spl2     spl3     opx1       opx2      opx3    fsp1      fsp2      fsp3       qtz       phl       wat      
+% cmp_mem = [         10.4000         0         0         0   77.7000   15.5000         0         0         0         0    8.5000         0         0         0         0         0         0         0
+%                     11.3000    5.4000    2.2000         0   55.8000    5.5000    1.6000    0.8000         0   11.5000    3.1000    2.8000         0         0         0         0         0         0
+%                      4.6000   10.1000   11.0000   13.2000    6.5000    4.0000         0         0    1.1000         0         0         0   36.6000   12.8000         0         0         0         0
+%                           0         0   13.4000   32.9000    3.7000    7.8000         0         0    8.5000         0         0         0    7.0000   23.0000    3.7000         0         0         0
+%                           0         0    3.1000   11.2000         0         0         0         0    1.0000         0         0         0         0   20.4000   39.5000   21.5000         0    6.9000
+%                     30.6000         0         0         0   19.8000    8.1000         0         0         0         0         0    7.1000         0         0         0         0   29.1000    5.3000
+% 
+%                     cpx1       cpx2      cpx3    cpx4       for        fay      spl1       spl2     spl3     opx1       opx2      opx3    fsp1      fsp2      fsp3       qtz       phl       wat      
+% cmp_mem = [        5         0         0         0   82.8000    8.2000         0         0         0         0         5         0         0         0         0         0         0         0
+%              23.6000    6.4000         0         0   33.6000    4.7000    2.4000    1.2000         0   25.6000    2.6000         0         0         0         0         0         0         0
+%               3.3000    2.3000    1.7000         0   75.9000    4.7000         0         0         0    2.1000    6.2000    3.8000         0         0         0         0         0         0
+%                    0   17.1000    8.7000   15.8000    2.0000    1.4000         0         0    1.1000         0         0         0   30.5000   23.4000         0         0         0         0
+%                    0         0    5.3000   26.3000         0         0         0         0    6.0000         0         0         0         0   29.7000   29.4000    2.5000         0    0.9000
+%              38.9000         0         0         0   12.9000   10.2000         0         0         0         0         0    6.5000         0         0         0         0   28.0000    3.5000];
 
+                    %cpx1       cpx2      cpx3         for        fay      spl1       spl2    opx1       opx2     fsp1      fsp2      fsp3       qtz       phl       wat      
+% cmp_mem = [        0         0         0   91.84	  8.16         0         0         0         0         0         0         0          0          0          0
+              %  27.72	  4.75	    0.00	33.66	  6.83	    3.17	  0.00	     17.43	    6.44   0.00	      0.00	      0.00	    0.00	  0.00	   0.00
+              % 1.8000   26.1000    9.4000    6.7000    7.2000    0.8000    0.1000         0         0   45.3000    2.5000         0         0         0         0
+              %      0    1.8000   40.0000    0.1000    2.7000         0   12.5000         0         0    7.1000   35.7000    0.1000         0         0         0
+              %      0    3.4000   27.1000         0         0         0    1.0000         0         0         0   42.1000   24.5000    1.5000         0    0.5000
+              %      4        0         3         0         0         0         3         4         0         0         0        40         0         5    2.9729 ];
+
+              %cpx1       cpx2     cpx3     for       fay      spl1       spl2       opx1       opx2     fsp1      fsp2      fsp3       qtz       phl       wat
+cmp_mem = [        0         0         0   91.84	  8.16         0         0         0         0         0         0         0          0          0          0
+               27.72	  4.75	    0.00	33.66	  6.83	    3.17	  0.00	     17.43	    6.44   0.00	      0.00	      0.00	    0.00	  0.00	   0.00
+              1.8000   26.1000    9.4000    6.7000    7.2000    0.8000    0.1000         0         0   45.3000    2.5000         0         0         0         0
+                    0    1.8000   40.0000    0.1000    2.7000         0   12.5000         0         0    7.1000   35.7000    0.1000         0         0         0
+                    0    1.1000   28.3000         0         0         0    3.3000         0         0         0   47.4000   19.7000    4.000         0    0.5000
+              11.4000         0    9.6000         0         0         0    2.1000    7.5000         0         0         0   66.5000         0         2    0.8000];
 
 
 %PHS_frc(:,end+1) = 0; 
@@ -90,10 +125,10 @@ cmp_oxd_best = cmp_oxd_init;
 
 
 %Set initial component–endmember conditions for fitting melting point parameters.
-T0_init = [1850 1699  1205 839  600];  T0_best = T0_init; % T0_init = [1850 1699 1168 868 600 ]
-A_init  = [7.2066    5.1901    5.0877    3.1551    2.8711];  A_best =  A_init;  %  A_init  = [6.7  5.4  5.1  2.8 2.8  ]
-B_init  = [3.1551    2.8711    2.7025    2.9255    2.8689];  B_best =  B_init;  %  B_init  = [6.5  5.1  4.3  2.7 2.8 ]
-r_init  = [93.7948    7.4456    3.0011  137.1733    7.3981]; r_best =  r_init; %   r_init  = [36.0 7.5  6.1 14.6 7.1 ]
+T0_init = [1850        1605        1120        1044         865         700];  T0_best = T0_init; % T0_init = [1850   1663    1180   807  600] [1850 1600  1120 1000 900 600]
+A_init  = [6.5000    5.6000    5.2000    4.2000    1.9000    2.7000];  A_best =  A_init;  %  A_init  = [6.9    5.7   4.5   1.6    3] [7.4  5.2  5.2  3.2  3.2 2.9]
+B_init  = [2.6000    3.1000    2.5000    4.1000    1.5000    2.6000];  B_best =  B_init;  %  B_init  = [3.1551    2.8711    2.7025    2.9255    2.8689][3.2  2.9  2.7  3.1  3.1 2.9]
+r_init  = [17.8000    7.7000    3.0000    4.7000    7.3000    8.0000]; r_best =  r_init; %   r_init  = [20.5  11.1   7.9   27.5   7.3][30.7  7.5  3.0  5   5 7.4]
 
 
 % compose initial parameter guess
@@ -133,7 +168,6 @@ level = 3;
 run('MCMC/PlotFitFrac.m')
 
 % Fitting algorithm determines the fraction of each mineral endmember in every pseudo component.
-
 %% *****  calibrate pseudo-components and melting point parameters  *******   Monte Carlo algorithm (brun-in & annealing）
 
 % cal_MORB_hi;  % read calibration file
@@ -171,7 +205,7 @@ data   = [MLT_oxdp(:);SOL_oxdp(:);SOL_mem(:);PHS_frc(:)];
 dm    =[1*max(20.0,0.05*T0_init.'); ...
         1*max(0.25,0.4* A_init.'); ...   
         1*max(0.25,0.4* B_init.'); ...
-        1*max(0.50,0.75* r_init.'); ... %0.4 
+        1*max(0.50,0.2* r_init.'); ... %0.4 
         1*max(5.00,min(20.0,cmp_mem_init(:))).*indmem(:)];
 m0_lw  = m0 - dm;
 m0_up  = m0 + dm;
@@ -243,7 +277,7 @@ RunTime(1) = toc;
 % extract best fit parameters
 T0_best       = bestfit(               (1:cal.ncmp)).';
 A_best        = bestfit(1*(cal.ncmp)+(1:cal.ncmp)).';
-B_best        = bestfit(2*(cal.ncmp-1)+(1:cal.ncmp-1)).'; %A_best;
+B_best        = bestfit(2*(cal.ncmp)+(1:cal.ncmp)).'; %A_best;
 r_best        = bestfit(3*(cal.ncmp)+(1:cal.ncmp)).';  % a set of fitting parameters which have to do with the curvature of the phase loops that this model is generating.
 cmp_mem_best  = reshape(bestfit(4*(cal.ncmp)+(1:cal.ncmp*cal.nmem)),cal.ncmp,cal.nmem);
 cmp_oxd_best  = cmp_mem_best*cal.mem_oxd/100;

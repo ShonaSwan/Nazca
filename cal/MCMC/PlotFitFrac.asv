@@ -3,105 +3,156 @@ if ~exist('level','var'); level = 0; end
 
 if level>0
 
-    % plot fitted melting points
- %   figure(102); clf;
+    % Plot 1: KLB-1 mantle melting curves
+    figure(101); clf;
 
- %   plot(Tm,PP/10,'LineWidth',1); axis ij tight; hold on
- %   plot(Tsol,Psl/10,'kd','LineWidth',1.5);
- %   plot(Tliq,Psl/10,'ko','LineWidth',1.5);
- %   plot(Tsolfit,Psl/10,'bd','LineWidth',2);
- %   plot(Tliqfit,Psl/10,'ro','LineWidth',2);
+    % Six pseudo-component melting curves
+    plot(TmKLB,PP_KLB/10,'LineWidth',1);
+    hold on
 
-    % legend([cal.cmpStr(1:end-1),'Tsol','Tliq','Tsol fit','Tliq fit'],Fs{:},TX{:},LB{:})
-    % xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
-    % ylabel('Pressure [GPa]',TX{:},FS{:})
-    % title('Melting points MCMC fit',FL{:},TX{:})
-    % set(gca,Fs{:},TL{:});
-    %drawnow
+    % MAGEMin reference points
+    plot(TsolKLB,PslKLB/10,'kd','LineWidth',1.5,...
+    'MarkerFaceColor','k');
+    plot(TliqKLB,PslKLB/10,'ko','LineWidth',1.5,...
+    'MarkerFaceColor','k');
 
-    % plot fitted phase fractions
-    figure(101); clf; 
-    cmap = [colororder;[0 0 0]];
+    % Model-fitted solidus and liquidus
+    plot(TsolfitKLB,PslKLB/10,'k--','LineWidth',1.8);
+    plot(TliqfitKLB,PslKLB/10,'k:','LineWidth',1.8);
 
-    for iph=1:cal.nmsy-1
-        plot(Tmp,PHS_frc   (:,iph),'-'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
-    end
-    for iph=1:cal.nmsy-1
-        plot(Tmp,PHS_frcfit(:,iph),'--','Color',cmap(iph,:),'LineWidth',1.5); axis tight;
-    end
-    legend(['mlt',cal.msyStr(1:end-2)],Fs{:},TX{:},LB{:})
-    xlabel('Temperature [$^\circ$C]',FS{:},TX{:})
-    ylabel('Phase proportions [wt\%]',FS{:},TX{:})
-    title('Phase stability MCMC fit',FL{:},TX{:})
-    set(gca,Fs{:},TL{:});
+    xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
+    ylabel('Pressure [GPa]',TX{:},FS{:})
+    title('KLB-1 mantle melting',FL{:},TX{:})
+
+    set(gca,'YDir','reverse',Fs{:},TL{:});
+    legend([cal.cmpStr(:); ...
+        {'MAGEMin solidus';'MAGEMin liquidus'; ...
+         'Fitted solidus';'Fitted liquidus'}],...
+        'Location','bestoutside');
+
+    grid on
+    box on
+    drawnow
+
+    % Plot 2: Initial melt melting curves
+    figure(102); clf;
+
+    % Six pseudo-component melting curves
+    plot(TmFC,PP_FC/10,'LineWidth',1);
+    hold on
+
+    % MAGEMin reference points
+    plot(TsolMelt,PslFC/10,'bd','LineWidth',1.5,...
+    'MarkerFaceColor','b');
+    plot(TliqMelt,PslFC/10,'ro','LineWidth',1.5,...
+    'MarkerFaceColor','r');
+
+    % Model-fitted solidus and liquidus
+    plot(TsolfitFC,PslFC/10,'b--','LineWidth',1.8);
+    plot(TliqfitFC,PslFC/10,'r:','LineWidth',1.8);
+
+    xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
+    ylabel('Pressure [GPa]',TX{:},FS{:})
+    title('Initial melt melting',FL{:},TX{:})
+
+    set(gca,'YDir','reverse',Fs{:},TL{:});
+    legend([cal.cmpStr(:); ...
+    {'MAGEMin solidus';'MAGEMin liquidus'; ...
+         'Fitted solidus';'Fitted liquidus'}],...
+     'Location','bestoutside');
+
+    grid on
+    box on
     drawnow
 
     % plot fitted phase fractions
-    figure(102); clf; 
+    % May be a cheaty way of doing this but... 
+    idx_melt = 1:33;
+    idx_cryst = 33:64;
+
+    % plot fitted phase fractions
+    figure(103); clf; 
     cmap = [colororder;[0 0 0]];
 
     for iph=1:cal.nmsy-1
-        plot(Prs,PHS_frc   (:,iph),'-'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
+        plot(Prs(idx_melt),PHS_frc(idx_melt,iph),'-'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
     end
     for iph=1:cal.nmsy-1
-        plot(Prs,PHS_frcfit(:,iph),'--','Color',cmap(iph,:),'LineWidth',1.5); axis tight;
+        plot(Prs(idx_melt),PHS_frcfit(idx_melt,iph),'--','Color',cmap(iph,:),'LineWidth',1.5); axis tight;
     end
     legend(['mlt',cal.msyStr(1:end-2)],Fs{:},TX{:},LB{:})
     xlabel('Pressure [kbar]',FS{:},TX{:})
     ylabel('Phase proportions [wt\%]',FS{:},TX{:})
-    title('Phase stability MCMC fit',FL{:},TX{:})
+    title('Phase stability MCMC fit (Fractional Melting)',FL{:},TX{:})
     set(gca,Fs{:},TL{:});
     drawnow
 
+    figure(104); clf; 
+    cmap = [colororder;[0 0 0]];
+
+    for iph=1:cal.nmsy-1
+        plot(Tmp(idx_cryst),PHS_frc(idx_cryst,iph),'-'  ,'Color',cmap(iph,:),'LineWidth',1.5); axis tight; hold on
+    end
+    for iph=1:cal.nmsy-1
+        plot(Tmp(idx_cryst),PHS_frcfit(idx_cryst,iph),'--','Color',cmap(iph,:),'LineWidth',1.5); axis tight;
+    end
+    legend(['mlt',cal.msyStr(1:end-2)],Fs{:},TX{:},LB{:})
+    xlabel('Temperature [$^\circ$C]',FS{:},TX{:})
+    ylabel('Phase proportions [wt\%]',FS{:},TX{:})
+    title('Phase stability MCMC fit (Fractional Crystalisation)',FL{:},TX{:})
+    set(gca,Fs{:},TL{:});
+    drawnow
+
+ 
     % plotted fitted system components
-    figure(103); clf;
-
-    subplot(3,1,1)
-    plot(Tmp,MLT_cmpfit*100,'-','LineWidth',1.5); axis tight
-    ylabel('Melt comp. [wt\%]',TX{:},FS{:})
-    set(gca,Fs{:},TL{:});
-
-    subplot(3,1,2)
-    plot(Tmp,SOL_cmpfit*100,'-','LineWidth',1.5); axis tight
-    ylabel('Solid comp. [wt\%]',TX{:},FS{:})
-    set(gca,Fs{:},TL{:});
-
-    subplot(3,1,3)
-    plot(Tmp,SYS_cmpfit*100,'-','LineWidth',1.5); axis tight   % change line type
-    legend(cal.cmpStr,Fs{:},TX{:},LB{:})
-    xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
-    ylabel('System comp. [wt\%]',TX{:},FS{:})
-    set(gca,Fs{:},TL{:});
-
-    sgtitle('Pseudo-component evolution',FL{:},TX{:})
-    drawnow
+    
 
   % plotted fitted system components
-    figure(104); clf;
+    figure(105); clf;
 
     subplot(3,1,1)
-    plot(Prs,MLT_cmpfit*100,'-','LineWidth',1.5); axis tight
+    plot(Prs(idx_melt),MLT_cmpfit(idx_melt,:)*100,'-','LineWidth',1.5); axis tight
     ylabel('Melt comp. [wt\%]',TX{:},FS{:})
     set(gca,Fs{:},TL{:});
 
     subplot(3,1,2)
-    plot(Prs,SOL_cmpfit*100,'-','LineWidth',1.5); axis tight
+    plot(Prs(idx_melt),SOL_cmpfit(idx_melt,:)*100,'-','LineWidth',1.5); axis tight
     ylabel('Solid comp. [wt\%]',TX{:},FS{:})
     set(gca,Fs{:},TL{:});
 
     subplot(3,1,3)
-    plot(Prs,SYS_cmpfit*100,'-','LineWidth',1.5); axis tight   % change line type
+    plot(Prs(idx_melt),SYS_cmpfit(idx_melt,:)*100,'-','LineWidth',1.5); axis tight   % change line type
     legend(cal.cmpStr,Fs{:},TX{:},LB{:})
     xlabel('Pressure [kbar]',TX{:},FS{:})
     ylabel('System comp. [wt\%]',TX{:},FS{:})
     set(gca,Fs{:},TL{:});
 
-    sgtitle('Pseudo-component evolution',FL{:},TX{:})
+    sgtitle('Pseudo-component evolution (Fractional Melting)',FL{:},TX{:})
     drawnow
 
+    figure(106); clf;
 
+    subplot(3,1,1)
+    plot(Tmp(idx_cryst),MLT_cmpfit(idx_cryst,:)*100,'-','LineWidth',1.5); axis tight
+    ylabel('Melt comp. [wt\%]',TX{:},FS{:})
+    set(gca,Fs{:},TL{:});
 
-    figno = 105;
+    subplot(3,1,2)
+    plot(Tmp(idx_cryst),SOL_cmpfit(idx_cryst,:)*100,'-','LineWidth',1.5); axis tight
+    ylabel('Solid comp. [wt\%]',TX{:},FS{:})
+    set(gca,Fs{:},TL{:});
+
+    subplot(3,1,3)
+    plot(Tmp(idx_cryst),SYS_cmpfit(idx_cryst,:)*100,'-','LineWidth',1.5); axis tight   % change line type
+    legend(cal.cmpStr,Fs{:},TX{:},LB{:})
+    xlabel('Temperature [$^\circ$C]',TX{:},FS{:})
+    ylabel('System comp. [wt\%]',TX{:},FS{:})
+    set(gca,Fs{:},TL{:});
+
+    sgtitle('Pseudo-component evolution (Fractional Crystalisation)',FL{:},TX{:})
+    drawnow
+
+figno = 107;
     % plot fitted mineral system compositions
     kmem = 1;
     figure(figno); clf; figno = figno+1;
@@ -115,82 +166,8 @@ if level>0
             if kk<=cal.nmsy-2
                 subplot(spz,spx,kk);
                 for iem = kmem:kmem+sum(cal.msy_mem(kk,:))-1
-                    p(iem) = plot(Tmp, SOL_mem   (:,iem),'-' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
-                             plot(Tmp, SOL_memfit(:,iem),'--','Color',cmap(iem-kmem+1,:),'LineWidth',1.5);
-                end
-                %if kk==cal.nmsy; legend([{'proj.'},{'fit'}],Fs{:},TX{:},LB{:}); 
-                %else; 
-                legend(p(kmem:kmem+sum(cal.msy_mem(kk,:))-1),cal.memStr{kmem:kmem+sum(cal.msy_mem(kk,:))-1},Fs{:},TX{:},LB{:});
-                   
-               % end
-                xlabel('Temperature [$^\circ$C]',FS{:},TX{:})
-                ylabel(cal.msyStr(kk),FS{:},TX{:})
-                set(gca,Fs{:},TL{:});
-                kmem = kmem+sum(cal.msy_mem(kk,:));
-                kk = kk+1;
-            else
-                break;
-            end
-        end
-    end
-    sgtitle('Mineral endm. MCMC fit',FL{:},TX{:});
-    drawnow
-    
- figno = 105;
-    % plot fitted mineral system compositions
-    kmem = 1;
-    figure(figno); clf; figno = figno+1;
-
-    spz = ceil(sqrt(cal.nmsy-2));
-    spx = ceil((cal.nmsy-2)/spz);
-
-    kk = 1;
-    for ix = 1:spx
-        for iz = 1:spz
-            if kk<=cal.nmsy-2
-                subplot(spz,spx,kk);
-                for iem = kmem:kmem+sum(cal.msy_mem(kk,:))-1
-                    p(iem) = plot(Tmp, MLT_mem   (:,iem),'-' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
-                             plot(Tmp, MLT_memfit(:,iem),'--','Color',cmap(iem-kmem+1,:),'LineWidth',1.5);
-                end
-                %if kk==cal.nmsy; legend([{'proj.'},{'fit'}],Fs{:},TX{:},LB{:}); 
-                %else; 
-                legend(p(kmem:kmem+sum(cal.msy_mem(kk,:))-1),cal.memStr{kmem:kmem+sum(cal.msy_mem(kk,:))-1},Fs{:},TX{:},LB{:});
-                   
-               % end
-                xlabel('Temperature [$^\circ$C]',FS{:},TX{:})
-                ylabel(cal.msyStr(kk),FS{:},TX{:})
-                set(gca,Fs{:},TL{:});
-                kmem = kmem+sum(cal.msy_mem(kk,:));
-                kk = kk+1;
-            else
-                break;
-            end
-        end
-    end
-    sgtitle('Mineral endm. MCMC fit',FL{:},TX{:});
-    drawnow
-
-
-
-
-
-figno = 106;
-    % plot fitted mineral system compositions
-    kmem = 1;
-    figure(figno); clf; figno = figno+1;
-
-    spz = ceil(sqrt(cal.nmsy-2));
-    spx = ceil((cal.nmsy-2)/spz);
-
-    kk = 1;
-    for ix = 1:spx
-        for iz = 1:spz
-            if kk<=cal.nmsy-2
-                subplot(spz,spx,kk);
-                for iem = kmem:kmem+sum(cal.msy_mem(kk,:))-1
-                    p(iem) = plot(Prs, SOL_mem   (:,iem),'-' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
-                             plot(Prs, SOL_memfit(:,iem),'--','Color',cmap(iem-kmem+1,:),'LineWidth',1.5);
+                    p(iem) = plot(Prs(idx_melt), SOL_mem   (idx_melt,iem),'-' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
+                             plot(Prs(idx_melt), SOL_memfit(idx_melt,iem),'--','Color',cmap(iem-kmem+1,:),'LineWidth',1.5);
                 end
                 %if kk==cal.nmsy; legend([{'proj.'},{'fit'}],Fs{:},TX{:},LB{:}); 
                 %else; 
@@ -207,9 +184,45 @@ figno = 106;
             end
         end
     end
-    sgtitle('Mineral endm. MCMC fit',FL{:},TX{:});
+    sgtitle('Mineral endm. MCMC fit (Fractional Melting)',FL{:},TX{:});
     drawnow
     
+figno = 108;
+    % plot fitted mineral system compositions
+    kmem = 1;
+    figure(figno); clf; figno = figno+1;
+
+    spz = ceil(sqrt(cal.nmsy-2));
+    spx = ceil((cal.nmsy-2)/spz);
+
+    kk = 1;
+    for ix = 1:spx
+        for iz = 1:spz
+            if kk<=cal.nmsy-2
+                subplot(spz,spx,kk);
+                for iem = kmem:kmem+sum(cal.msy_mem(kk,:))-1
+                    p(iem) = plot(Tmp(idx_cryst), SOL_mem   (idx_cryst,iem),'-' ,'Color',cmap(iem-kmem+1,:),'LineWidth',1.5); axis tight; hold on
+                             plot(Tmp(idx_cryst), SOL_memfit(idx_cryst,iem),'--','Color',cmap(iem-kmem+1,:),'LineWidth',1.5);
+                end
+                %if kk==cal.nmsy; legend([{'proj.'},{'fit'}],Fs{:},TX{:},LB{:}); 
+                %else; 
+                legend(p(kmem:kmem+sum(cal.msy_mem(kk,:))-1),cal.memStr{kmem:kmem+sum(cal.msy_mem(kk,:))-1},Fs{:},TX{:},LB{:});
+                   
+               % end
+                xlabel('Temperature [$^\circ$C]',FS{:},TX{:})
+                ylabel(cal.msyStr(kk),FS{:},TX{:})
+                set(gca,Fs{:},TL{:});
+                kmem = kmem+sum(cal.msy_mem(kk,:));
+                kk = kk+1;
+            else
+                break;
+            end
+        end
+    end
+    sgtitle('Mineral endm. MCMC fit (Fractional Crystalisation)',FL{:},TX{:});
+    drawnow
+
+
 end
 
 
@@ -217,8 +230,8 @@ if level>1
 
     % plot fitted liquid, solid, mixture compositions
     
-    ioxd = [   1    2    3   4    5   6    7    8   9   10  ];
-    figure(107); clf;
+    ioxd = [   1    2    3    4    5    6    7    8    9    10  ];
+    figure(109); clf;
 
     spz = ceil(sqrt(noxd));
     spx = ceil((noxd)/spz);
@@ -251,9 +264,8 @@ if level>1
     sgtitle('MLT \& SOL MCMC fit',FL{:},TX{:})
     drawnow
 
-
-    % plot fitted T-X diagrams
-    figure(108); clf; 
+  % plot fitted P-X diagrams
+    figure(110); clf; 
 
     spz = ceil(sqrt(noxd));
     spx = ceil((noxd)/spz);
@@ -263,10 +275,72 @@ if level>1
         for iz = 1:spz
             if kk<=noxd
                 subplot(spz,spx,kk);
-                scatter(MLT_oxdp  (:,kk),Tmp,25,[0.7,0.7,0.7],'o'); axis tight; hold on
-                scatter(SOL_oxdp  (:,kk),Tmp,25,[0.7,0.7,0.7],'s');
-                scatter(SYS_oxdp  (:,kk),Tmp,25,[0.7,0.7,0.7],'d');
-                scatter(MLT_oxdfit(:,kk),Tmp,25,[0.7,0.1,0.2],'o','filled');
+                scatter(MLT_oxdp  (idx_melt,kk),Prs(idx_melt),25,[0.7,0.7,0.7],'o'); axis tight; hold on
+                scatter(SOL_oxdp  (idx_melt,kk),Prs(idx_melt),25,[0.7,0.7,0.7],'s');
+                scatter(SYS_oxdp  (idx_melt,kk),Prs(idx_melt),25,[0.7,0.7,0.7],'d');
+                scatter(MLT_oxdfit(idx_melt,kk),Prs(idx_melt),25,[0.7,0.1,0.2],'o','filled');
+                scatter(SOL_oxdfit(idx_melt,kk),Prs(idx_melt),25,[0.2,0.1,0.7],'s','filled');
+                scatter(SYS_oxdfit(idx_melt,kk),Prs(idx_melt),25,[0.1,0.1,0.1],'d','filled');
+                
+                if kk==noxd; legend([{'proj. mlt'},{'proj. sol'},{'proj. sys'},{'fit mlt'},{'fit sol'},{'fit sys'},{'best cmp'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
+                xlabel(cal.oxdStr(kk),FS{:},TX{:})
+                ylabel('prs [kbar]',FS{:},TX{:})
+                set(gca,Fs{:},TL{:});
+                kk = kk+1;
+            else
+                break;
+            end
+        end
+    end
+    sgtitle('MLT \& SOL MCMC fit (Fractional Melting)',FL{:},TX{:})
+    drawnow
+
+% plot fitted T-X diagrams
+    figure(111); clf; 
+
+    spz = ceil(sqrt(noxd));
+    spx = ceil((noxd)/spz);
+
+    kk = 1;
+    for ix = 1:spx
+        for iz = 1:spz
+            if kk<=noxd
+                subplot(spz,spx,kk);
+                scatter(MLT_oxdp  (idx_cryst,kk),Tmp(idx_cryst),25,[0.7,0.7,0.7],'o'); axis tight; hold on
+                scatter(SOL_oxdp  (idx_cryst,kk),Tmp(idx_cryst),25,[0.7,0.7,0.7],'s');
+                scatter(SYS_oxdp  (idx_cryst,kk),Tmp(idx_cryst),25,[0.7,0.7,0.7],'d');
+                scatter(MLT_oxdfit(idx_cryst,kk),Tmp(idx_cryst),25,[0.7,0.1,0.2],'o','filled');
+                scatter(SOL_oxdfit(idx_cryst,kk),Tmp(idx_cryst),25,[0.2,0.1,0.7],'s','filled');
+                scatter(SYS_oxdfit(idx_cryst,kk),Tmp(idx_cryst),25,[0.1,0.1,0.1],'d','filled');
+             
+                if kk==noxd; legend([{'proj. mlt'},{'proj. sol'},{'proj. sys'},{'fit mlt'},{'fit sol'},{'fit sys'},{'best cmp'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
+                xlabel(cal.oxdStr(kk),FS{:},TX{:})
+                ylabel('Temp [C]',FS{:},TX{:})
+                set(gca,Fs{:},TL{:});
+                kk = kk+1;
+            else
+                break;
+            end
+        end
+    end
+    sgtitle('MLT \& SOL MCMC fit (Fractional Crystalisation)',FL{:},TX{:})
+    drawnow
+
+% plot fitted T-X diagrams (Combined)
+    figure(112); clf; 
+
+    spz = ceil(sqrt(noxd));
+    spx = ceil((noxd)/spz);
+
+    kk = 1;
+    for ix = 1:spx
+        for iz = 1:spz
+            if kk<=noxd
+                subplot(spz,spx,kk);
+                scatter(MLT_oxdp  (idx_cryst,kk),Tmp,25,[0.7,0.7,0.7],'o'); axis tight; hold on
+                scatter(SOL_oxdp  (idx_cryst,kk),Tmp,25,[0.7,0.7,0.7],'s');
+                scatter(SYS_oxdp  (idx_cryst,kk),Tmp,25,[0.7,0.7,0.7],'d');
+                scatter(MLT_oxdfit(idx_cryst,kk),Tmp,25,[0.7,0.1,0.2],'o','filled');
                 scatter(SOL_oxdfit(:,kk),Tmp,25,[0.2,0.1,0.7],'s','filled');
                 scatter(SYS_oxdfit(:,kk),Tmp,25,[0.1,0.1,0.1],'d','filled');
                 for iem = 1:cal.ncmp-1
@@ -275,7 +349,7 @@ if level>1
                 end
                 if kk==noxd; legend([{'proj. mlt'},{'proj. sol'},{'proj. sys'},{'fit mlt'},{'fit sol'},{'fit sys'},{'best cmp'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
                 xlabel(cal.oxdStr(kk),FS{:},TX{:})
-                ylabel('Temperature [C]',FS{:},TX{:})
+                ylabel('Temp [C]',FS{:},TX{:})
                 set(gca,Fs{:},TL{:});
                 kk = kk+1;
             else
@@ -283,39 +357,12 @@ if level>1
             end
         end
     end
-    sgtitle('MLT \& SOL MCMC fit',FL{:},TX{:})
+    sgtitle('MLT \& SOL MCMC fit (Fractional Crystalisation)',FL{:},TX{:})
     drawnow
 
-  % plot fitted T-X diagrams
-    figure(109); clf; 
 
-    spz = ceil(sqrt(noxd));
-    spx = ceil((noxd)/spz);
 
-    kk = 1;
-    for ix = 1:spx
-        for iz = 1:spz
-            if kk<=noxd
-                subplot(spz,spx,kk);
-                scatter(MLT_oxdp  (:,kk),Prs,25,[0.7,0.7,0.7],'o'); axis tight; hold on
-                scatter(SOL_oxdp  (:,kk),Prs,25,[0.7,0.7,0.7],'s');
-                scatter(SYS_oxdp  (:,kk),Prs,25,[0.7,0.7,0.7],'d');
-                scatter(MLT_oxdfit(:,kk),Prs,25,[0.7,0.1,0.2],'o','filled');
-                scatter(SOL_oxdfit(:,kk),Prs,25,[0.2,0.1,0.7],'s','filled');
-                scatter(SYS_oxdfit(:,kk),Prs,25,[0.1,0.1,0.1],'d','filled');
-                
-                if kk==noxd; legend([{'proj. mlt'},{'proj. sol'},{'proj. sys'},{'fit mlt'},{'fit sol'},{'fit sys'},{'best cmp'},{'init cmp'}],Fs{:},TX{:},LO{:}); end
-                xlabel(cal.oxdStr(kk),FS{:},TX{:})
-                ylabel('pressure [kbar]',FS{:},TX{:})
-                set(gca,Fs{:},TL{:});
-                kk = kk+1;
-            else
-                break;
-            end
-        end
-    end
-    sgtitle('MLT \& SOL MCMC fit',FL{:},TX{:})
-    drawnow
+
 
 end
 
@@ -369,7 +416,6 @@ end
     A       = round(A_best,1)           % => cal.A
     B       = round(B_best,1)           % => cal.B
     r       = round(r_best,1)           % => cal.r
-    %dTH2O   = round(dT_best,0)          % => cal.dTH2O
     c0      = round([SYS_cmpfit(  1,1:end-1)./sum(SYS_cmpfit(  1,1:end-1),2),SYS_cmpfit(1,end)],3) % => cal.c0
     c1      = round(mean([SYS_cmpfit(end-4:end,1:end-1)./sum(SYS_cmpfit(end-4:end,1:end-1),2),SYS_cmpfit(end-4:end,end)],1),3) % => cal.c1
     c0_oxd  = round([SYS_oxd(  1,1:end-1)./sum(SYS_oxd(  1,1:end-1),2),SYS_oxd(1,end)/100]*100,2) % => cal.c0

@@ -76,8 +76,8 @@ F  = [cmp_oxd(1:end,1:end).';ones(1,cal.ncmp)];
 V  = 1/factorial(8)*abs(det(F.'*F))^0.5;
 P  = linspace(0,P_max/10,10).';
 Tm =  T0 .* (1 + P./A).^(1./A);
-DT = max(max(min(-1e-16,diff(Tm,1,2))));
-L  = (sum(- 0.5*((data(:) - dhat(:))./sigma(:)).^2 ))./sqrt(length(dhat(:))) - V*simplex_wt + 10^2/DT*Tdiff_wt;
+% DT = max(max(min(-1e-16,diff(Tm,1,2))));
+L  = (sum(- 0.5*((data(:) - dhat(:))./sigma(:)).^2 ))./sqrt(length(dhat(:))) - V*simplex_wt ; %+ 10^2/DT*Tdiff_wt;
 end
 
 function L = LikeFunc(dhat, data, sigma, model)

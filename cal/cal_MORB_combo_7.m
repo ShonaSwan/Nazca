@@ -7,14 +7,14 @@ clear cal;
 cal.noxd   = 10;
 cal.nmem   = 15;
 cal.nmsy   = 7;
-cal.ncmp   = 6;
+cal.ncmp   = 7;
 
 % label strings for all compositional representations
 cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','Cr$_2$O$_3$','FeO','MgO','CaO','Na$_2$O','K$_2$O','H$_2$O'};
      elStr = {'Si','Ti','Al','Cr','Fe','Mg','Ca','Na','K','H'};
 cal.memStr = {'cpx1','cpx2','cpx3','for','fay','spl1','spl2','opx1','opx2','fsp1','fsp2','fsp3','qtz','phl','wat'};
 cal.msyStr = {'cpx','olv','spn','opx','fsp','qtz','phl'};
-cal.cmpStr = {'dun','spx','bas','oth','pgr','hab'};
+cal.cmpStr = {'hrz','spx','tro','bas','try','pgr','hab'};
 
 for i = 1:cal.ncmp; cal.(cal.cmpStr{i}) = i; end
 for i = 1:cal.nmsy; cal.(cal.msyStr{i}) = i; end
@@ -30,13 +30,12 @@ cal.imsy = [ 5    2    1    6];  % mineral system indices for plotting basalt te
 % oxide composition of mineral end-members
 %                SiO2       TiO2      Al2O3      Cr2O3     FeO       MgO        CaO       Na2O      K2O      H2O       
 cal.mem_oxd = [  53.3900         0    6.5700         0    5.0000   22.8500   11.2500    0.9400         0         0
-                  53.5200         0    3.1600         0    3.5300   19.5500   20.1000    0.1400         0         0
-                  50.9800         0    0.5300         0   28.1900    4.8300   13.8900    1.5800         0         0
-                  41.1600         0         0         0    8.6300   50.2100         0         0         0         0
-                  30.2400         0         0         0   66.8300    2.9300         0         0         0         0
-                        0         0   44.8100   26.1000   10.4500   18.6400         0         0         0         0
-                        0   30.4300         0    1.0500   68.5200         0         0         0         0         0
-                
+                 53.5200         0    3.1600         0    3.5300   19.5500   20.1000    0.1400         0         0
+                 50.9800         0    0.5300         0   28.1900    4.8300   13.8900    1.5800         0         0
+                 41.1600         0         0         0    8.6300   50.2100         0         0         0         0
+                 30.2400         0         0         0   66.8300    2.9300         0         0         0         0
+                       0         0   44.8100   26.1000   10.4500   18.6400         0         0         0         0
+                       0   30.4300         0    1.0500   68.5200         0         0         0         0         0
                  53.5300         0    7.0700         0    6.4300   30.9600    2.0100         0         0         0
                  55.4100         0    3.5400         0    6.1400   31.9400    2.9700         0         0         0
                  47.5900         0   33.6500         0         0         0   16.6600    1.9300    0.1700         0
@@ -54,26 +53,31 @@ cal.mem_oxd = cal.mem_oxd./sum(cal.mem_oxd,2)*100;
 % mineral end-members in mineral systems
 cal.msy_mem = [1  1  1  0  0  0  0  0  0  0  0  0  0  0  0      % clinopyroxene (cpx)
                0  0  0  1  1  0  0  0  0  0  0  0  0  0  0      % olivine (olv)
-               0  0  0  0  0  1  1  0  0  0  0  0  0  0  0        % spinel (spn)
+               0  0  0  0  0  1  1  0  0  0  0  0  0  0  0      % spinel (spn)
                0  0  0  0  0  0  0  1  1  0  0  0  0  0  0      % orthopyroxene(opx)
                0  0  0  0  0  0  0  0  0  1  1  1  0  0  0      % feldspar (fsp)
-               0  0  0  0  0  0  0  0  0  0  0  0  1  0  0       % quartz (qtz)
-               0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  ];    % micas (mic) 
+               0  0  0  0  0  0  0  0  0  0  0  0  1  0  0      % quartz (qtz)
+               0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  ];  % micas (mic) 
 
 
 % mineral end-member composition of melting model components
-%              cpx1  cpx2   cpx3    for   fay  spl1  spl2  spl3  opx1  opx2  fsp1  fsp2  fsp3  qtz   phl     
-cal.cmp_mem = [97.0   3.0     0     0     0     0     0     0     0     0     0     0     0     0    0        % dunite (dun)
-               
-               18.0   4.0     0     0  72.0   0.0   6.0     0     0     0     0     0     0     0    0        % spinel pyroxenite (spx)
-                 
-               8.0   4.0   26.0  10.0  20.0  26.0   5.0     0     0     0     0     0     0     0    0        % basalt (bas)
-               
-               8.0   4.0   26.0  10.0  20.0  26.0   5.0     0     0     0     0     0     0     0    0        % basalt (bas)
-                 
-                  0     0   1.0  51.0     0   5.0     0     0     0  40.0     0     0     0     0    0        % plagiogranite (pgr)
 
-               10.0   5.0   5.0   1.0  15.0   2.0   2.0  55.0   5.0     0     0     0     0     0    0  ];    % hydrous alkali basalt (hab)
+%Need to populate this table once I have finished MCMC
+
+%              cpx1  cpx2   cpx3    for   fay  spl1  spl2  opx1  opx2  fsp1  fsp2  fsp3  qtz   phl   wat  
+cal.cmp_mem = [  0     0      0      0     0     0     0     0     0     0     0     0     0     0    0        % Harzburgite (hrz)
+               
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0        % Spinel pyroxenite (spx)
+                 
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0       % Troctolite (tro)
+               
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0      % Basalt (bas)
+                 
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0      % Trachyte (try)
+
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0     % Plagiogranite (pgr)
+               
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0 ];    % Hydrous alkaline basalt (hab)
                   
 cal.cmp_mem = cal.cmp_mem./sum(cal.cmp_mem,2)*100;
 
@@ -92,16 +96,16 @@ for i=1:cal.ncmp
 end
 
 % set pure component melting points T_m^i at P=0
-cal.T0  = [1850 17050 1025 825 800 750];
+cal.T0  = [1850 17050 1025 825 800  800750];
 
 % set first coeff. for P-dependence of T_m^i [GPa]
-cal.A   = [7.5 5.4 2.4 2.0 2.8 3.0 ];
+cal.A   = [7.5 5.4 2.4 2.0 2.8 2.8 3.0 ];
 
 % set second coeff. for P-dependence of T_m^i [1]
-cal.B   = [7.5 5.4 2.4 2.0 2.8 3.0];
+cal.B   = [7.5 5.4 2.4 2.0 2.8  2.8 3.0];
 
 % set coeff. for T-dependence of partition coefficients K^i [1/K]
-cal.r  = [37.0  8.0  6.0  8.0  10.0  12.0 ];
+cal.r  = [37.0  8.0  6.0  8.0 10.0 10.0  12.0 ];
 
 % set entropy gain of fusion DeltaS [J/K]
 cal.Dsx = 300;

@@ -350,7 +350,7 @@ drawnow
 
 % !!!  Run Section to save calibrated end-members and reduced compositions  !!!
 close all;
-save('MORB_Comb_');
+save('MORB_Comb_7');
 
 
 

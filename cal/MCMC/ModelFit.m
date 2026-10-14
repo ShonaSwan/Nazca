@@ -43,8 +43,6 @@ var.m = ones(np,1); var.x = 0*var.m; var.f = 0*var.m;
 var.c      = cmpSYS;        % component fractions [wt]
 var.T      = T;             % temperature [C]
 var.P      = P/1e9;         % pressure [GPa]
-var.H2O    = cmpSYS(:,end); % water concentration [wt]
-cal.H2Osat = cmpSYS(:,end)+0.01;
 [var,cal]  = meltmodel(var,cal,'E');
 
 % get fitted phase oxide compositions

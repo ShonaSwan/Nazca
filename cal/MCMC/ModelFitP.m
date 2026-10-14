@@ -1,33 +1,30 @@
-function [datafit,MLT_oxdfit,SOL_oxdfit,SYS_oxdfit,SOL_memfit,PHS_oxdfit,PHS_frcfit,SOL_cmpfit,MLT_cmpfit,SYS_cmpfit,Tsolfit,Tliqfit,Tm] = ModelFitP(model,T,P,SYS,PHS,Psl,cal,reg)
-
+function [datafit,MLT_oxdfit,SOL_oxdfit,SYS_oxdfit,SOL_memfit,PHS_oxdfit,PHS_frcfit,SOL_cmpfit,MLT_cmpfit,SYS_cmpfit,TsolfitKLB,TliqfitKLB,TsolfitFC,TliqfitFC,TmKLB,TmFC] = ...
+    ModelFitP(model,T,P,SYS,PHS,PslKLB,PslFC,cal,reg)
 % get number of data points
 np = length(T);
 
 % get model parameters from model vector
-cal.T0    = model(               (1:cal.ncmp-1)).';
-cal.A     = model(1*(cal.ncmp-1)+(1:cal.ncmp-1)).';
-cal.B     = cal.A;%model(2*(cal.ncmp-1)+(1:cal.ncmp-1)).';
-cal.r     = model(3*(cal.ncmp-1)+(1:cal.ncmp-1)).';
-cal.dTH2O = 1400 * 1200./cal.T0; %model(4*(cal.ncmp-1)+(1:cal.ncmp-1)).';
-cmp_mem   = reshape(model(5*(cal.ncmp-1)+(1:cal.ncmp*cal.nmem)),cal.ncmp,cal.nmem);
-cmp_oxd   = cmp_mem*cal.mem_oxd./100;
+cal.T0 = model(1:cal.ncmp).';
+cal.A  = model(cal.ncmp + (1:cal.ncmp)).';
+cal.B  = model(2*cal.ncmp + (1:cal.ncmp)).';
+cal.r  = model(3*cal.ncmp + (1:cal.ncmp)).';
+
+% component mineral compositions
+cmp_mem = reshape( model(4*cal.ncmp + (1:cal.ncmp*cal.nmem)),cal.ncmp,cal.nmem);
+
+cmp_oxd = cmp_mem*cal.mem_oxd./100;
 
 % find system component composition by least-squares
-SYS_cmpfit = lsqregcmp(cmp_oxd(1:end-1,1:end-1).',SYS(:,1:end-1),reg);
-SYS_cmpfit = [SYS_cmpfit,SYS(:,end)/100];
-SYS_cmpfit = SYS_cmpfit./sum(SYS_cmpfit,2);
+SYS_cmpfit = lsqregcmp(cmp_oxd.',SYS,reg);
 
 % get fitted phase oxide compositions
 SYS_oxdfit = SYS_cmpfit*cmp_oxd;
 
 % get local phase equilibrium
-var.m = ones(np,1)/2; var.x = var.m; var.f = 0*var.m;
+var.m = ones(np,1)/2; var.x = var.m; 
 var.c      = SYS_cmpfit;        % component fractions [wt]
-% var.X      = var.c*cmp_oxd; % melt oxide fractions [wt %]
 var.T      = T;             % temperature [C]
 var.P      = P/10;         % pressure [GPa]
-var.H2O    = SYS_cmpfit(:,end); % water concentration [wt]
-cal.H2Osat = var.H2O./(PHS(:,1)/100);%fluidsat(var);
 [var,cal]  = leappart(var,cal,'E');
 
 % get fitted phase oxide compositions
@@ -50,20 +47,45 @@ PHS_frcfit = zeros(size(PHS));
 PHS_frcfit(:,1) = var.m*100;
 PHS_frcfit(:,2:end) = SOL_memfit*cal.msy_mem.';%.*(1-PHS_frcfit(:,1)/100);
 
-% get solidus and liquidus at starting composition
-cal = rmfield(cal,{'Tsol' 'Tliq'});
-% Psl = Psl(1:end/2);
-var.m = ones(size(Psl))/2; var.x = var.m; var.f = 0*var.m;
-var.c      = repmat(SYS_cmpfit(1,:).*[ones(1,cal.ncmp-1),0]./sum(SYS_cmpfit(1,1:end-1),2),length(Psl),1);
-var.P      = Psl/10;                     % pressure [GPa]
-var.T      = 1000+Psl(:)*5e-8;           % temperature [C]
-var.H2O    = Psl(:)*0;                   % water concentration [wt]
-cal.H2Osat = Psl(:)*0;
-[~,cal]    = leappart(var,cal,'T');
+% KLB-1 inital melting refenece 
 
-Tsolfit = cal.Tsol;
-Tliqfit = cal.Tliq;
-Tm      = cal.Tm;
+cKLB1 = SYS_cmpfit(1,:);
+cKLB1 = cKLB1 ./ sum(cKLB1);
+
+if isfield(cal,'Tsol') && isfield(cal,'Tliq')
+    cal = rmfield(cal,{'Tsol','Tliq'});
+end
+
+var.m = ones(size(PslKLB(:)))/2;
+var.x = var.m;
+var.c = repmat(cKLB1,length(PslKLB),1);
+var.P = PslKLB(:)/10;             % pressure [GPa]
+var.T = 1000 + PslKLB(:)*5e-8;   % temperature [C]
+
+[~,cal] = leappart(var,cal,'T');
+
+TsolfitKLB = cal.Tsol;
+TliqfitKLB = cal.Tliq;
+TmKLB = cal.Tm;
+
+% Initial melt / fractional-crystallisation reference
+cFC = SYS_cmpfit(33,:);
+cFC = cFC ./ sum(cFC);
+
+if isfield(cal,'Tsol') && isfield(cal,'Tliq')
+    cal = rmfield(cal,{'Tsol','Tliq'});
+end
+var.m = ones(size(PslFC(:)))/2;
+var.x = var.m;
+var.c = repmat(cFC,length(PslFC),1);
+var.P = PslFC(:)/10;                % pressure [GPa]
+var.T = 1000 + PslFC(:)*5e-8;      % temperature [C]
+
+[~,cal] = leappart(var,cal,'T');
+
+TsolfitFC = cal.Tsol;
+TliqfitFC = cal.Tliq;
+TmFC = cal.Tm;
 
 % % get solidus and liquidus at end composition
 % cal = rmfield(cal,{'Tsol' 'Tliq'});
@@ -78,6 +100,6 @@ Tm      = cal.Tm;
 % Tsolfit = [Tsolfit;cal.Tsol];
 % Tliqfit = [Tliqfit;cal.Tliq];
 
-datafit = [MLT_oxdfit(:);SOL_oxdfit(:);SOL_memfit(:);PHS_frcfit(:);Tsolfit(:);Tliqfit(:)];%repmat(PHSfit(:,1),6,1)];
+datafit = [MLT_oxdfit(:);SOL_oxdfit(:);SOL_memfit(:);PHS_frcfit(:);TsolfitKLB(:); TliqfitKLB(:); TsolfitFC(:); TliqfitFC(:)]; %repmat(PHSfit(:,1),6,1)];
 
 end

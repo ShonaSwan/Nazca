@@ -6,23 +6,23 @@ run('./par_default')
 
 % set run parameters
 
-runID     =  '2D_MORB';            % run identifier
+runID     =  '2D_MORB_u3vep';     % run identifier
 restart   =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop       =  50;                  % output frame plotted/saved every 'nop' time steps
+nop       =  10;                  % output frame plotted/saved every 'nop' time steps
 plot_op   =  1;                   % switch on to live plot results
-save_op   =  1;                   % switch on to save output to file
+save_op   =  0;                   % switch on to save output to file
 plot_cv   =  0;                   % switch on to live plot iterative convergence
 
 % set model domain parameters
-D         =  100e3;               % chamber depth [m]
+D         =  150e3;               % chamber depth [m]
 N         =  100;                 % number of grid points in z-direction
 h         =  D/N;                 % grid spacing (equal in both dimensions, do not set) [m]
-L         =  1.5*D;               % domain width (equal to h for 1-D mode) [m]
+L         =  1*D;                 % domain width (equal to h for 1-D mode) [m]
 
 % set model timing parameters
 Nt        =  5e5;                 % number of time steps to take
 tend      =  1e9*yr;              % end time for simulation [s]
-dt        =  100*yr;              % initial time step [s]
+dt        =  1*yr;                % initial time step [s]
 mumin     =  1e-6;                % lower limit for melt fraction in coeff. 
 mumax     =  0.20;                % upper limit for melt fraction in coeff.
 mutra     =  1e-4;                % transition point to disequilibrium, tensile plasticity
@@ -31,7 +31,7 @@ tracer_sw =  0;                   % Tracer point switch
 % model set up switches (plume or MOR)
 init_mode =  'MOR';               % 'plume' or 'MOR'
 bndmode   =  0;                   % boundary assimilation mode ( 0 = MOR 1/2; 1 = MOR full; 2 = Plume only (closed sides);
-meansw    =  0;                   % 0 = Geometric mean 1 = Arithmetic mean
+meansw    =  1;                   % 0 = Geometric mean 1 = Arithmetic mean
 
 %Extract, Extrude, and Intrude melt
 erupt_ratio = 0.50;               % 1 = all eruption (surface), 0 = all emplacement (intrusion at moho), values in between = partitioning
@@ -40,19 +40,19 @@ mthr        = 0.10;               % threshold melt fraction for extraction/erupt
 
 % MOR Spreading parameters  
 sprate    =  0.03/yr;             % Half spreading rate [m/s] (modeling half the ridge)
-bnd_sprw  =  1e3;                 % Width of top boundary spreading rate 'S' function [km] 
+bnd_sprw  =  2e3;                 % Width of top boundary spreading rate 'S' function [km] 
 
 % set initial thermo-chemical state of the Mantle 
 minage    =  1e5*yr;              % (20e6 / 7e5) 
 T0        =  5;                   % temperature of the top  boundary [deg C]
 T1        =  1350;                % temperature of the mantle  [deg C]
 wlay_c    =  1*h/D;               % thickness of smooth layer boundary (relative to domain depth D)
-maj0      =  [0.64 0.15 0.20 0.01 0 0];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
+maj0      =  [0.61 0.14 0.22 0.02 0.005 0.00];  % components (maj comp, H2O) top layer [wt] (will be normalised to unit sum!)
 maj1      =  maj0;                % major element components base layer [wt] (will be normalised to unit sum!)
-dr_maj    =  [1,1,-1,-1,-0,-0]*0e-3;     % Random perturbation of the composition field
+dr_maj    =  [1,1,-1,-1,-0,-0]*5e-3;     % Random perturbation of the composition field
 trc0      =  [1,1,1,1,1,1];       % trace elements system layer [wt ppb]
 trcscale  =  1e-9;                % parts per billion (ppb) conversion
-dr_trc    =  [0,0,-1,0,0,+1]*0e-2;% trace elements random noise           
+dr_trc    =  [-2,-1,1,1,1,0]*1e-2;% trace elements random noise           
 
 % set initial thermo-chemical state of the Crust  
 crust_sw  =  0;                     % 0 = no crust, 1 = crust 
@@ -90,8 +90,9 @@ kTm       =  1;                   % melt  thermal conductivity [W/m/K]
 kTx       =  5;                   % xtal  thermal conductivity [W/m/K]
 cPm       =  1300;                % melt  heat capacity [J/kg/K]
 cPx       =  1000;                % xtal  heat capacity [J/kg/K]
-tyield    =  6e7;                 % yield stress for shear failure [Pa]
-pyield    =  3e7;                 % yield pressure for tensile failure [Pa]
+G0        =  3e10;                % shear modulus [Pa]
+tyield    =  4e7;                 % yield stress for shear failure [Pa]
+pyield    =  2e7;                 % yield pressure for tensile failure [Pa]
 etaymin   =  1e20;                % minimum yield viscosity
 n_disl    =   1.0;                % dislocation creep powerlaw 
 lmbd_melt =   27;                 % exponential melt weakening prefactor
@@ -107,17 +108,17 @@ TINT      =  'bd2im';             % time integration scheme ('be1im','bd2im','cn
 ADVN      =  'weno5';             % advection scheme ('centr','upw1','quick','fromm','weno3','weno5','tvdim')
 CFL       =  0.75;                % (physical) time stepping courant number (multiplies stable step) [0,1]
 rtol      =  1e-3;                % outer its relative tolerance
-atol      =  1e-5;                % outer its absolute tolerance
+atol      =  1e-6;                % outer its absolute tolerance
 maxit     =  12;                  % maximum outer its
-delta     =  0.25;                % relaxing parameter for viscosity update
+delta     =  0.8;                % relaxing parameter for viscosity update
 etacntr   =  1e8;                 % maximum viscosity contrast
-etamin    =  1e16;                % minimum viscosity
+etamin    =  1e18;                % minimum viscosity
 Rcouple   =  0;                   % switch on for full reactive coupling
 Pcouple   =  0;                   % switch on for full pressure coupling
-itpar.fp.damp = 0.95;              % fixed-point iterative damping (0-1)
+itpar.fp.damp = 1.0;              % fixed-point iterative damping (0-1)
 itpar.aa.m    = 4;                % Anderson acceleration depth (2-7)
 itpar.aa.damp = 0.2;              % Anderson acceleration damping (0-1)
-itpar.aa.reg  = 1e-9;             % Anderson acceleration regularisation (0-1)
+itpar.aa.reg  = 1e-12;             % Anderson acceleration regularisation (0-1)
 
 %*****  RUN NAKHLA MODEL  *************************************************
 run('../src/main')

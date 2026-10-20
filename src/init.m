@@ -51,8 +51,8 @@ nclmp = length(colmap);
 lncls = colmap([5,135],:);
 
 
-    BCA     =  {'',''};  % boundary condition on advection (top,bot,left,right)
-    BCD     =  {'',''};  % boundary condition on diffusion (top,bot,left,right)
+BCA     =  {'continuous','closed'};  % boundary condition on advection (top,bot,left,right)
+BCD     =  {'continuous','closed'};  % boundary condition on diffusion (top,bot,left,right)
 
 Dsm = cal.Dsx;
 
@@ -266,9 +266,16 @@ Re     = eps;
 Div_V  = 0.*Tp;  advn_rho = 0.*Tp;  advn_X = 0.*Tp; advn_M = 0.*Tp;
 drhodt = 0.*Tp;  drhodto = drhodt; 
 exx    = 0.*Tp;  ezz = 0.*Tp;  exz = zeros(Nz-1,Nx-1);  eII = 0.*Tp;
-txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz-1,Nx-1);  tII = 0.*Tp;
-eta    = 1e21.*ones(Nz,Nx);  etai = eta;
-zeta   = 100.*eta;  zetai = zeta;
+txx    = 0.*Tp;  tzz = 0.*Tp;  txz = zeros(Nz+1,Nx+1);  tII = 0.*Tp;
+txxo   = txx; tzzo = tzz; txzo = txz; tIIo = tII; Pco = Pc(2:end-1,2:end-1);
+advn_txx = txx*0; advn_tzz = 0*txx; advn_txz = txz; advn_Pc = 0*Pco;
+[Pcoo   , Pco   ] = deal(Pco   , Pc(2:end-1,2:end-1));
+[tIIoo  , tIIo  ] = deal(tIIo  , tII);
+[tzzoo  , tzzo  ] = deal(tzzo  , tzz);
+[txxoo  , txxo  ] = deal(txxo  , txx);
+[txzoo  , txzo  ] = deal(txzo  , txz);
+eta    = 1e18.*ones(Nz,Nx); etaco = 1e18.*ones(Nz+1,Nx+1); etavp = eta; tupd = 0.*eta; tupdco = 0.*etaco; etavpco = etaco;
+zeta   = 100.*eta; zetai = zeta; pupd = 0.*zeta; zetavp = zeta;
 etamax = etacntr.*etamin;
 KD     = 1e-24.*ones(Nz,Nx); KDi = KD;
 MFDSrc = 0.*Tp;
@@ -285,6 +292,9 @@ Pt     = Ptop + mean(rhox0,'all').*g0.*ZZ;  Pl = Pt;  Pto = Pt; Ptoo = Pt; dPtdt
 rhox   = rhox0.*(1-aTx.*(Tp-Tref)+bPx.*(Pt-Pref));
 rhom   = rhom0.*(1-aTx.*(Tp-Tref)+bPm.*(Pt-Pref));
 rho    = rhox;
+rhoxw  = (rhox(icz(1:end-1),:)+rhox(icz(2:end),:))/2;
+rhoxw(end,:) = 2*rhoxw(end-1,:) - rhoxw(end-2,:);
+rhoxu  = (rhox(:,icx(1:end-1))+rhox(:,icx(2:end)))/2;
 M      = 0*rhox;
 X      = rhox;
 rhow   = (rho(icz(1:end-1),:)+rho(icz(2:end),:))/2;
@@ -410,7 +420,10 @@ while res > tol
 
         it = it+1;
 end
-
+% % Extracted bounday conditions
+% twophs  = double(deltac(icz,icx)>h/8);
+% twophsw = double(muw(:  ,icx)>1e-9);
+% twophsu = double(muu(icz,:  )>1e-9);
 Pto  = Pt;
 To   = T;  
 Tpo  = Tp;
@@ -431,6 +444,11 @@ majwall(2,:,:) = maj(end,:,:);
 trcwall(1,:,:) = nan*trc(1,:,:);
 trcwall(2,:,:) = trc(end,:,:)*trcscale;
 cwall          = cat(3,majwall,trcwall);
+
+% Extracted bounday conditions
+twophs  = double(deltac(icz,icx)>h/4);
+twophsw = double(muw(:  ,icx)>1e-9);
+twophsu = double(muu(icz,:  )>1e-9);
 
 % initialise phase change rates
 Gx   = 0.*x; Gm  = 0.*m; 
@@ -512,8 +530,8 @@ if restart
         SOL = [W(:);U(:);wm(:);um(:);Pf(:);Pc(:)];
         RHO = X+M; 
      
-        store;
         phseql;
+        store;
         update;
         fluidmech;
         update;
@@ -535,12 +553,12 @@ if restart
     end
 else
     % complete, plot, and save initial condition
-    store;
     phseql;
-    fluidmech;
+    store;
+    % fluidmech;
     update;
-    fluidmech;
-    update;
+    % fluidmech;
+    % update;
     history;
     output;
     step = step+1;

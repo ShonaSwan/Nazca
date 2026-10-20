@@ -23,11 +23,11 @@ while time <= tend && step <= Nt
         %%%% solve thermo-chemical equations
         thermochem;
 
-        %%%% update non-linear parameters and auxiliary variables
-        update;
-
         %%%% solve fluid-mechanics equations
         fluidmech;
+
+        %%%% update non-linear parameters and auxiliary variables
+        update;
 
         %%%% report convergence
         report;
@@ -45,6 +45,11 @@ while time <= tend && step <= Nt
     % record model history
     history;
 
+    % Extracted bounday conditions
+    twophs  = double(deltac(icz,icx)>h/4);
+    twophsw = double(muw(:  ,icx)>1e-9);
+    twophsu = double(muu(icz,:  )>1e-9);
+    
     % Cm  = cm.*m.*rho;
     % Cx  = cx.*x.*rho;
     % C   = Cm + CCx;

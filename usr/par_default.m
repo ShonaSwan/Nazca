@@ -38,7 +38,7 @@ sprate   =  0.04/yr;             % Half spreading rate [m/s] (modeling half the 
 init_mode = 'plume';              % 'plume' or 'MOR'
 bndmode   =  1;                   % boundary assimilation mode (0 = MOR; 1 = Plume)
 seed      =  24;                  % random perturbation seed
-smth      =  10;                  % regularisation of initial random perturbation
+smth      =  5;                  % regularisation of initial random perturbation
 zlay      =  2.0;                 % layer thickness (relative to domain depth D)
 dlay      =  0.0;                 % random perturbation to layer thickness (relative to grid spacing h)
 wlay_T    =  0*h/D;               % thickness of smooth layer boundary (relative to domain depth D)

@@ -6,6 +6,11 @@
 [Too    , To    ] = deal(To    , T    );
 [Tpoo   , Tpo   ] = deal(Tpo   , Tp   );
 [chioo  , chio  ] = deal(chio  , chi  );
+[Pcoo   , Pco   ] = deal(Pco   , Pc(2:end-1,2:end-1));
+[tIIoo  , tIIo  ] = deal(tIIo  , tII);
+[tzzoo  , tzzo  ] = deal(tzzo  , tzz);
+[txxoo  , txxo  ] = deal(txxo  , txx);
+[txzoo  , txzo  ] = deal(txzo  , txz);
 
 [dSdtoo     , dSdto    ] = deal(dSdto    , dSdt    );
 [dCmdtoo    , dCmdto   ] = deal(dCmdto   , dCmdt   );
@@ -16,6 +21,9 @@
 
 dto = dt;
 Pto = Pt;
+
+indmL = U((2:end-1),    1) > 0 | Zc.' < LAB_depth(end)/2;
+indmR = U((2:end-1),end-1) < 0 | Zc.' < LAB_depth(end)/2;
 
 % reset update history
 specrad.S.est   = specrad.S.mean   + 0.*specrad.S.est;
@@ -35,3 +43,6 @@ FHST.Cm         = 0.*FHST.Cm;
 FHST.Cx         = 0.*FHST.Cx;
 FHST.MFD        = 0.*FHST.MFD;
 FHST.CMP        = 0.*FHST.CMP;
+
+CMPCrr(:) = 0;
+MFDCrr(:) = 0;

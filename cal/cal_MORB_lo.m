@@ -103,7 +103,7 @@ cal.Dsx = 300;
 % specify geochemical model parameters
 cal.ntrc     = 6;                    % number of trace elements
 cal.trcStr   = {'K 0.01','K 0.10','K 0.5','K 3.00','K 10.0','K 0.5'};
-cal.Ktrc_mem = [0.01;0.10;0.5;3.0;10.0;0.5].*ones(cal.ntrc,cal.nmem);
+cal.Ktrc_mem = [0.01;0.10;1;3.0;10.0;1].*ones(cal.ntrc,cal.nmem);
 cal.ElRatio  = [1,4;2,5;3,6];
 
 % specify density parameters
@@ -112,7 +112,9 @@ cal.rhox0   = [3200,4000,2680,2550,3210,3520,3930,4730,2700,2700,2540]; % mem re
 
 % specify three-phase coefficient model parameters
 %              for  fay  ant  alb   dps  aug  ulv  crm  phl  dol  qtz
-cal.etax0   = [1e19,1e19,1e17,1e17,1e20,1e20,1e17,1e17,1e15,1e16,1e19]; % mem ref viscosities [Pas]
+cal.etax0   = [1e19,1e19,1e17,1e17,1e20,1e20,1e21,1e21,1e15,1e16,1e19]; % mem ref viscosities [Pas]
+cal.G0      = [50,50,20,20,50,50,70,70,10,20,30]*1e9; % mem ref shear moduli [Pa]
+cal.frct0   = [30,30,10,10,25,25,35,35,5,10,20]; % mem ref friction angles [deg]
 cal.Eax     = 300e3;                  % solid viscosity activation energy [J/mol]
 cal.AA      =[ 0.5989, 0.1772; ...    % permission slopes
                0.0397, 0.1182 ];      % increases permission slopes away from step function 

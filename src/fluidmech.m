@@ -4,7 +4,7 @@ if ~bnchm && step>0 && ~restart
 
 % source and correction terms for mixture mass and matrix compaction equations
 MFDSrc = - (a1*rho -a2*rhoo -a3*rhooo )/dt + Gex + Gem + Gin;
-CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex;
+CMPSrc = - (a1*rhox-a2*rhoxo-a3*rhoxoo)/dt + Gex./chi;
 
 res_MFD = (a1*rho-a2*rhoo-a3*rhooo) - (b1*drhodt + b2*drhodto + b3*drhodtoo)*dt;
 % res_CMP = (Pc(2:end-1,2:end-1)./zeta + ups).*rhox*dt;
@@ -105,7 +105,9 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 
 
 % z-RHS vector
-rr  = + buoy .* (Drhow(2:end-1,:).*g0)/(Drho0*g0);
+rr  = + buoy   .* (Drhow(2:end-1,:).*g0)/(Drho0*g0) ...
+      + (ddz(tupd             .*(a2*tzzo           +a3*tzzoo           -advn_tzz           *dt),h) ...
+      +  ddx(tupdco(2:end-1,:).*(a2*txzo(2:end-1,:)+a3*txzoo(2:end-1,:)-advn_txz(2:end-1,:)*dt),h))/(Drho0*g0);
 
 if bnchm; rr = rr + src_W_mms(2:end-1,2:end-1)/(p0/h0); end
 
@@ -135,11 +137,11 @@ IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 % left boundary
 if bndmode == 1 % Mid ocean Ridge Full spreading 
 ii  = MapU((2:end-1),1); jj1 = ii; jj2 = MapU((2:end-1),2);
-if iter==1; indm = U((2:end-1),1) > 0 | Zc.' < LAB_depth(end); end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indm).*Uleft];
-aa  = zeros(size(ii)) - (Zc.' < LAB_depth(end)).*sprate/u0;
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+0];%(1-indmL).*Uleft];
+aa  = zeros(size(ii)) - (Zc.' <= LAB_depth(1)).*sprate/u0 ...
+                      - (Zc.' >  LAB_depth(1)).*abs(U(2:end-1,2))/u0;
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 else 
 ii  = MapU((2:end-1),1); jj1 = ii; jj2 = MapU((2:end-1),2);
@@ -153,18 +155,18 @@ end
 % right boundary
 if bndmode == 0  || bndmode == 1 % Mid ocean Ridge set up 
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
-if iter==1; indmR = U((2:end-1),end-1) < 0 | Zc.' < LAB_depth(end); end
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
-IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+(1-indmR).*Uright];
-aa  = zeros(size(ii)) + (Zc.' < LAB_depth(end)).*sprate/u0;
+IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+0];
+aa  = zeros(size(ii)) + (Zc.' <= LAB_depth(end)).*sprate/u0 ...
+                      + (Zc.' >  LAB_depth(end)).*abs(U(2:end-1,end-1))/u0;
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];
 else
 ii  = MapU((2:end-1),end); jj1 = ii; jj2 = MapU((2:end-1),end-1);
 aa  = zeros(size(ii));
 IIL = [IIL; ii(:)]; JJL = [JJL; jj1(:)];   AAL = [AAL; aa(:)+1];
 IIL = [IIL; ii(:)]; JJL = [JJL; jj2(:)];   AAL = [AAL; aa(:)+Uright];
-aa  = zeros(size(ii));
+aa  = zeros(size(ii)) + sprate/u0;
 IIR = [IIR; ii(:)]; AAR = [AAR; aa(:)];   
 end
 
@@ -198,6 +200,9 @@ IIL = [IIL; ii(:)]; JJL = [JJL; jj4(:)];   AAL = [AAL;-(1/2*EtaC2(:)-1/3*EtaP2(:
 rr = zeros(size(ii));
 if bnchm
     rr = rr + src_U_mms(2:end-1,2:end-1)/(p0/h0);
+else
+    rr = rr + (ddx(tupd             .*(a2*txxo           +a3*txxoo           -advn_txx           *dt),h) ...
+            +  ddz(tupdco(:,2:end-1).*(a2*txzo(:,2:end-1)+a3*txzoo(:,2:end-1)-advn_txz(:,2:end-1)*dt),h))/(Drho0*g0);
 end
 
 IIR = [IIR; ii(:)];  AAR = [AAR; rr(:)];
@@ -290,7 +295,8 @@ IIL = [IIL; ii(:)]; JJL = [JJL; ii(:)];   AAL = [AAL; aa(:)];  % pressure at the
 
 % set right hand side in z-direction
 rr  = Drhomw(2:end-1,:).*g0./(Drho0*g0);
-rr(end,end) = 0;  % avoid conflict with boundary conditions at lower right corner (Div.v = 0)
+% rr(end,end) = 0;  % avoid conflict with boundary conditions at lower right corner (Div.v = 0)
+% if bndmode>0; rr(end,1) = 0; end
 
 % if bnchm; rr = rr + src_wm_mms(2:end-1,2:end-1); end
 
@@ -461,7 +467,8 @@ if bnchm
     rr  = zeros(size(ii));
     rr = rr + src_Pc_mms(2:end-1,2:end-1)/p0;
 else 
-    rr  = (CMPSrc + CMPCrr)./MFD0;
+    rr  = (CMPSrc + CMPCrr)./MFD0 ...
+        + (rhox./zeta.*pupd.*(a2*Pco+a3*Pcoo-advn_Pc*dt))./MFD0;
 end
 
 IIR = [IIR; ii(:)];AAR = [AAR; rr(:)];

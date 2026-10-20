@@ -42,6 +42,12 @@ rho.est  = 0.2*rho.mean + 0.8*rho.est;            % dampen towards mean to avoid
 % Fixed-point update coefficients
 alpha(:) = 4./(2 + rho.est).^2;
 
+% % Moving average for stability
+% rho.mean = (rho.mean + mean(rho_new))/2;             % moving average
+% 
+% % Chebyshev-like coefficients
+% alpha = 4./(2 + rho.mean).^2;
+
 % New fixed-point update and iterate
 f(:) = itpar.fp.damp * -alpha(:).*r(:);
 

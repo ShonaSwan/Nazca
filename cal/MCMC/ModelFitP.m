@@ -1,5 +1,5 @@
-function [datafit,MLT_oxdfit,SOL_oxdfit,SYS_oxdfit,SOL_memfit,PHS_oxdfit,PHS_frcfit,SOL_cmpfit,MLT_cmpfit,SYS_cmpfit,TsolfitKLB,TliqfitKLB,TsolfitFC,TliqfitFC,TmKLB,TmFC] = ...
-    ModelFitP(model,T,P,SYS,PHS,PslKLB,PslFC,cal,reg)
+function [datafit,MLT_oxdfit,SOL_oxdfit,SYS_oxdfit,SOL_memfit,PHS_oxdfit,PHS_frcfit,SOL_cmpfit,MLT_cmpfit,SYS_cmpfit,SYS_cmpfit_Anh,TsolfitKLB,TliqfitKLB,TsolfitFC,TliqfitFC,TmKLB,TmFC] = ...
+    ModelFitP(model,T,P,SYS,PHS,PslKLB,PslFC,cal,reg,Datamode)
 % get number of data points
 np = length(T);
 
@@ -16,7 +16,7 @@ cmp_oxd = cmp_mem*cal.mem_oxd./100;
 
 % find system component composition by least-squares
 SYS_cmpfit = lsqregcmp(cmp_oxd.',SYS,reg);
-
+SYS_cmpfit_Anh = lsqregcmp(cmp_oxd(:,1:end-1).',SYS(:,1:end-1),reg);
 % get fitted phase oxide compositions
 SYS_oxdfit = SYS_cmpfit*cmp_oxd;
 
@@ -47,8 +47,8 @@ PHS_frcfit = zeros(size(PHS));
 PHS_frcfit(:,1) = var.m*100;
 PHS_frcfit(:,2:end) = SOL_memfit*cal.msy_mem.';%.*(1-PHS_frcfit(:,1)/100);
 
-% KLB-1 inital melting refenece 
 
+% KLB-1 inital melting refenece 
 cKLB1 = SYS_cmpfit(1,:);
 cKLB1 = cKLB1 ./ sum(cKLB1);
 
@@ -69,8 +69,15 @@ TliqfitKLB = cal.Tliq;
 TmKLB = cal.Tm;
 
 % Initial melt / fractional-crystallisation reference
-cFC = SYS_cmpfit(33,:);
+
+if Datamode == 0 | Datamode == 1
+cFC = SYS_cmpfit(48,:);
 cFC = cFC ./ sum(cFC);
+elseif  Datamode == 2
+cFC = SYS_cmpfit(1,:);
+cFC = cFC ./ sum(cFC);
+end 
+
 
 if isfield(cal,'Tsol') && isfield(cal,'Tliq')
     cal = rmfield(cal,{'Tsol','Tliq'});

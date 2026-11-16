@@ -6,15 +6,15 @@ clear cal;
 % number of oxides, mineral end-members, mineral systems, model components
 cal.noxd   = 10;
 cal.nmem   = 15;
-cal.nmsy   = 7;
+cal.nmsy   = 8;
 cal.ncmp   = 7;
 
 % label strings for all compositional representations
 cal.oxdStr = {'SiO$_2$','TiO$_2$','Al$_2$O$_3$','Cr$_2$O$_3$','FeO','MgO','CaO','Na$_2$O','K$_2$O','H$_2$O'};
      elStr = {'Si','Ti','Al','Cr','Fe','Mg','Ca','Na','K','H'};
-cal.memStr = {'cpx1','cpx2','cpx3','for','fay','spl1','spl2','opx1','opx2','fsp1','fsp2','fsp3','qtz','phl','wat'};
-cal.msyStr = {'cpx','olv','spn','opx','fsp','qtz','phl'};
-cal.cmpStr = {'hrz','spx','tro','bas','try','pgr','hab'};
+cal.memStr = {'opx1','opx2','cpx1','cpx2','cpx3','spl1','spl2','for','fay','fsp1','fsp2','fsp3','bio','qtz','phl'};
+cal.msyStr = {'opx','cpx','spn','olv','fsp','bio','qtz','phl'};
+cal.cmpStr = {'hrz','spx','bas','baf','try','pgr','hab'};
 
 for i = 1:cal.ncmp; cal.(cal.cmpStr{i}) = i; end
 for i = 1:cal.nmsy; cal.(cal.msyStr{i}) = i; end
@@ -29,21 +29,21 @@ cal.imsy = [ 5    2    1    6];  % mineral system indices for plotting basalt te
 
 % oxide composition of mineral end-members
 %                SiO2       TiO2      Al2O3      Cr2O3     FeO       MgO        CaO       Na2O      K2O      H2O       
-cal.mem_oxd = [  53.3900         0    6.5700         0    5.0000   22.8500   11.2500    0.9400         0         0
-                 53.5200         0    3.1600         0    3.5300   19.5500   20.1000    0.1400         0         0
-                 50.9800         0    0.5300         0   28.1900    4.8300   13.8900    1.5800         0         0
-                 41.1600         0         0         0    8.6300   50.2100         0         0         0         0
-                 30.2400         0         0         0   66.8300    2.9300         0         0         0         0
-                       0         0   44.8100   26.1000   10.4500   18.6400         0         0         0         0
-                       0   30.4300         0    1.0500   68.5200         0         0         0         0         0
-                 53.5300         0    7.0700         0    6.4300   30.9600    2.0100         0         0         0
-                 55.4100         0    3.5400         0    6.1400   31.9400    2.9700         0         0         0
-                 47.5900         0   33.6500         0         0         0   16.6600    1.9300    0.1700         0
-                 64.1100         0   22.4400         0         0         0    3.5500    9.3400    0.5600         0
-                 66.1100         0   19.7300         0         0         0    0.8500    5.7000    7.6100         0        
-                100.0000         0         0         0         0         0         0         0         0         0
-                 40.5000    2.6000   15.9000         0    3.0000   23.7000         0         0    10.700        3.6
-                       0         0         0         0         0         0         0         0         0       100];           
+cal.mem_oxd = [  53.53	0.00	7.07	0.00	6.43	30.96	2.01	0.00	0.00	0.00
+                   55.41	0.00	3.54	0.00	6.14	31.94	2.97	0.00	0.00	0.00
+                   50.77	1.17	0.63	0.00	27.08	5.83	12.88	1.64	0.00	0.00
+                   53.24	0.61	6.55	0.00	4.85	23.90	10.06	0.80	0.00	0.00
+                   53.83	0.10	2.80	0.00	3.70	19.99	19.58	0.00	0.00	0.00
+                    0.00	0.00	41.98	28.04	10.37	19.61	0.00	0.00	0.00	0.00
+                    0.00	27.74	0.00	0.00	71.55	0.71	0.00	0.00	0.00	0.00
+                   41.07	0.00	0.00	0.00	9.36	49.57	0.00	0.00	0.00	0.00
+                   30.87	0.00	0.00	0.00	63.40	5.73	0.00	0.00	0.00	0.00
+                   47.76	0.00	33.54	0.00	0.00	0.00	16.53	2.04	0.13	0.00
+                   64.14	0.00	22.41	0.00	0.00	0.00	3.52	9.33	0.60	0.00
+                   66.11	0.00	19.73	0.00	0.00	0.00	0.85	5.70	7.61	0.00
+                   35.95	3.40	11.69	0.00	30.34	5.98	0.00	0.00	9.70	2.94
+                  100.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00
+                   39.00	2.00	11.00	1.00	4.00	24.00	0.00	0.00	11.00	8.00];           
         
 
 
@@ -51,13 +51,14 @@ cal.mem_oxd = cal.mem_oxd./sum(cal.mem_oxd,2)*100;
 
 % mineral end-members in mineral systems
 % mineral end-members in mineral systems
-cal.msy_mem = [1  1  1  0  0  0  0  0  0  0  0  0  0  0  0      % clinopyroxene (cpx)
-               0  0  0  1  1  0  0  0  0  0  0  0  0  0  0      % olivine (olv)
-               0  0  0  0  0  1  1  0  0  0  0  0  0  0  0      % spinel (spn)
-               0  0  0  0  0  0  0  1  1  0  0  0  0  0  0      % orthopyroxene(opx)
+cal.msy_mem = [1  1  0  0  0  0  0  0  0  0  0  0  0  0  0      % orthopyroxene(opx) 
+               0  0  1  1  1  0  0  0  0  0  0  0  0  0  0      % clinopyroxene (cpx)
+               0  0  0  0  0  1  1  0  0  0  0  0  0  0  0      % spinel (spn) 
+               0  0  0  0  0  0  0  1  1  0  0  0  0  0  0      % olivine (olv)
                0  0  0  0  0  0  0  0  0  1  1  1  0  0  0      % feldspar (fsp)
-               0  0  0  0  0  0  0  0  0  0  0  0  1  0  0      % quartz (qtz)
-               0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  ];  % micas (mic) 
+               0  0  0  0  0  0  0  0  0  0  0  0  1  0  0      % biotite (bio)
+               0  0  0  0  0  0  0  0  0  0  0  0  0  1  0      % quartz (qtz)
+               0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  ];  % phlogopite (phl) 
 
 
 % mineral end-member composition of melting model components
@@ -69,9 +70,9 @@ cal.cmp_mem = [  0     0      0      0     0     0     0     0     0     0     0
                
                  0     0      0      0     0     0     0     0     0     0     0     0     0     0    0        % Spinel pyroxenite (spx)
                  
-                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0       % Troctolite (tro)
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0       % Basalt (bas
                
-                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0      % Basalt (bas)
+                 0     0      0      0     0     0     0     0     0     0     0     0     0     0    0      % Basalt (baf) another one ...
                  
                  0     0      0      0     0     0     0     0     0     0     0     0     0     0    0      % Trachyte (try)
 

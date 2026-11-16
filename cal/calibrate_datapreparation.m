@@ -30,7 +30,7 @@ LO = {'Location','bestoutside'};
 %load in the MAGEMin data and opens it.(window with table opens, using
 %default selection click Import Selection => Import Data) then opens file 
 
-filename = './FracC_ig.csv';  
+filename = './FracC_22_ig.csv';  
 uiopen(filename,1)
 % *** we do not select liq=100 or liq < 10 wt% ? need to decide limits for fractional melting ? 
 
@@ -38,7 +38,7 @@ uiopen(filename,1)
 %% *****  unpack calibration data  ****************************************
 
 % !!!  update table name on following line, then Run Section  !!!
-DAT = FracC_ig ;       % residual fraction = 10%        % table name must correspond to table header above
+DAT = FracC_22_ig ;       % residual fraction = 10%        % table name must correspond to table header above
 DAT.Properties.VariableNames{'point___'} = 'point'; DAT.Properties.VariableNames{'T__C_'}    = 'TC';DAT.Properties.VariableNames{'P_kbar_'} = 'Pkbar';DAT.Properties.VariableNames{'mode_wt__'} = 'modewt'; DAT.Properties.VariableNames{'density_kg_m3_'} = 'densitykgm3';
 
 DAT.Properties.VariableNames{'SiO2_wt__'}  = 'SiO2wt';DAT.Properties.VariableNames{'TiO2_wt__'}  = 'TiO2wt';DAT.Properties.VariableNames{'Al2O3_wt__'} = 'Al2O3wt';DAT.Properties.VariableNames{'Cr2O3_wt__'} = 'Cr2O3wt';DAT.Properties.VariableNames{'FeO_wt__'}   = 'FeOwt'; DAT.Properties.VariableNames{'MgO_wt__'}   = 'MgOwt'; DAT.Properties.VariableNames{'CaO_wt__'}   = 'CaOwt'; DAT.Properties.VariableNames{'Na2O_wt__'}  = 'Na2Owt'; DAT.Properties.VariableNames{'K2O_wt__'}   = 'K2Owt'; DAT.Properties.VariableNames{'H2O_wt__'}   = 'H2Owt';
@@ -53,9 +53,10 @@ iliq = find(strcmp(phs,'liq'));                                            % ens
 iphs = 1:nphs; iphs(iliq) = []; iphs = [iliq,iphs];
 phs  = phs(iphs);
   
-%liq = 1; g = 2; cpx = 3; ol = 4; opx = 5; spl = 6;  
-%liq = 1; pl = 2; cpx = 3; spl = 4; ol = 5;  usp = 6; 
-liq = 1; ol = 2; pl = 3; spl = 4; cpx = 5; usp = 6;
+
+
+liq = 1;  ol = 2; pl = 3; cpx = 4; spl = 5;  usp = 6; pig = 7; afs = 8; bi = 9; q = 10;
+%liq = 1;  opx = 2; cpx = 3; spl = 4;  ol = 5; 
 
 % set oxide list in preferred sequence   Reorder the oxides
 oxd  = ["SiO2";"TiO2";"Al2O3";"Cr2O3";"FeO";"MgO";"CaO";"Na2O";"K2O";"H2O"];       % set major oxides
@@ -98,6 +99,18 @@ for iph = 1:nphs
     PHS_oxd(hasphs(:,iph)==1,iph,:) = PHS_oxd(hasphs(:,iph)==1,iph,:)./(sum(PHS_oxd(hasphs(:,iph)==1,iph,:),3)+eps)*100;
 end
 
+PHS_oxd(:,cpx,:) = (PHS_frc(:,cpx).*PHS_oxd(:,cpx,:) + PHS_frc(:,pig).*PHS_oxd(:,pig,:)) ./ (PHS_frc(:,cpx) + PHS_frc(:,pig) + eps);
+PHS_oxd(:,pig,:) = [];
+RHO(:,cpx) = (PHS_frc(:,cpx) + PHS_frc(:,pig)) ./ (PHS_frc(:,cpx)./(RHO(:,cpx) + eps) + PHS_frc(:,pig)./(RHO(:,pig) + eps) + eps);
+RHO(:,pig) = [];
+PHS_frc(:,cpx) = PHS_frc(:,cpx) + PHS_frc(:,pig);
+PHS_frc(:,pig) = [];
+phs(pig) = [];
+hasphs(:,cpx) = max(hasphs(:,cpx), hasphs(:,pig));
+hasphs(:,pig) = [];
+
+liq = 1;  ol = 2; pl = 3; cpx = 4; spl = 5;  usp = 6; afs = 7; bi = 8; q = 9;
+
 PHS_oxd(:,spl,:) = (PHS_frc(:,spl).*PHS_oxd(:,spl,:) + PHS_frc(:,usp).*PHS_oxd(:,usp,:)) ./ (PHS_frc(:,spl) + PHS_frc(:,usp) + eps);
 PHS_oxd(:,usp,:) = [];
 RHO(:,spl) = (PHS_frc(:,spl) + PHS_frc(:,usp)) ./ (PHS_frc(:,spl)./(RHO(:,spl) + eps) + PHS_frc(:,usp)./(RHO(:,usp) + eps) + eps);
@@ -107,8 +120,21 @@ PHS_frc(:,usp) = [];
 phs(usp) = [];
 hasphs(:,spl) = max(hasphs(:,spl), hasphs(:,usp));
 hasphs(:,usp) = [];
-nphs = nphs - 1;
 
+liq = 1;  ol = 2; pl = 3; cpx = 4; spl = 5;  afs = 6; bi = 7; q = 8;
+
+
+PHS_oxd(:,pl,:) = (PHS_frc(:,pl).*PHS_oxd(:,pl,:) + PHS_frc(:,afs).*PHS_oxd(:,afs,:)) ./ (PHS_frc(:,pl) + PHS_frc(:,afs) + eps);
+PHS_oxd(:,afs,:) = [];
+RHO(:,pl) = (PHS_frc(:,pl) + PHS_frc(:,afs)) ./ (PHS_frc(:,pl)./(RHO(:,pl) + eps) + PHS_frc(:,afs)./(RHO(:,afs) + eps) + eps);
+RHO(:,afs) = [];
+PHS_frc(:,pl) = PHS_frc(:,pl) + PHS_frc(:,afs);
+PHS_frc(:,afs) = [];
+phs(afs) = [];
+hasphs(:,pl) = max(hasphs(:,pl), hasphs(:,afs));
+hasphs(:,afs) = [];
+
+nphs = nphs - 3
 
 %  % Take the Melt phase and run it through the shape function 
 % Melt_fractions = PHS_frc(:,1);                    % melt mode wt% at each point
@@ -143,6 +169,7 @@ nphs = nphs - 1;
 
 %%  Rename and Save.mat
 
-save('FracC_MOR.mat', 'PHS_frc', 'PHS_oxd','RHO','phs','hasphs','pts','Tmp','Prs','npts','nphs');
+save('Frac_C_MOR.mat', 'PHS_frc', 'PHS_oxd','RHO','phs','hasphs','pts','Tmp','Prs','npts','nphs');
 
 fprintf('Done');
+

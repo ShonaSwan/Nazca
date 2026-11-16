@@ -21,9 +21,21 @@ LO = {'Location','bestoutside'};
 % A parameter fitting algorithm is used to optimise the result, so that one endmember better represents the differentiation end point, while the other endmember better represents the starting point.
 
 % !!!  Run Section to load end-member calibration and prepare for pseudo-component calibration  !!!
-load('MORB_Comb_7');
 
-cal_MORB_combo_7;  % read calibration file
+Datamode   =  0; 
+
+if Datamode == 0       % Both trends combined 
+    load('MORB_FM_FC_Final');
+    cal_MORB_combo_6;  
+    
+elseif Datamode == 1   % Fractional melting 
+   load('MORB_FM_Final');
+   cal_MORB_frac_melt;  
+
+elseif Datamode == 2   % Fractional crystalisation  
+    load('MORB_FC_Final'); 
+    cal_MORB_frac_cryst;  
+end 
 
 % !!!  Edit end-member appearances in pseudo-components  !!!
 % - number and sequence of end-members must correspond to list in cal file
@@ -34,32 +46,45 @@ cal_MORB_combo_7;  % read calibration file
 % - phase out mineral systems and their end-members in accordance with
 %   their fading or disappearance in PHS_frc
 
+
 %% Defining the Solidus and Liquidus values for the inital KLB1 composition and the Inital fractional melting composition 
-% KLB-1 mantle: example high-pressure range
-PslKLB = [3:1:10, 15:5:50]'; % kbar
 
-% Initial melt: example lower-pressure range
-PslFC   = (2:0.1:3)';         % kbar
+ % KLB-1 mantle: example high-pressure range /% Initial melt: example lower-pressure range
+ PslKLB = [3:1:10, 15:5:50]'; PslFC   = ([2,3])';  % kbar 
+ % Obtain these temperatures from MAGEMin at each pressure
+ TsolKLB = [1139.24,1151.37,1160.84,1167.95,1172.45,1173.73,1170.75,1190.82,1301.46,1388.83,1457.63,1512.81,1557.59,1594.07,1622.67,1644.58 ];
+ TliqKLB = [1802.87,1807.59,1812.13,1816.5,1820.7,1824.75,1828.63,1832.38,1849.11,1862.94,1874.35,1883.71,1891.33,1897.43,1902.21,1905.83];
+ TsolMelt = [1065.35, 1065.35];
+ TliqMelt = [1284.98, 1284.98];
+ % TsolMelt = [907.14,909.76,912.47,915.09,917.73,920.37,922.99,925.53,928.12,930.65,933.23];
+ % TliqMelt = [1288.33, 1288.45, 1288.57, 1288.67, 1288.79,1288.89,1289.0,1289.11,1289.21,1289.31, 1289.41];
 
-% Obtain these temperatures from MAGEMin at each pressure
-TsolKLB = [969.31, 993.23, 1015.48, 1035.68,1052.35, 1064.03, 1073.76, 1091.26, 1157.69, 1192.66, 1197.96, 1168.41,1087.7, 710.79,661.87,620.12];
-TliqKLB = [1802.34, 1807.06, 1811.61, 1815.97, 1820.17, 1824.21, 1828.1, 1831.84, 1848.55, 1862.37, 1873.77, 1883.12, 1890.73,1896.8,1901.57,1905.17];
-
-TsolMelt = [907.14,909.76,912.47,915.09,917.73,920.37,922.99,925.53,928.12,930.65,933.23];% 935.73,938.21,940.68,943.25,947.65,950.15,952.66,955.71,958.52,960.93];
-
-TliqMelt = [1288.33, 1288.45, 1288.57, 1288.67, 1288.79,1288.89,1289.0,1289.11,1289.21,1289.31, 1289.41];%,1289.51,1289.6,1289.69,1289.79,1289.88,1289.96,1290.05,1290.13,1290.21,1290.29];
 %%
+if Datamode == 0 
+%                   Opx   |  Cpx   |  Spl  |  Ol  |   Pl  | Bio  |Qrt | Phl
+indmem  = logical([ 1 0 0   0 0 0 0   0 0    1 1    0 0 0    0     0    0  ;   % Harzburgite (hrz)
+                    1 1 1   1 1 0 0   1 0    1 1    0 0 0    0     0    0  ;   % Spinel pyroxenite (spx)
+                    0 0 1   1 1 1 0   1 1    1 1    1 1 0    0     0    0  ;   % Basalt (bas)
+                    0 0 0   0 0 1 1   1 1    1 0    0 1 1    0     0    0  ;   % Trachyte (try)
+                    0 0 0   0 0 1 1   0 1    0 0    0 1 1    1     1    0  ;   % Plagiogranite (pgr)
+                    1 0 0   1 1 0 0   1 1    1 1    1 0 0    0     0    1]);   % Hydrous alkaline basalt (hab)
 
-%                     Cpx   |  Ol |  Spl  |  Opx  |  Pl  |  Qrt | Phl
-indmem  = logical([ 1 0 0    1 1    0 0      1 0    0 0 0    0     0  0  ;   % Harzburgite (hrz)
-                    1 1 0    1 1    1 0      0 1    0 0 0    0     0  0  ;   % Spinel pyroxenite (spx)
-                    0 0 0    1 1    0 0      0 0    1 0 0    0     0  0  ;   % Troctolite (tro)
-                    0 1 1    1 1    1 1      0 0    1 1 0    0     0  0  ;   % Basalt (bas)
-                    0 1 1    0 1    0 1      0 0    1 1 1    0     0  0  ;   % Trachyte (try)
-                    0 0 1    0 0    0 1      0 0    0 1 1    1     0  1  ;   % Plagiogranite (pgr)
-                    1 0 1    1 1    1 0      1 0    1 0 0    0     1  1]);   % Hydrous alkaline basalt (hab)
-               
+elseif Datamode == 1 
 
+    %                 Opx |  Cpx   | Spl  |  Ol  |   Phl | Pl
+indmem  = logical([ 1 0 0   1 0 0    0     1 1       0   0 0  ;   % Harzburgite (hrz)
+                    1 1 1   1 1 0    1     1 1       0   0 0  ;   % Spinel pyroxenite (spx)
+                    0 0 1   1 1 1    1     1 1       0   1 1  ;   % Basalt (bas)
+                    1 0 0   1 1 0    1     1 1       1   0 0]);   % Hydrous alkaline basalt (hab)
+                    
+elseif Datamode == 2 
+   
+    %                 Ol |   Pl   |  Cpx  |  Spl |  Bio  | Qrt 
+indmem  = logical([  1 1   1 1 0     1 0    1 1       0      0     ;   % Basalt (bas)
+                     1 0   0 1 1     1 1    1 1       0      0     ;   % Trachyte (try)
+                     0 0   0 1 1     0 1    0 1       1      1   ]);   % Plagiogranite (pgr)
+ 
+end 
 
 cmp_oxd = 0.5*EMInt + 0.5*EMExt; %*cal.mem_oxd(1:end-1,1:end-1)/100; EM_Int: internal endmembers obtained earlier via PCA and endmember extraction.
 %cmp_oxd = [cmp_oxd,zeros(cal.ncmp)];
@@ -73,14 +98,33 @@ for ic = 1:ncmp
     cmp_mem(ic,imem) = lsqregcmp(A,b,[0.5,5,0,0.002])*100;
 end
 
-              %cpx1       cpx2     cpx3     for       fay      spl1       spl2       opx1       opx2     fsp1      fsp2      fsp3       qtz       phl       wat
-cmp_mem = [     0          0        0       71.84	   8.16     0          0         20.00      0        0         0         0          0         0         0       % Harzburgite (hrz)
-               27.72	   4.75	    0       33.66	   6.83	    3.17	   0	      0	       23.44     0 	       0	     0	        0	      0     	0       % Spinel pyroxenite (spx)
-                0          0        0       25.11      3.99     0          0          0         0       70.89      0         0          0         0         0       % Troctolite (tro)
-                1.80      26.10     9.40     6.70      7.20     0.80       0.10       0         0       45.30      2.50      0          0         0         0       % Basalt (bas)
-                0          1.80    40.00     0.1000    2.70     0         12.50       0         0        7.10     35.70      0.10       0         0         0       % Trachyte (try)
-                0          1.10    28.30     0         0        0          3.30       0         0        0        47.40     19.70       4.00      0         0.50    % Plagiogranite (pgr)
-               11.40       0        9.60     0         0        0          2.10       7.50      0        0         0        66.50       0         2.00      0.80];  % Hydrous alkaline basalt (hab)
+if Datamode == 0 
+
+    
+ %             opx1     opx2      opx3     cpx1      cpx2      cpx3       cpx4      spl1      spl2      for      fay       fsp1      fsp2     fsp3      bio      qtz        phl
+ cmp_mem = [22.6000         0         0         0         0         0         0    0.1000         0   76.0000    1.3000         0         0         0         0         0         0
+             0.1000   23.2000    0.1000   19.0000    6.7000         0         0    1.8000         0   48.5000    0.6000         0         0         0         0         0         0
+                  0         0   16.0400         0         0   25.9300    4.1200         0         0    1.8100    8.7600   38.2700    5.0700         0         0         0         0
+                  0         0         0         0         0         0   36.6000    4.6000   12.9000         0         0         0   45.7000    0.2000         0         0         0
+                  0         0         0         0         0         0    5.3100         0    0.4000         0         0         0         0   66.0600    5.3100   22.9200         0
+             0.1000         0         0   16.2200    9.0100         0         0    3.6000         0   27.1300    3.6000   21.7200         0         0         0         0   18.6200];
+
+elseif Datamode == 1 
+            
+             % opx1   opx2   opx3    cpx1    cpx2    cpx3    spl1    for    fay      phl     pla1   pla2
+cmp_mem = [  22.60	0.00	0.00	0.00	0.00	0.00	0.10	76.00	1.30	0.00	0.00	0.00
+              0.10	23.20	0.10	19.00	6.70	0.00	1.80	48.50	0.60	0.00	0.00	0.00
+              0.00	0.00	16.04	0.00	0.00	25.93	0.00	1.81	8.76	0.00	38.27	5.07
+              0.10	0.00	0.00	16.22	9.01	0.00	3.60	27.13	3.60	18.62	21.72	0.00];
+
+elseif Datamode == 2
+          %   for    fay     fsp1    fsp2    fsp3    cpx1   cpx2    spl1     spl2   bio      qtz
+cmp_mem = [  1.81	8.76	38.27	5.07	0.00	25.93	4.12	0.00	0.00	0.00	0.00
+             0.00	0.00	0.00	45.70	0.20	0.00	36.60	4.60	12.90	0.00	0.00
+             0.00	0.00	0.00	0.00	66.06	0.00	5.31	0.00	0.40	5.31	22.92];
+                    
+
+end 
 
 %PHS_frc(:,end+1) = 0; 
 
@@ -89,18 +133,31 @@ cmp_mem_init = cmp_mem_init./sum(cmp_mem_init,2)*100;
 indmem = logical(cmp_mem_init);
 cmp_mem_best = cmp_mem_init;
 
-
 cmp_oxd_init = cmp_mem_init*cal.mem_oxd/100;
 cmp_oxd_best = cmp_oxd_init;
 
 
-%Set initial component–endmember conditions for fitting melting point parameters.
-%          (hrz) (spx) (tro) (bas) (try) (pgr) (hab)
-T0_init = [1850  1655  1255  1120  1044   750   850];  T0_best = T0_init; % T0_init = [1850   1663    1180   807  600] 
-A_init  = [ 6.5   5.6   5.2   5.2   4.2   1.9   5.7];  A_best =  A_init;  %  A_init  = [6.9    5.7   4.5   1.6    3] 
-B_init  = [ 2.6   3.1   2.5   2.5   4.1   1.5   5.6];  B_best =  B_init;  %  B_init  = [3.1 2.8 2.7 2.9 2.8]
-r_init  = [17.8   7.7   3.0   3.0   4.7   7.3   8.0];  r_best =  r_init; %   r_init  = [20.5  11.1   7.9   27.5   7.3]
+% %Set initial component–endmember conditions for fitting melting point parameters.
+if Datamode == 0 
+       %  (hrz)  (spx)  (bas)  (try)   (pgr)   (hab)
+T0_init = [1850  1600    1120    950     760    700];  T0_best = T0_init; % T0_init = [1850   1663    1180   807  600] 
+A_init  = [ 7.5  7.0     2.90    2.00    2.00   4.0];  A_best =  A_init;  %  A_init  = [6.9    5.7   4.5   1.6    3] 
+B_init  = [ 7.   7.0     2.50    2.20    1.70   4.6];  B_best =  B_init;  %  B_init  = [3.1 2.8 2.7 2.9 2.8]
+r_init  = [ 30    10     1.80    7.7      12    10.0];  r_best =  r_init; %   r_init  = [20.5  11.1   7.9   27.5   7.3]
+elseif Datamode == 1 
+        %  (hrz)     (spx)    (bas)     (hab)
+T0_init = [1850    1600    1120     700];  T0_best = T0_init; 
+A_init  = [7.50     7.0    2.90    4.0];  A_best =  A_init;  
+B_init  = [7.5      7.0    2.50    4.6];  B_best =  B_init; 
+r_init  = [30       10     1.80    10.0];  r_best =  r_init; 
 
+elseif Datamode == 2
+       %   (bas)    (try)   (pgr) 
+T0_init = [ 1120     995     760];  T0_best = T0_init; % T0_init = [1850   1663    1180   807  600] 
+A_init  = [ 2.90    2.00    2.00];  A_best =  A_init;  %  A_init  = [6.9    5.7   4.5   1.6    3] 
+B_init  = [ 2.50    2.20    1.70];  B_best =  B_init;  %  B_init  = [3.1 2.8 2.7 2.9 2.8]
+r_init  = [ 1.80    7.7       12];  r_best =  r_init; %   r_init  = [20.5  11.1   7.9   27.5   7.3]
+end 
 
 % compose initial parameter guess
 m0     = [T0_init.';A_init.';B_init.';r_init.';cmp_mem_init(:).*indmem(:);];
@@ -108,44 +165,63 @@ m0     = [T0_init.';A_init.';B_init.';r_init.';cmp_mem_init(:).*indmem(:);];
 % set function to calculate forward model
 % m --> dhat
 % dhatFunc  = @(model) OxdFromCmpMem(model,MLTp,SOLp,PHS(:,1),cal);
-dhatFunc  = @(model) ModelFitP(model,Tmp,Prs,SYS_oxdp,PHS_frc,PslKLB,PslFC,cal,[0.5,5,1.75,1e-3]);
+dhatFunc  = @(model) ModelFitP(model,Tmp,Prs,SYS_oxdp,PHS_frc,PslKLB,PslFC,cal,[0.5,6,1.75,1e-4],Datamode); %0.5,5,1.75,1e-3 %
 
 % test fit function for initial guess
-[~,MLT_oxdfit,SOL_oxdfit,SYS_oxdfit,SOL_memfit, PHS_oxdfit,PHS_frcfit,SOL_cmpfit,MLT_cmpfit,SYS_cmpfit,TsolfitKLB,TliqfitKLB,TsolfitFC,TliqfitFC,TmKLB,TmFC] = dhatFunc(m0);
+[~,MLT_oxdfit,SOL_oxdfit,SYS_oxdfit,SOL_memfit, PHS_oxdfit,PHS_frcfit,SOL_cmpfit,MLT_cmpfit,SYS_cmpfit,SYS_cmpfit_Anh,TsolfitKLB,TliqfitKLB,TsolfitFC,TliqfitFC,TmKLB,TmFC] = dhatFunc(m0);
 
 %fractional melting 
 %evaluate melting points as function of pressure psl = magemin points 
-PP_KLB = linspace(0.001,max(PslKLB),100).';
 
-var.m = ones(size(PP_KLB))/2;
-var.x = var.m;
-cal.T0 = T0_init;
-cal.A  = A_init;
-cal.B  = B_init;
-cal.r  = r_init;
+    cal.T0 = T0_init;
+    cal.A  = A_init;
+    cal.B  = B_init;
+    cal.r  = r_init;
 
-var.c = repmat(SYS_cmpfit(1,:)./sum(SYS_cmpfit(1,:)), ...
-               length(PP_KLB),1);
-var.P = PP_KLB/10;
-var.T = 1000 + PP_KLB*5e-8;
+if Datamode == 0 
+    %fractional melting 
+    PP_KLB = linspace(0.001,max(PslKLB),100).';
+    var.m = ones(size(PP_KLB))/2;
+    var.x = var.m;
+    var.c = repmat(SYS_cmpfit_Anh(1,:)./sum(SYS_cmpfit_Anh(1,:)),length(PP_KLB),1);
+    var.P = PP_KLB/10;
+    var.T = 1000 + PP_KLB*5e-8;
+    [~,cal] = leappart(var,cal,'T');
+    TmKLB = cal.Tm;
 
-[~,cal] = leappart(var,cal,'T');
-TmKLB = cal.Tm;
+    %fractional crystalstions 
+    PP_FC = linspace(min(PslFC),max(PslFC),100).';
+    var.m = ones(size(PP_FC))/2;
+    var.x = var.m;
+    var.c = repmat(SYS_cmpfit_Anh(33,:)./sum(SYS_cmpfit_Anh(33,:)),length(PP_FC),1);
+    var.P = PP_FC/10;
+    var.T = 1000 + PP_FC*5e-8;
+    [~,cal] = leappart(var,cal,'T');
+    TmFC = cal.Tm;
 
+elseif Datamode == 1 
+    %fractional melting 
+    PP_KLB = linspace(0.001,max(PslKLB),100).';
+    var.m = ones(size(PP_KLB))/2;
+    var.x = var.m;
+    var.c = repmat(SYS_cmpfit_Anh(1,:)./sum(SYS_cmpfit_Anh(1,:)),length(PP_KLB),1);
+    var.P = PP_KLB/10;
+    var.T = 1000 + PP_KLB*5e-8;
+    [~,cal] = leappart(var,cal,'T');
+    TmKLB = cal.Tm;
 
-%fractional crystalstions 
-PP_FC = linspace(min(PslFC),max(PslFC),100).';
+elseif Datamode == 2
+     %fractional crystalstions 
+    PP_FC = linspace(min(PslFC),max(PslFC),100).';
+    var.m = ones(size(PP_FC))/2;
+    var.x = var.m;
+    var.c = repmat(SYS_cmpfit_Anh(1,:)./sum(SYS_cmpfit_Anh(1,:)),length(PP_FC),1);
+    var.P = PP_FC/10;
+    var.T = 1000 + PP_FC*5e-8;
+    [~,cal] = leappart(var,cal,'T');
+    TmFC = cal.Tm;
 
-var.m = ones(size(PP_FC))/2;
-var.x = var.m;
-
-var.c = repmat(SYS_cmpfit(33,:)./sum(SYS_cmpfit(33,:)), ...
-               length(PP_FC),1);
-var.P = PP_FC/10;
-var.T = 1000 + PP_FC*5e-8;
-
-[~,cal] = leappart(var,cal,'T');
-TmFC = cal.Tm;
+end
 
 
 % rescale mineral phase fractions
@@ -166,7 +242,7 @@ T0_init = T0_best; A_init = A_best; B_init = B_best; r_init = r_best; cmp_mem_in
 m0      = [T0_init.';A_init.';B_init.';r_init.';cmp_mem_init(:).*indmem(:)];
 
 % *** !!!  set MCMC parameters then Run Section dbstack   to execute MCMC routine  !!!
-Niter           = 1e4 ;% 1e4;               % 1e6 number of samples to take; how many samples to take during one Monte Carlo run (how many times you do a random shuffle)
+Niter           = 1e3 ;% 1e4;               % 1e6 number of samples to take; how many samples to take during one Monte Carlo run (how many times you do a random shuffle)
 anneal.initstep =   5e-3 ;%1e-3;              % Adjust the step size to achieve a reasonable acceptance ratio of 20–30 per cent. The step size determines how far from the current solution guess the next random perturbation is applied
 anneal.levels   = 1;                 % select number of annealing levels
 anneal.burnin   = max(1,Niter/1e3);  % Set the length of the initial burn-in sequence. This defines the duration of the burn-in period.
